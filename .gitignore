@@ -104,3 +104,6 @@ typings/
 
 # VS code settings
 .vscode/
+
+# dist/ directory
+dist/
