@@ -1,5 +1,5 @@
 {
-  "name": "@ergoplatform/ledgerjs-hw-app-ergo",
+  "name": "ledgerjs-hw-app-ergo",
   "version": "0.0.2",
   "license": "Apache-2.0",
   "author": "anon-br",
@@ -12,7 +12,7 @@
     "hardwallet",
     "wallet"
   ],
-  "umdName": "@ergoplatform/ledgerjs-hw-app-ergo",
+  "umdName": "ledgerjs-hw-app-ergo",
   "libraryFile": "erg",
   "main": "dist/erg.js",
   "module": "dist/erg.es.js",
