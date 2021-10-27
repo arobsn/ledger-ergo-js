@@ -1,0 +1,61 @@
+{
+  "name": "@ergoplatform/ledgerjs-hw-app-ergo",
+  "version": "0.1.0",
+  "license": "Apache-2.0",
+  "author": "anon-br",
+  "description": "An Ergo Platform JS Library for communication with Ledger Hardware Wallets.",
+  "homepage": "",
+  "keywords": [
+    "ergo",
+    "ledger",
+    "library",
+    "hardwallet",
+    "wallet"
+  ],
+  "libraryFile": "erg",
+  "main": "dist/erg.js",
+  "module": "dist/erg.es.js",
+  "types": "dist/erg.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anon-br/ledgerjs-hw-app-ergo.git"
+  },
+  "bugs": {
+    "url": "https://github.com/anon-br/ledgerjs-hw-app-ergo/issues"
+  },
+  "scripts": {
+    "build": "rollup -c rollup.config.ts",
+    "watch": "rollup -cw rollup.config.ts",
+    "prepublish": "npm run increment-version",
+    "increment-version": "npm version patch -git-tag-version false -allow-same-version true",
+    "configure-npm": "node ./set-registry.js -s https://registry.npmjs.org",
+    "configure-gpr": "node ./set-registry.js -s https://npm.pkg.github.com",
+    "test": "jest"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "@lopatnov/rollup-plugin-uglify": "^2.1.1",
+    "@types/jest": "^27.0.2",
+    "@types/typescript": "^2.0.0",
+    "jest": "^27.2.4",
+    "jest-config": "^27.2.4",
+    "rollup": "^2.58.0",
+    "rollup-plugin-commonjs": "^10.1.0",
+    "rollup-plugin-json": "^4.0.0",
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-sourcemaps": "^0.6.3",
+    "rollup-plugin-typescript2": "^0.30.0",
+    "terser": "^5.9.0",
+    "ts-jest": "^27.0.5",
+    "typescript": "^4.4.3"
+  },
+  "dependencies": {
+    "@ledgerhq/hw-transport": "^6.7.0",
+    "bip32-path": "^0.4.2"
+  }
+}

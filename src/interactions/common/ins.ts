@@ -1,0 +1,9 @@
+export const enum INS {
+  GET_APP_VERSION = 0x01,
+  GET_APP_NAME = 0x02,
+
+  GET_EXTENTED_PUB_KEY = 0x10,
+  DERIVE_ADDRESS = 0x11,
+  ATTEST_INPUT = 0x20,
+  SIGN_TX = 0x21,
+}
