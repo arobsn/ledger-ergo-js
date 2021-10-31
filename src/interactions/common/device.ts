@@ -20,33 +20,21 @@ export default class Device {
     this._cla = cla;
   }
 
-  public async send(ins: INS, p1: number, p2: number, data: Buffer): Promise<DeviceResponse> {
-    if (data.length <= MAX_DATA_LENGTH) {
-      return this.sendChunck(ins, p1, p2, data);
-    }
-
-    let responses: Buffer[] = [];
-    let returnCode = RETURN_CODE.OK;
+  public async sendData(ins: INS, p1: number, p2: number, data: Buffer): Promise<DeviceResponse[]> {
+    let responses: DeviceResponse[] = [];
     for (let i = 0; i < Math.ceil(data.length / MAX_DATA_LENGTH); i++) {
       const chunk = data.slice(
         i * MAX_DATA_LENGTH,
         Math.min((i + 1) * MAX_DATA_LENGTH, data.length)
       );
 
-      const response = await this.sendChunck(ins, p1, p2, chunk);
-      returnCode = response.returnCode;
-      responses.push(response.data);
+      responses.push(await this.send(ins, p1, p2, chunk));
     }
 
-    return { returnCode, data: Buffer.concat(responses) };
+    return responses;
   }
 
-  private async sendChunck(
-    ins: INS,
-    p1: number,
-    p2: number,
-    data: Buffer
-  ): Promise<DeviceResponse> {
+  public async send(ins: INS, p1: number, p2: number, data: Buffer): Promise<DeviceResponse> {
     if (data.length > MAX_DATA_LENGTH) {
       throw new DeviceError(RETURN_CODE.TOO_MUCH_DATA);
     }
