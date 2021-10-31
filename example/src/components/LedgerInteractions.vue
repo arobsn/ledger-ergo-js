@@ -4,6 +4,7 @@
   <button @click="getExtendedPublicKey()">GetExtendedPublicKey</button>
   <button @click="deriveAddress()">deriveAddress</button>
   <button @click="showAddress()">showAddress</button>
+  <button @click="resetTransport()">resetTransport</button>
   <p>
     <code>{{ data }}</code>
   </p>
@@ -14,63 +15,69 @@ import { defineComponent } from "vue";
 import ErgoApp from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
 
+var ergoApp: ErgoApp;
+
 export default defineComponent({
   name: "LedgerInteractions",
   data: () => {
     return { data: "" };
   },
+  beforeDestroy() {
+    if (ergoApp) {
+      ergoApp.closeTransport();
+    }
+  },
   methods: {
     async getVersion() {
-      let ergoApp = new ErgoApp(await HidTransport.create());
+      await this.createApp();
       try {
         this.data = JSON.stringify(await ergoApp.getAppVersion());
       } catch (e) {
         this.data = (e as Error).message;
-      } finally {
-        ergoApp.closeTransport();
       }
     },
     async getAppName() {
-      let ergoApp = new ErgoApp(await HidTransport.create());
+      await this.createApp();
       try {
         this.data = JSON.stringify(await ergoApp.getAppName());
       } catch (e) {
         this.data = (e as Error).message;
-      } finally {
-        ergoApp.closeTransport();
       }
     },
     async getExtendedPublicKey() {
-      let ergoApp = new ErgoApp(await HidTransport.create());
+      await this.createApp();
       this.data = "Awaiting approval on the device...";
       try {
-        this.data = JSON.stringify(await ergoApp.getExtendedPublicKey("m/44'/429'/0'"));
+        this.data = JSON.stringify(await ergoApp.getExtendedPublicKey("m/44'/429'/0'", true));
       } catch (e) {
         this.data = (e as Error).message;
-      } finally {
-        ergoApp.closeTransport();
       }
     },
     async deriveAddress() {
-      let ergoApp = new ErgoApp(await HidTransport.create());
+      await this.createApp();
       this.data = "Awaiting approval on the device...";
       try {
-        this.data = JSON.stringify(await ergoApp.deriveAddress("m/44'/429'/0'/1/0"));
+        this.data = JSON.stringify(await ergoApp.deriveAddress("m/44'/429'/0'/1/0", true));
       } catch (e) {
         this.data = (e as Error).message;
-      } finally {
-        ergoApp.closeTransport();
       }
     },
     async showAddress() {
-      let ergoApp = new ErgoApp(await HidTransport.create());
+      await this.createApp();
       this.data = "Check the address at device display...";
       try {
-        this.data = JSON.stringify(await ergoApp.showAddress("m/44'/429'/0'/1/0"));
+        this.data = JSON.stringify(await ergoApp.showAddress("m/44'/429'/0'/1/0", true));
       } catch (e) {
         this.data = (e as Error).message;
-      } finally {
-        ergoApp.closeTransport();
+      }
+    },
+    async resetTransport() {
+      await ergoApp.closeTransport();
+      await this.createApp(true);
+    },
+    async createApp(force = false) {
+      if (!ergoApp || force) {
+        ergoApp = new ErgoApp(await HidTransport.create());
       }
     }
   }

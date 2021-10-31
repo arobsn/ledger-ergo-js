@@ -18,6 +18,7 @@ export const CLA = 0xe0;
  */
 export default class ErgoApp {
   private _device: Device;
+  private _authToken: number;
 
   constructor(transport: Transport, scrambleKey = "ERG") {
     const methods = [
@@ -31,6 +32,17 @@ export default class ErgoApp {
     transport.decorateAppAPIMethods(this, methods, scrambleKey);
 
     this._device = new Device(transport, CLA);
+    this._authToken = 0;
+    this.newAuthToken();
+  }
+
+  private newAuthToken(): void {
+    let newToken = 0;
+    do {
+      newToken = Math.floor(Math.random() * 0xffffffff) + 1;
+    } while (newToken === this._authToken);
+
+    this._authToken = newToken;
   }
 
   /**
@@ -54,8 +66,11 @@ export default class ErgoApp {
    * @param path BIP32 path.
    * @returns a Promise with the **chain code** and the **public key** for provided BIP32 path.
    */
-  public async getExtendedPublicKey(path: string): Promise<ExtendedPublicKey> {
-    return getExtendedPublicKey(this._device, path);
+  public async getExtendedPublicKey(
+    path: string,
+    useAuthToken: boolean = false
+  ): Promise<ExtendedPublicKey> {
+    return getExtendedPublicKey(this._device, path, useAuthToken ? this._authToken : undefined);
   }
 
   /**
@@ -63,8 +78,8 @@ export default class ErgoApp {
    * @param path Bip44 path.
    * @returns a Promise with the derived address in hex format.
    */
-  public async deriveAddress(path: string): Promise<DerivedAddress> {
-    return deriveAddress(this._device, path);
+  public async deriveAddress(path: string, useAuthToken: boolean = false): Promise<DerivedAddress> {
+    return deriveAddress(this._device, path, useAuthToken ? this._authToken : undefined);
   }
 
   /**
@@ -72,8 +87,8 @@ export default class ErgoApp {
    * @param path Bip44 path.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
-  public async showAddress(path: string): Promise<boolean> {
-    return showAddress(this._device, path);
+  public async showAddress(path: string, useAuthToken: boolean = false): Promise<boolean> {
+    return showAddress(this._device, path, useAuthToken ? this._authToken : undefined);
   }
 
   /**
