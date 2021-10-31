@@ -1,4 +1,4 @@
-# @ergoplatform/ledgerjs-hw-app-ergo example
+# ledgerjs-hw-app-ergo example
 
 ## Project setup
 

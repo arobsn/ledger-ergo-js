@@ -1,4 +1,4 @@
-import { getErrorMessage } from "./errorCodes";
+import { getReturnMessage } from "./returnCodes";
 
 export class DeviceError extends Error {
   private _code;
@@ -8,7 +8,7 @@ export class DeviceError extends Error {
   }
 
   constructor(code: number) {
-    super(getErrorMessage(code));
+    super(getReturnMessage(code));
     this._code = code;
     this.name = this.constructor.name;
   }

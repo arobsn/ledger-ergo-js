@@ -2,7 +2,8 @@ import { INS } from "./common/ins";
 import { bip32ToBuffer } from "./common/serialization";
 import Device from "./common/device";
 import { DerivedAddress } from "../erg";
-import { DeviceResponse, RETURN_CODE } from "../types/internal";
+import { DeviceResponse } from "../types/internal";
+import { RETURN_CODE } from "../errors";
 
 const enum ReturnType {
   Return,

@@ -1,2 +1,2 @@
 export { DeviceError } from "./deviceError";
-export { ERROR_CODES, getErrorMessage } from "./errorCodes";
+export { getReturnMessage, RETURN_CODE } from "./returnCodes";

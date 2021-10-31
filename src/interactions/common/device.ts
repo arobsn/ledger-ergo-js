@@ -1,6 +1,7 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { DeviceError } from "../../errors/deviceError";
-import { DeviceResponse, RETURN_CODE } from "../../types/internal";
+import { RETURN_CODE } from "../../errors";
+import { DeviceResponse } from "../../types/internal";
 import { INS } from "./ins";
 
 const MAX_DATA_LENGTH = 255;
