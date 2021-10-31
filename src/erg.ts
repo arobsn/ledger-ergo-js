@@ -20,7 +20,7 @@ export default class ErgoApp {
   private _device: Device;
   private _authToken: number;
 
-  constructor(transport: Transport, scrambleKey = "ERG") {
+  constructor(transport: Transport, authToken = 0, scrambleKey = "ERG") {
     const methods = [
       "getAppVersion",
       "getSerial",
@@ -32,8 +32,10 @@ export default class ErgoApp {
     transport.decorateAppAPIMethods(this, methods, scrambleKey);
 
     this._device = new Device(transport, CLA);
-    this._authToken = 0;
-    this.newAuthToken();
+    this._authToken = authToken;
+    if (this._authToken == 0) {
+      this.newAuthToken();
+    }
   }
 
   private newAuthToken(): void {

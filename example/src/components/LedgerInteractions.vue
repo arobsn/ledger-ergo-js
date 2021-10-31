@@ -1,10 +1,16 @@
 <template>
-  <button @click="getVersion()">GetVersion</button>
-  <button @click="getAppName()">GetAppName</button>
-  <button @click="getExtendedPublicKey()">GetExtendedPublicKey</button>
-  <button @click="deriveAddress()">deriveAddress</button>
-  <button @click="showAddress()">showAddress</button>
-  <button @click="resetTransport()">resetTransport</button>
+  <p>
+    <label>Use authToken<input type="checkbox" v-model="useAuthToken"/></label>
+    <code>{{ hexAuthToken }}</code>
+    <button @click="newToken()">newToken</button>
+  </p>
+  <p>
+    <button @click="getVersion()">GetVersion</button>
+    <button @click="getAppName()">GetAppName</button>
+    <button @click="getExtendedPublicKey()">GetExtendedPublicKey</button>
+    <button @click="deriveAddress()">deriveAddress</button>
+    <button @click="showAddress()">showAddress</button>
+  </p>
   <p>
     <code>{{ data }}</code>
   </p>
@@ -14,71 +20,90 @@
 import { defineComponent } from "vue";
 import ErgoApp from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
-
-var ergoApp: ErgoApp;
+import { serializeAuthToken } from "../../../src/interactions/common/serialization";
 
 export default defineComponent({
   name: "LedgerInteractions",
   data: () => {
-    return { data: "" };
+    return {
+      data: "",
+      useAuthToken: true,
+      authToken: 0
+    };
   },
-  beforeDestroy() {
-    if (ergoApp) {
-      ergoApp.closeTransport();
+  created() {
+    this.newToken();
+  },
+  computed: {
+    hexAuthToken() {
+      return `0x${serializeAuthToken(this.authToken).toString("hex")}`;
     }
   },
   methods: {
     async getVersion() {
-      await this.createApp();
+      var ergoApp = await this.createApp();
       try {
         this.data = JSON.stringify(await ergoApp.getAppVersion());
       } catch (e) {
         this.data = (e as Error).message;
+      } finally {
+        ergoApp.closeTransport();
       }
     },
     async getAppName() {
-      await this.createApp();
+      var ergoApp = await this.createApp();
       try {
         this.data = JSON.stringify(await ergoApp.getAppName());
       } catch (e) {
         this.data = (e as Error).message;
+      } finally {
+        ergoApp.closeTransport();
       }
     },
     async getExtendedPublicKey() {
-      await this.createApp();
+      var ergoApp = await this.createApp();
       this.data = "Awaiting approval on the device...";
       try {
-        this.data = JSON.stringify(await ergoApp.getExtendedPublicKey("m/44'/429'/0'", true));
+        this.data = JSON.stringify(
+          await ergoApp.getExtendedPublicKey("m/44'/429'/0'", this.useAuthToken)
+        );
       } catch (e) {
         this.data = (e as Error).message;
+      } finally {
+        ergoApp.closeTransport();
       }
     },
     async deriveAddress() {
-      await this.createApp();
+      var ergoApp = await this.createApp();
       this.data = "Awaiting approval on the device...";
       try {
-        this.data = JSON.stringify(await ergoApp.deriveAddress("m/44'/429'/0'/1/0", true));
+        this.data = JSON.stringify(
+          await ergoApp.deriveAddress("m/44'/429'/0'/1/0", this.useAuthToken)
+        );
       } catch (e) {
         this.data = (e as Error).message;
+      } finally {
+        ergoApp.closeTransport();
       }
+    },
+    newToken() {
+      this.authToken = Math.floor(Math.random() * 0xffffffff) + 1;
     },
     async showAddress() {
-      await this.createApp();
+      var ergoApp = await this.createApp();
       this.data = "Check the address at device display...";
       try {
-        this.data = JSON.stringify(await ergoApp.showAddress("m/44'/429'/0'/1/0", true));
+        this.data = JSON.stringify(
+          await ergoApp.showAddress("m/44'/429'/0'/1/0", this.useAuthToken)
+        );
       } catch (e) {
         this.data = (e as Error).message;
+      } finally {
+        ergoApp.closeTransport();
       }
     },
-    async resetTransport() {
-      await ergoApp.closeTransport();
-      await this.createApp(true);
-    },
-    async createApp(force = false) {
-      if (!ergoApp || force) {
-        ergoApp = new ErgoApp(await HidTransport.create());
-      }
+    async createApp(): Promise<ErgoApp> {
+      return new ErgoApp(await HidTransport.create(), this.useAuthToken ? this.authToken : 0);
     }
   }
 });
