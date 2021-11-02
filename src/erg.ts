@@ -66,6 +66,7 @@ export default class ErgoApp {
   /**
    * Get the extended public key.
    * @param path BIP32 path.
+   * @param useAuthToken use an authorization token to keep session opened.
    * @returns a Promise with the **chain code** and the **public key** for provided BIP32 path.
    */
   public async getExtendedPublicKey(
@@ -78,6 +79,7 @@ export default class ErgoApp {
   /**
    * Derive the address for a given Bip44 path.
    * @param path Bip44 path.
+   * @param useAuthToken use an authorization token to keep session opened.
    * @returns a Promise with the derived address in hex format.
    */
   public async deriveAddress(path: string, useAuthToken: boolean = false): Promise<DerivedAddress> {
@@ -87,6 +89,7 @@ export default class ErgoApp {
   /**
    * Derive and show the address on device screen for a given Bip44 path.
    * @param path Bip44 path.
+   * @param useAuthToken use an authorization token to keep session opened.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
   public async showAddress(path: string, useAuthToken: boolean = false): Promise<boolean> {
