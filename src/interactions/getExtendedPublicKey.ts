@@ -1,6 +1,5 @@
-import { INS } from "./common/ins";
 import { serializeBip32Path, serializeAuthToken } from "./common/serialization";
-import Device from "./common/device";
+import Device, { COMMAND } from "./common/device";
 import { ExtendedPublicKey } from "../types/public";
 import { chunkBy } from "./common/utils";
 
@@ -20,7 +19,7 @@ export async function getExtendedPublicKey(
 ): Promise<ExtendedPublicKey> {
   const data = serializeBip32Path(path);
   const response = await device.send(
-    INS.GET_EXTENTED_PUB_KEY,
+    COMMAND.GET_EXTENTED_PUB_KEY,
     authToken ? P1.WITH_TOKEN : P1.WITHOUT_TOKEN,
     P2.UNUSED,
     authToken ? Buffer.concat([data, serializeAuthToken(authToken)]) : data

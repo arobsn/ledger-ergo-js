@@ -1,6 +1,5 @@
 import { Version } from "../types/public";
-import { INS } from "./common/ins";
-import Device from "./common/device";
+import Device, { COMMAND } from "./common/device";
 
 const FLAG_IS_DEBUG = 0x01;
 
@@ -13,7 +12,12 @@ const enum P2 {
 }
 
 export async function getAppVersion(device: Device): Promise<Version> {
-  const response = await device.send(INS.GET_APP_VERSION, P1.UNUSED, P2.UNUSED, Buffer.from([]));
+  const response = await device.send(
+    COMMAND.GET_APP_VERSION,
+    P1.UNUSED,
+    P2.UNUSED,
+    Buffer.from([])
+  );
 
   return {
     major: response.data[0],

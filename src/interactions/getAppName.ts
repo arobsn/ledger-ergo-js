@@ -1,5 +1,4 @@
-import { INS } from "./common/ins";
-import Device from "./common/device";
+import Device, { COMMAND } from "./common/device";
 import { AppName } from "../types/public";
 
 const enum P1 {
@@ -11,6 +10,6 @@ const enum P2 {
 }
 
 export async function getAppName(device: Device): Promise<AppName> {
-  const response = await device.send(INS.GET_APP_NAME, P1.UNUSED, P2.UNUSED, Buffer.from([]));
+  const response = await device.send(COMMAND.GET_APP_NAME, P1.UNUSED, P2.UNUSED, Buffer.from([]));
   return { name: response.data.toString("ascii") };
 }

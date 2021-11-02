@@ -2,7 +2,16 @@ import type Transport from "@ledgerhq/hw-transport";
 import { DeviceError } from "../../errors/deviceError";
 import { RETURN_CODE } from "../../errors";
 import { DeviceResponse } from "../../types/internal";
-import { INS } from "./ins";
+
+export const enum COMMAND {
+  GET_APP_VERSION = 0x01,
+  GET_APP_NAME = 0x02,
+
+  GET_EXTENTED_PUB_KEY = 0x10,
+  DERIVE_ADDRESS = 0x11,
+  ATTEST_INPUT = 0x20,
+  SIGN_TX = 0x21,
+}
 
 const MAX_DATA_LENGTH = 255;
 const MIN_RESPONSE_LENGTH = 2;
@@ -20,7 +29,12 @@ export default class Device {
     this._cla = cla;
   }
 
-  public async sendData(ins: INS, p1: number, p2: number, data: Buffer): Promise<DeviceResponse[]> {
+  public async sendData(
+    ins: COMMAND,
+    p1: number,
+    p2: number,
+    data: Buffer
+  ): Promise<DeviceResponse[]> {
     let responses: DeviceResponse[] = [];
     for (let i = 0; i < Math.ceil(data.length / MAX_DATA_LENGTH); i++) {
       const chunk = data.slice(
@@ -34,7 +48,7 @@ export default class Device {
     return responses;
   }
 
-  public async send(ins: INS, p1: number, p2: number, data: Buffer): Promise<DeviceResponse> {
+  public async send(ins: COMMAND, p1: number, p2: number, data: Buffer): Promise<DeviceResponse> {
     if (data.length > MAX_DATA_LENGTH) {
       throw new DeviceError(RETURN_CODE.TOO_MUCH_DATA);
     }
@@ -54,7 +68,7 @@ export default class Device {
     return { returnCode, data: responseData };
   }
 
-  private mountApdu(cla: number, ins: INS, p1: number, p2: number, data: Buffer): Buffer {
+  private mountApdu(cla: number, ins: COMMAND, p1: number, p2: number, data: Buffer): Buffer {
     const header = Buffer.alloc(5);
     header.writeUInt8(cla, 0);
     header.writeUInt8(ins, 1);

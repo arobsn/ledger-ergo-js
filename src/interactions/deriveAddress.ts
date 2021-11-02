@@ -1,6 +1,5 @@
-import { INS } from "./common/ins";
 import { serializeBip32Path, serializeAuthToken } from "./common/serialization";
-import Device from "./common/device";
+import Device, { COMMAND } from "./common/device";
 import { DerivedAddress } from "../erg";
 import { DeviceResponse } from "../types/internal";
 import { RETURN_CODE } from "../errors";
@@ -33,7 +32,7 @@ function sendDeriveAddress(
 ): Promise<DeviceResponse> {
   const data = Buffer.concat([Buffer.alloc(1, Network.Mainnet), serializeBip32Path(path)]);
   return device.send(
-    INS.DERIVE_ADDRESS,
+    COMMAND.DERIVE_ADDRESS,
     returnType == ReturnType.Return ? P1.RETURN : P1.DISPLAY,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
     authToken ? Buffer.concat([data, serializeAuthToken(authToken)]) : data
