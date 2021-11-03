@@ -1,5 +1,4 @@
 import type Transport from "@ledgerhq/hw-transport";
-import bip32Path from "bip32-path";
 import Device from "./interactions/common/device";
 import {
   getAppName,
@@ -10,7 +9,7 @@ import {
 } from "./interactions";
 import { AppName, DerivedAddress, ExtendedPublicKey, Version } from "./types/public";
 import { assert } from "./validations/assert";
-import { isValidBip32Path, isValidErgoPath } from "./validations/parse";
+import { isValidErgoPath } from "./validations/parse";
 import { pathStringToArray } from "./interactions/common/serialization";
 
 export * from "./errors";
@@ -78,7 +77,6 @@ export default class ErgoApp {
     path: string,
     useAuthToken: boolean = false
   ): Promise<ExtendedPublicKey> {
-    assert(isValidBip32Path(path), "Invalid Bip32 path.");
     const pathArray = pathStringToArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
 
@@ -112,8 +110,6 @@ export default class ErgoApp {
   }
 
   private getDerivationPathArray(path: string) {
-    assert(isValidBip32Path(path), "Invalid Bip32 path.");
-
     const pathArray = pathStringToArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
     assert(pathArray.length >= 5, "Invalid path lenght.");
