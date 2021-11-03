@@ -26,7 +26,7 @@ const enum Network {
 
 function sendDeriveAddress(
   device: Device,
-  path: string,
+  path: number[],
   returnType: ReturnType,
   authToken?: number
 ): Promise<DeviceResponse> {
@@ -41,7 +41,7 @@ function sendDeriveAddress(
 
 export async function deriveAddress(
   device: Device,
-  path: string,
+  path: number[],
   authToken?: number
 ): Promise<DerivedAddress> {
   const response = await sendDeriveAddress(device, path, ReturnType.Return, authToken);
@@ -50,7 +50,7 @@ export async function deriveAddress(
 
 export async function showAddress(
   device: Device,
-  path: string,
+  path: number[],
   authToken?: number
 ): Promise<boolean> {
   const response = await sendDeriveAddress(device, path, ReturnType.Display, authToken);

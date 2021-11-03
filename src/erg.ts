@@ -1,4 +1,5 @@
 import type Transport from "@ledgerhq/hw-transport";
+import bip32Path from "bip32-path";
 import Device from "./interactions/common/device";
 import {
   getAppName,
@@ -8,10 +9,15 @@ import {
   showAddress,
 } from "./interactions";
 import { AppName, DerivedAddress, ExtendedPublicKey, Version } from "./types/public";
+import { assert } from "./validations/assert";
+import { isValidBip32Path, isValidErgoPath } from "./validations/parse";
+import { pathStringToArray } from "./interactions/common/serialization";
 
 export * from "./errors";
 export * from "./types/public";
 export const CLA = 0xe0;
+
+const CHANGE_PATH_INDEX = 3;
 
 /**
  * Ergo's Ledger hardware wallet API
@@ -72,7 +78,15 @@ export default class ErgoApp {
     path: string,
     useAuthToken: boolean = false
   ): Promise<ExtendedPublicKey> {
-    return getExtendedPublicKey(this._device, path, useAuthToken ? this._authToken : undefined);
+    assert(isValidBip32Path(path), "Invalid Bip32 path.");
+    const pathArray = pathStringToArray(path);
+    assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
+
+    return getExtendedPublicKey(
+      this._device,
+      pathArray,
+      useAuthToken ? this._authToken : undefined
+    );
   }
 
   /**
@@ -82,7 +96,8 @@ export default class ErgoApp {
    * @returns a Promise with the derived address in hex format.
    */
   public async deriveAddress(path: string, useAuthToken: boolean = false): Promise<DerivedAddress> {
-    return deriveAddress(this._device, path, useAuthToken ? this._authToken : undefined);
+    const pathArray = this.getDerivationPathArray(path);
+    return deriveAddress(this._device, pathArray, useAuthToken ? this._authToken : undefined);
   }
 
   /**
@@ -92,7 +107,19 @@ export default class ErgoApp {
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
   public async showAddress(path: string, useAuthToken: boolean = false): Promise<boolean> {
-    return showAddress(this._device, path, useAuthToken ? this._authToken : undefined);
+    const pathArray = this.getDerivationPathArray(path);
+    return showAddress(this._device, pathArray, useAuthToken ? this._authToken : undefined);
+  }
+
+  private getDerivationPathArray(path: string) {
+    assert(isValidBip32Path(path), "Invalid Bip32 path.");
+
+    const pathArray = pathStringToArray(path);
+    assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
+    assert(pathArray.length >= 5, "Invalid path lenght.");
+    assert(pathArray[CHANGE_PATH_INDEX] in [0, 1], "Invalid change path value.");
+
+    return pathArray;
   }
 
   /**

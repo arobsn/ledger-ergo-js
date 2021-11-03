@@ -14,7 +14,7 @@ const enum P2 {
 
 export async function getExtendedPublicKey(
   device: Device,
-  path: string,
+  path: number[],
   authToken?: number
 ): Promise<ExtendedPublicKey> {
   const data = serializeBip32Path(path);

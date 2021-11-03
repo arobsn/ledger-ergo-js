@@ -1,10 +1,9 @@
 import bip32Path from "bip32-path";
 
-export function serializeBip32Path(path: string): Buffer {
-  const paths = !path ? [] : bip32Path.fromString(path).toPathArray();
-  const buffer = Buffer.alloc(1 + paths.length * 4);
-  buffer[0] = paths.length;
-  paths.forEach((element: any, index: number) => {
+export function serializeBip32Path(path: number[]): Buffer {
+  const buffer = Buffer.alloc(1 + path.length * 4);
+  buffer[0] = path.length;
+  path.forEach((element: any, index: number) => {
     buffer.writeUInt32BE(element, 1 + 4 * index);
   });
 
@@ -16,4 +15,8 @@ export function serializeAuthToken(token: number): Buffer {
   buffer.writeUInt32BE(token, 0);
 
   return buffer;
+}
+
+export function pathStringToArray(path: string): number[] {
+  return bip32Path.fromString(path).toPathArray();
 }
