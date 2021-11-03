@@ -23,7 +23,6 @@ export default class ErgoApp {
   constructor(transport: Transport, authToken = 0, scrambleKey = "ERG") {
     const methods = [
       "getAppVersion",
-      "getSerial",
       "getAppName",
       "getExtendedPublicKey",
       "deriveAddress",
