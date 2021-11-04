@@ -36,3 +36,18 @@ export type ExtendedPublicKey = {
 export type DerivedAddress = {
   addressHex: string;
 };
+
+export type Token = {
+  id: string;
+  amount: string;
+};
+
+export type Box = {
+  txId: string;
+  index: number;
+  value: string;
+  ergoTree: Buffer;
+  creationHeight: number;
+  tokens: Token[];
+  additionalRegisters: Buffer;
+};
