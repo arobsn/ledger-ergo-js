@@ -27,7 +27,7 @@ export function pathStringToArray(path: string): number[] {
   return bip32Path.fromString(path).toPathArray();
 }
 
-export function uint64ToBuffer(value: string): Buffer {
+export function uint64StringToBuffer(value: string): Buffer {
   assert(isUint64String(value), "invalid uint64_str");
   const data = bs10.decode(value);
   assert(data.length <= 8, "excessive data");

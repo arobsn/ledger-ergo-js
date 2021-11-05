@@ -1,6 +1,6 @@
 import { Box, Token } from "../erg";
 import Device, { COMMAND } from "./common/device";
-import { serializeAuthToken, uint64ToBuffer as uint64StringToBuffer } from "./common/serialization";
+import { serializeAuthToken, uint64StringToBuffer } from "./common/serialization";
 import type { DeviceResponse } from "../types/internal";
 
 const enum P1 {
