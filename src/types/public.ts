@@ -31,7 +31,7 @@ export type ExtendedPublicKey = {
 };
 
 /**
- * Response to [[Ada.deriveAddress]] call in hex format
+ * Response to [[ErgoApp.deriveAddress]] call in hex format
  */
 export type DerivedAddress = {
   addressHex: string;
