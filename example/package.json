@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@ledgerhq/hw-transport-webhid": "^6.7.0",
+    "ergo-lib-wasm-browser": "^0.14.0",
     "vue": "^3.0.0"
   },
   "devDependencies": {
