@@ -7,10 +7,18 @@ import {
   deriveAddress,
   showAddress,
 } from "./interactions";
-import { AppName, DerivedAddress, ExtendedPublicKey, Version } from "./types/public";
+import {
+  AppName,
+  AttestedBoxFrame,
+  Box,
+  DerivedAddress,
+  ExtendedPublicKey,
+  Version,
+} from "./types/public";
 import { assert } from "./validations/assert";
 import { isValidErgoPath } from "./validations/parse";
 import { pathStringToArray } from "./interactions/common/serialization";
+import { attestInput } from "./interactions/attestInput";
 
 export * from "./errors";
 export * from "./types/public";
@@ -32,6 +40,7 @@ export default class ErgoApp {
       "getExtendedPublicKey",
       "deriveAddress",
       "showAddress",
+      "attestInput",
     ];
     transport.decorateAppAPIMethods(this, methods, scrambleKey);
 
@@ -80,11 +89,7 @@ export default class ErgoApp {
     const pathArray = pathStringToArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
 
-    return getExtendedPublicKey(
-      this._device,
-      pathArray,
-      useAuthToken ? this._authToken : undefined
-    );
+    return getExtendedPublicKey(this._device, pathArray, this.getAuthToken(useAuthToken));
   }
 
   /**
@@ -93,9 +98,9 @@ export default class ErgoApp {
    * @param useAuthToken use an authorization token to keep session opened.
    * @returns a Promise with the derived address in hex format.
    */
-  public async deriveAddress(path: string, useAuthToken: boolean = false): Promise<DerivedAddress> {
+  public async deriveAddress(path: string, useAuthToken = false): Promise<DerivedAddress> {
     const pathArray = this.getDerivationPathArray(path);
-    return deriveAddress(this._device, pathArray, useAuthToken ? this._authToken : undefined);
+    return deriveAddress(this._device, pathArray, this.getAuthToken(useAuthToken));
   }
 
   /**
@@ -104,9 +109,9 @@ export default class ErgoApp {
    * @param useAuthToken use an authorization token to keep session opened.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
-  public async showAddress(path: string, useAuthToken: boolean = false): Promise<boolean> {
+  public async showAddress(path: string, useAuthToken = false): Promise<boolean> {
     const pathArray = this.getDerivationPathArray(path);
-    return showAddress(this._device, pathArray, useAuthToken ? this._authToken : undefined);
+    return showAddress(this._device, pathArray, this.getAuthToken(useAuthToken));
   }
 
   private getDerivationPathArray(path: string) {
@@ -116,6 +121,14 @@ export default class ErgoApp {
     assert(pathArray[CHANGE_PATH_INDEX] in [0, 1], "Invalid change path value.");
 
     return pathArray;
+  }
+
+  public async attestInput(box: Box, useAuthToken = false): Promise<AttestedBoxFrame[]> {
+    return attestInput(this._device, box, this.getAuthToken(useAuthToken));
+  }
+
+  private getAuthToken(useAuthToken: boolean): number | undefined {
+    return useAuthToken ? this._authToken : undefined;
   }
 
   /**

@@ -51,3 +51,12 @@ export type Box = {
   tokens: Token[];
   additionalRegisters: Buffer;
 };
+
+export type AttestedBoxFrame = {
+  boxId: string;
+  framesCount: number;
+  frameIndex: number;
+  amount: string;
+  tokens: Token[];
+  attestation: string;
+};

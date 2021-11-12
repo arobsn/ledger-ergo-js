@@ -28,10 +28,19 @@ export function pathStringToArray(path: string): number[] {
 }
 
 export function uint64StringToBuffer(value: string): Buffer {
-  assert(isUint64String(value), "invalid uint64_str");
+  assert(isUint64String(value), "invalid uint64 string");
   const data = bs10.decode(value);
   assert(data.length <= 8, "excessive data");
 
   const padding = Buffer.alloc(8 - data.length);
   return Buffer.concat([padding, data]);
+}
+
+export function bufferToUint64String(buffer: Buffer): string {
+  assert(buffer.length === 8, "invalid uint64 buffer");
+  return trimLeadingZeros(bs10.encode(buffer));
+}
+
+function trimLeadingZeros(text: string): string {
+  return text.replace(/^0+/, "");
 }
