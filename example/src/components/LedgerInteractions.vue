@@ -11,6 +11,7 @@
     <button @click="deriveAddress()">deriveAddress</button>
     <button @click="showAddress()">showAddress</button>
     <button @click="attestInput()">attestInput</button>
+    <button @click="signTx()">signTx</button>
   </p>
   <p>
     <code>{{ data }}</code>
@@ -23,6 +24,7 @@ import ErgoApp, { Token } from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
 import { serializeAuthToken } from "../../../src/interactions/common/serialization";
 import { Tokens } from "ergo-lib-wasm-browser";
+import { generate_block_headers } from "@/txUtils";
 
 const exampleBox = {
   id: "3e762407d99b006d53b6583adcca08ef690b42fb0b2ed7abf63179eb6b9033b2",
@@ -189,6 +191,74 @@ export default defineComponent({
       } finally {
         ergoApp.closeTransport();
       }
+    },
+    async signTx() {
+      const {
+        Address,
+        Wallet,
+        ErgoBox,
+        ErgoBoxCandidateBuilder,
+        Contract,
+        ErgoBoxes,
+        ErgoBoxCandidates,
+        ErgoStateContext,
+        TxBuilder,
+        BoxValue,
+        I64,
+        SecretKey,
+        SecretKeys,
+        TxId,
+        SimpleBoxSelector,
+        Tokens,
+        PreHeader
+      } = await import("ergo-lib-wasm-browser");
+
+      const sk = SecretKey.random_dlog();
+      // simulate existing box guarded by the sk key
+      const input_contract = Contract.pay_to_address(sk.get_address());
+      const input_box = new ErgoBox(
+        BoxValue.from_i64(I64.from_str("1000000000")),
+        0,
+        input_contract,
+        TxId.zero(),
+        0,
+        new Tokens()
+      );
+      // create a transaction that spends the "simulated" box
+      const recipient = Address.from_testnet_str(
+        "3WvsT2Gm4EpsM9Pg18PdY6XyhNNMqXDsvJTbbf6ihLvAmSb7u5RN"
+      );
+      const unspent_boxes = new ErgoBoxes(input_box);
+      const contract = Contract.pay_to_address(recipient);
+      const outbox_value = BoxValue.SAFE_USER_MIN();
+      const outbox = new ErgoBoxCandidateBuilder(outbox_value, contract, 0).build();
+      const tx_outputs = new ErgoBoxCandidates(outbox);
+      const fee = TxBuilder.SUGGESTED_TX_FEE();
+      const change_address = Address.from_testnet_str(
+        "3WvsT2Gm4EpsM9Pg18PdY6XyhNNMqXDsvJTbbf6ihLvAmSb7u5RN"
+      );
+      const min_change_value = BoxValue.SAFE_USER_MIN();
+      const box_selector = new SimpleBoxSelector();
+      const target_balance = BoxValue.from_i64(outbox_value.as_i64().checked_add(fee.as_i64()));
+      const box_selection = box_selector.select(unspent_boxes, target_balance, new Tokens());
+      const tx_builder = TxBuilder.new(
+        box_selection,
+        tx_outputs,
+        0,
+        fee,
+        change_address,
+        min_change_value
+      );
+      const tx = tx_builder.build();
+      const tx_data_inputs = ErgoBoxes.from_boxes_json([]);
+      const block_headers = await generate_block_headers();
+      const pre_header = PreHeader.from_block_header(block_headers.get(0));
+      const ctx = new ErgoStateContext(pre_header);
+      const sks = new SecretKeys();
+
+      sks.add(sk);
+      const wallet = Wallet.from_secrets(sks);
+      const signed_tx = wallet.sign_transaction(ctx, tx, unspent_boxes, tx_data_inputs);
     }
   }
 });
