@@ -42,7 +42,7 @@ export type Token = {
   amount: string;
 };
 
-export type Box = {
+export type InputBox = {
   txId: string;
   index: number;
   value: string;
@@ -59,4 +59,12 @@ export type AttestedBoxFrame = {
   amount: string;
   tokens: Token[];
   attestation: string;
+  raw: Buffer;
+  extensionLength?: number;
+};
+
+export type UnsignedTx = {
+  inputs: AttestedBoxFrame[];
+  dataInputBoxIds: string[];
+  tokens: Token[];
 };

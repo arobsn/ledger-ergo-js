@@ -1,4 +1,4 @@
-import { AttestedBoxFrame, Box, Token } from "../erg";
+import { AttestedBoxFrame, InputBox, Token } from "../erg";
 import Device, { COMMAND } from "./common/device";
 import {
   bufferToUint64String,
@@ -6,6 +6,7 @@ import {
   uint64StringToBuffer,
 } from "./common/serialization";
 import type { DeviceResponse } from "../types/internal";
+import AttestedBox from "../models/attestedBox";
 
 const enum P1 {
   BOX_START = 0x01,
@@ -22,9 +23,9 @@ const enum P2 {
 
 export async function attestInput(
   device: Device,
-  box: Box,
+  box: InputBox,
   authToken?: number
-): Promise<AttestedBoxFrame[]> {
+): Promise<AttestedBox> {
   const sessionId = await sendHeader(device, box, authToken);
   let frameCount = await sendErgoTree(device, box.ergoTree, sessionId);
   if (box.tokens.length > 0) {
@@ -34,10 +35,10 @@ export async function attestInput(
     frameCount = await sendRegisters(device, box.additionalRegisters, sessionId);
   }
 
-  return await getAttestedFrames(device, frameCount, sessionId);
+  return new AttestedBox(box, await getAttestedFrames(device, frameCount, sessionId));
 }
 
-async function sendHeader(device: Device, box: Box, authToken?: number): Promise<number> {
+async function sendHeader(device: Device, box: InputBox, authToken?: number): Promise<number> {
   let header = Buffer.alloc(0x37);
   let offset = 0;
   Buffer.from(box.txId, "hex").copy(header, offset);
@@ -140,5 +141,5 @@ export function parseAttestedFrameResponse(frameBuff: Buffer): AttestedBoxFrame 
   }
 
   const attestation = frameBuff.slice(offset, (offset += 16)).toString("hex");
-  return { boxId, framesCount, frameIndex, amount, tokens, attestation };
+  return { boxId, framesCount, frameIndex, amount, tokens, attestation, raw: frameBuff };
 }

@@ -164,7 +164,7 @@ export default defineComponent({
           this.useAuthToken
         );
 
-        this.data = JSON.stringify(response, null, 2);
+        this.data = JSON.stringify(response.frames, null, 2);
 
         function mapTokens(tokens: Tokens) {
           const result = [] as Token[];

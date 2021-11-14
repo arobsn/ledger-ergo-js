@@ -7,18 +7,12 @@ import {
   deriveAddress,
   showAddress,
 } from "./interactions";
-import {
-  AppName,
-  AttestedBoxFrame,
-  Box,
-  DerivedAddress,
-  ExtendedPublicKey,
-  Version,
-} from "./types/public";
+import { AppName, InputBox, DerivedAddress, ExtendedPublicKey, Version } from "./types/public";
 import { assert } from "./validations/assert";
 import { isValidErgoPath } from "./validations/parse";
 import { pathStringToArray } from "./interactions/common/serialization";
 import { attestInput } from "./interactions/attestInput";
+import AttestedBox from "./models/attestedBox";
 
 export * from "./errors";
 export * from "./types/public";
@@ -123,7 +117,7 @@ export default class ErgoApp {
     return pathArray;
   }
 
-  public async attestInput(box: Box, useAuthToken = false): Promise<AttestedBoxFrame[]> {
+  public async attestInput(box: InputBox, useAuthToken = false): Promise<AttestedBox> {
     return attestInput(this._device, box, this.getAuthToken(useAuthToken));
   }
 
