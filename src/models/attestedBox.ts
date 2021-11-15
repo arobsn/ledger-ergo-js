@@ -1,4 +1,4 @@
-import { AttestedBoxFrame, InputBox } from "../erg";
+import { AttestedBoxFrame, InputBox } from "../types/public";
 
 export default class AttestedBox {
   private _box: InputBox;

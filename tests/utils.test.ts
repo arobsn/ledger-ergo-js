@@ -1,4 +1,4 @@
-import { chunkBy } from "../src/interactions/common/utils";
+import { chunkBy } from "../src/serialization/utils";
 
 describe("Utils test", () => {
   it("should chunk buffers", () => {

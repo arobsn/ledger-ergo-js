@@ -26,8 +26,8 @@ export type AppName = {
  * Extended public key in hex format
  */
 export type ExtendedPublicKey = {
-  publicKeyHex: string;
-  chainCodeHex: string;
+  publicKey: string;
+  chainCode: string;
 };
 
 /**

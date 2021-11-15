@@ -2,6 +2,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import { DeviceError } from "../../errors/deviceError";
 import { RETURN_CODE } from "../../errors";
 import { DeviceResponse } from "../../types/internal";
+import Serialize from "../../serialization/serialize";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -69,13 +70,13 @@ export default class Device {
   }
 
   private mountApdu(cla: number, ins: COMMAND, p1: number, p2: number, data: Buffer): Buffer {
-    const header = Buffer.alloc(5);
-    header.writeUInt8(cla, 0);
-    header.writeUInt8(ins, 1);
-    header.writeUInt8(p1, 2);
-    header.writeUInt8(p2, 3);
-    header.writeUInt8(data.length, 4);
-
-    return Buffer.concat([header, data]);
+    return Buffer.concat([
+      Serialize.uint8(cla),
+      Serialize.uint8(ins),
+      Serialize.uint8(p1),
+      Serialize.uint8(p2),
+      Serialize.uint8(data.length),
+      data,
+    ]);
   }
 }
