@@ -1,18 +1,17 @@
 import type Transport from "@ledgerhq/hw-transport";
 import Device from "./interactions/common/device";
+import { AppName, InputBox, DerivedAddress, ExtendedPublicKey, Version } from "./types/public";
+import { assert, isValidErgoPath } from "./validations";
+import AttestedBox from "./models/attestedBox";
 import {
   getAppName,
   getExtendedPublicKey,
   getAppVersion,
   deriveAddress,
   showAddress,
+  attestInput,
 } from "./interactions";
-import { AppName, InputBox, DerivedAddress, ExtendedPublicKey, Version } from "./types/public";
-import { assert } from "./validations/assert";
-import { isValidErgoPath } from "./validations/parse";
-import { pathStringToArray } from "./interactions/common/serialization";
-import { attestInput } from "./interactions/attestInput";
-import AttestedBox from "./models/attestedBox";
+import Serialize from "./serialization/serialize";
 
 export * from "./errors";
 export * from "./types/public";
@@ -23,7 +22,7 @@ const CHANGE_PATH_INDEX = 3;
 /**
  * Ergo's Ledger hardware wallet API
  */
-export default class ErgoApp {
+export class ErgoApp {
   private _device: Device;
   private _authToken: number;
 
@@ -80,7 +79,7 @@ export default class ErgoApp {
     path: string,
     useAuthToken: boolean = false
   ): Promise<ExtendedPublicKey> {
-    const pathArray = pathStringToArray(path);
+    const pathArray = Serialize.bip32PathAsArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
 
     return getExtendedPublicKey(this._device, pathArray, this.getAuthToken(useAuthToken));
@@ -109,7 +108,7 @@ export default class ErgoApp {
   }
 
   private getDerivationPathArray(path: string) {
-    const pathArray = pathStringToArray(path);
+    const pathArray = Serialize.bip32PathAsArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
     assert(pathArray.length >= 5, "Invalid path lenght.");
     assert(pathArray[CHANGE_PATH_INDEX] in [0, 1], "Invalid change path value.");

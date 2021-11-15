@@ -19,10 +19,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import ErgoApp, { Token } from "../../../src/erg";
+import { ErgoApp, Token } from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
-import { serializeAuthToken } from "../../../src/interactions/common/serialization";
 import { Tokens } from "ergo-lib-wasm-browser";
+import Serialize from "../../../src/serialization/serialize";
 
 const exampleBox = {
   id: "3e762407d99b006d53b6583adcca08ef690b42fb0b2ed7abf63179eb6b9033b2",
@@ -73,7 +73,7 @@ export default defineComponent({
   },
   computed: {
     hexAuthToken() {
-      return `0x${serializeAuthToken(this.authToken).toString("hex")}`;
+      return `0x${Serialize.uint32(this.authToken).toString("hex")}`;
     }
   },
   methods: {

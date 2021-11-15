@@ -8,6 +8,7 @@
     "sourceMap": true,
     "declaration": true,
     "esModuleInterop": true,
+    "importHelpers": true,
     "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
@@ -15,5 +16,5 @@
     "outDir": "dist/lib",
     "typeRoots": ["node_modules/@types"]
   },
-  "include": ["src"]
+  "include": ["src", "bip32-path.d.ts"]
 }
