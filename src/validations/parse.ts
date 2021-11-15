@@ -1,7 +1,11 @@
 import bip32Path from "bip32-path";
 
-export const MIN_UINT_64_STR = "0";
-export const MAX_UINT_64_STR = "18446744073709551615";
+const MIN_UINT_64_STR = "0";
+const MAX_UINT_64_STR = "18446744073709551615";
+const MIN_UINT_VALUE = 0;
+const MAX_UINT32_VALUE = 4294967295;
+const MAX_UINT16_VALUE = 65535;
+const MAX_UNIT8_VALUE = 255;
 
 export function isValidBip32Path(path: number[] | string): boolean {
   if (typeof path == "string") {
@@ -21,17 +25,39 @@ export function isValidErgoPath(path: number[]): boolean {
   return pathPurpose === ergoPurpose && pathCoinType === ergoCoinType;
 }
 
-export const isString = (data: unknown) => typeof data === "string";
+export function isInteger(data: unknown): boolean {
+  return Number.isInteger(data);
+}
 
-export const isInteger = (data: unknown) => Number.isInteger(data);
+export function isArray(data: unknown): boolean {
+  return Array.isArray(data);
+}
 
-export const isArray = (data: unknown) => Array.isArray(data);
+export function isBuffer(data: unknown): boolean {
+  return Buffer.isBuffer(data);
+}
 
-export const isBuffer = (data: unknown) => Buffer.isBuffer(data);
+export function isUint32(data: unknown): boolean {
+  return (
+    typeof data == "number" && isInteger(data) && data >= MIN_UINT_VALUE && data <= MAX_UINT32_VALUE
+  );
+}
+
+export function isUint16(data: number): boolean {
+  return (
+    typeof data == "number" && isInteger(data) && data >= MIN_UINT_VALUE && data <= MAX_UINT16_VALUE
+  );
+}
+
+export function isUint8(data: unknown): boolean {
+  return (
+    typeof data == "number" && isInteger(data) && data >= MIN_UINT_VALUE && data <= MAX_UNIT8_VALUE
+  );
+}
 
 export function isUint64String(data: string): boolean {
   return (
-    isString(data) &&
+    typeof data === "string" &&
     /^[0-9]*$/.test(data) &&
     // Length checks
     data.length > 0 &&
@@ -45,3 +71,6 @@ export function isUint64String(data: string): boolean {
     (data.length > MIN_UINT_64_STR.length || data >= MIN_UINT_64_STR)
   );
 }
+
+export const isHexString = (data: unknown) =>
+  typeof data === "string" && data.length % 2 === 0 && /^[0-9a-fA-F]*$/.test(data);

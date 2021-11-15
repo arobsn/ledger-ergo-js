@@ -14,26 +14,23 @@ export default [
         file: pkg.main,
         format: "umd",
         name: pkg.umdName,
-        sourcemap: true
+        sourcemap: true,
       },
       {
         file: pkg.module,
         format: "es",
-        sourcemap: true
-      }
+        sourcemap: true,
+      },
     ],
-    external: [
-      ...Object.keys(pkg.devDependencies || {}),
-      ...Object.keys(pkg.peerDependencies || {})
-    ],
+    external: [...Object.keys(pkg.devDependencies || {}), ...Object.keys(pkg.dependencies || {})],
     plugins: [
       json(),
       typescript({
-        typescript: require("typescript")
+        typescript: require("typescript"),
       }),
       resolve(),
-      commonjs()
-    ]
+      commonjs(),
+    ],
   },
   {
     input: `src/${pkg.libraryFile}.ts`,
@@ -41,20 +38,17 @@ export default [
       file: `dist/${pkg.libraryFile}.min.js`,
       name: pkg.umdName,
       format: "umd",
-      sourcemap: true
+      sourcemap: true,
     },
-    external: [
-      ...Object.keys(pkg.devDependencies || {}),
-      ...Object.keys(pkg.peerDependencies || {})
-    ],
+    external: [...Object.keys(pkg.devDependencies || {}), ...Object.keys(pkg.dependencies || {})],
     plugins: [
       json(),
       typescript({
-        typescript: require("typescript")
+        typescript: require("typescript"),
       }),
       resolve(),
       commonjs(),
-      uglify()
-    ]
-  }
+      uglify(),
+    ],
+  },
 ];

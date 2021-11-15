@@ -1,7 +1,8 @@
-import { serializeBip32Path, serializeAuthToken } from "./common/serialization";
 import Device, { COMMAND } from "./common/device";
 import { ExtendedPublicKey } from "../types/public";
-import { chunkBy } from "./common/utils";
+import { chunkBy } from "../serialization/utils";
+import Serialize from "../serialization/serialize";
+import Deserialize from "../serialization/deserialize";
 
 const enum P1 {
   WITHOUT_TOKEN = 0x01,
@@ -17,17 +18,17 @@ export async function getExtendedPublicKey(
   path: number[],
   authToken?: number
 ): Promise<ExtendedPublicKey> {
-  const data = serializeBip32Path(path);
+  const data = Serialize.bip32Path(path);
   const response = await device.send(
     COMMAND.GET_EXTENTED_PUB_KEY,
     authToken ? P1.WITH_TOKEN : P1.WITHOUT_TOKEN,
     P2.UNUSED,
-    authToken ? Buffer.concat([data, serializeAuthToken(authToken)]) : data
+    authToken ? Buffer.concat([data, Serialize.uint32(authToken)]) : data
   );
   const [publicKey, chainCode] = chunkBy(response.data, [33, 32]);
 
   return {
-    publicKeyHex: publicKey.toString("hex"),
-    chainCodeHex: chainCode.toString("hex"),
+    publicKey: Deserialize.hex(publicKey),
+    chainCode: Deserialize.hex(chainCode),
   };
 }

@@ -20,10 +20,10 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import ErgoApp, { Token } from "../../../src/erg";
+import { ErgoApp, Token } from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
-import { serializeAuthToken } from "../../../src/interactions/common/serialization";
 import { Tokens } from "ergo-lib-wasm-browser";
+import Serialize from "../../../src/serialization/serialize";
 import { generate_block_headers } from "@/txUtils";
 
 const exampleBox = {
@@ -75,7 +75,7 @@ export default defineComponent({
   },
   computed: {
     hexAuthToken() {
-      return `0x${serializeAuthToken(this.authToken).toString("hex")}`;
+      return `0x${Serialize.uint32(this.authToken).toString("hex")}`;
     }
   },
   methods: {
@@ -166,7 +166,7 @@ export default defineComponent({
           this.useAuthToken
         );
 
-        this.data = JSON.stringify(response, null, 2);
+        this.data = JSON.stringify(response.frames, null, 2);
 
         function mapTokens(tokens: Tokens) {
           const result = [] as Token[];

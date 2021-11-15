@@ -1,11 +1,9 @@
-import { AttestedBoxFrame, Box, Token } from "../erg";
+import { AttestedBoxFrame, InputBox, Token } from "../types/public";
 import Device, { COMMAND } from "./common/device";
-import {
-  bufferToUint64String,
-  serializeAuthToken,
-  uint64StringToBuffer,
-} from "./common/serialization";
 import type { DeviceResponse } from "../types/internal";
+import AttestedBox from "../models/attestedBox";
+import Serialize from "../serialization/serialize";
+import Deserialize from "../serialization/deserialize";
 
 const enum P1 {
   BOX_START = 0x01,
@@ -22,9 +20,9 @@ const enum P2 {
 
 export async function attestInput(
   device: Device,
-  box: Box,
+  box: InputBox,
   authToken?: number
-): Promise<AttestedBoxFrame[]> {
+): Promise<AttestedBox> {
   const sessionId = await sendHeader(device, box, authToken);
   let frameCount = await sendErgoTree(device, box.ergoTree, sessionId);
   if (box.tokens.length > 0) {
@@ -34,25 +32,26 @@ export async function attestInput(
     frameCount = await sendRegisters(device, box.additionalRegisters, sessionId);
   }
 
-  return await getAttestedFrames(device, frameCount, sessionId);
+  return new AttestedBox(box, await getAttestedFrames(device, frameCount, sessionId));
 }
 
-async function sendHeader(device: Device, box: Box, authToken?: number): Promise<number> {
-  let header = Buffer.alloc(0x37);
-  let offset = 0;
-  Buffer.from(box.txId, "hex").copy(header, offset);
-  header.writeUInt16BE(box.index, (offset += 32));
-  uint64StringToBuffer(box.value).copy(header, (offset += 2));
-  header.writeUInt32BE(box.ergoTree.length, (offset += 8));
-  header.writeUInt32BE(box.creationHeight, (offset += 4));
-  header.writeUInt8(box.tokens.length, (offset += 4));
-  header.writeUInt32BE(box.additionalRegisters.length, (offset += 1));
+async function sendHeader(device: Device, box: InputBox, authToken?: number): Promise<number> {
+  const header = Buffer.concat([
+    Serialize.hex(box.txId),
+    Serialize.uint16(box.index),
+    Serialize.uint64(box.value),
+    Serialize.uint32(box.ergoTree.length),
+    Serialize.uint32(box.creationHeight),
+    Serialize.uint8(box.tokens.length),
+    Serialize.uint32(box.additionalRegisters.length),
+    authToken ? Serialize.uint32(authToken) : Buffer.alloc(0),
+  ]);
 
   const response = await device.send(
     COMMAND.ATTEST_INPUT,
     P1.BOX_START,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
-    authToken ? Buffer.concat([header, serializeAuthToken(authToken)]) : header
+    header
   );
   return response.data[0];
 }
@@ -74,8 +73,8 @@ async function sendTokens(device: Device, tokens: Token[], sessionId: number): P
     const chunks = [];
     for (let j = i * 6; j < Math.min((i + 1) * 6, tokens.length); j++) {
       const token = tokens[j];
-      const id = Buffer.from(token.id, "hex");
-      const value = uint64StringToBuffer(token.amount);
+      const id = Serialize.hex(token.id);
+      const value = Serialize.uint64(token.amount);
       chunks.push(Buffer.concat([id, value]));
     }
     packets.push(Buffer.concat(chunks));
@@ -122,23 +121,29 @@ async function getAttestedFrames(
 
 export function parseAttestedFrameResponse(frameBuff: Buffer): AttestedBoxFrame {
   let offset = 0;
-  const boxId = frameBuff.slice(offset, (offset += 32)).toString("hex");
-  const framesCount = frameBuff.readIntBE(offset, 1);
-  offset += 1;
-  const frameIndex = frameBuff.readIntBE(offset, 1);
-  offset += 1;
-  const amount = bufferToUint64String(frameBuff.slice(offset, (offset += 8)));
-  const tokenCount = frameBuff.readIntBE(offset, 1);
-  offset += 1;
+  const boxId = Deserialize.hex(frameBuff.slice(offset, (offset += 32)));
+  const count = Deserialize.uint8(frameBuff.slice(offset, (offset += 1)));
+  const index = Deserialize.uint8(frameBuff.slice(offset, (offset += 1)));
+  const amount = Deserialize.uint64(frameBuff.slice(offset, (offset += 8)));
+  const tokenCount = Deserialize.uint8(frameBuff.slice(offset, (offset += 1)));
 
   const tokens: Token[] = [];
   for (let i = 0; i < tokenCount; i++) {
     tokens.push({
-      id: frameBuff.slice(offset, (offset += 32)).toString("hex"),
-      amount: bufferToUint64String(frameBuff.slice(offset, (offset += 8))),
+      id: Deserialize.hex(frameBuff.slice(offset, (offset += 32))),
+      amount: Deserialize.uint64(frameBuff.slice(offset, (offset += 8))),
     });
   }
 
-  const attestation = frameBuff.slice(offset, (offset += 16)).toString("hex");
-  return { boxId, framesCount, frameIndex, amount, tokens, attestation };
+  const attestation = Deserialize.hex(frameBuff.slice(offset, (offset += 16)));
+
+  return {
+    boxId,
+    framesCount: count,
+    frameIndex: index,
+    amount,
+    tokens,
+    attestation,
+    raw: frameBuff,
+  };
 }
