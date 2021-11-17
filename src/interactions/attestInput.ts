@@ -68,17 +68,10 @@ async function sendErgoTree(device: Device, data: Buffer, sessionId: number): Pr
 }
 
 async function sendTokens(device: Device, tokens: Token[], sessionId: number): Promise<number> {
-  const packets = [];
-  for (let i = 0; i < Math.ceil(tokens.length / 6); i++) {
-    const chunks = [];
-    for (let j = i * 6; j < Math.min((i + 1) * 6, tokens.length); j++) {
-      const token = tokens[j];
-      const id = Serialize.hex(token.id);
-      const value = Serialize.uint64(token.amount);
-      chunks.push(Buffer.concat([id, value]));
-    }
-    packets.push(Buffer.concat(chunks));
-  }
+  const MAX_PACKET_SIZE = 6;
+  const packets = Serialize.array(tokens, MAX_PACKET_SIZE, (t) =>
+    Buffer.concat([Serialize.hex(t.id), Serialize.uint64(t.amount)])
+  );
 
   const results: DeviceResponse[] = [];
   for (let p of packets) {

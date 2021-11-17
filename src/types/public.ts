@@ -1,3 +1,5 @@
+import AttestedBox from "../models/attestedBox";
+
 /**
  * Device app flags
  */
@@ -52,6 +54,14 @@ export type InputBox = {
   additionalRegisters: Buffer;
 };
 
+export type OutputBox = {
+  value: string;
+  ergoTree: Buffer;
+  creationHeight: number;
+  tokens: Token[];
+  additionalRegisters: Buffer;
+};
+
 export type AttestedBoxFrame = {
   boxId: string;
   framesCount: number;
@@ -64,7 +74,7 @@ export type AttestedBoxFrame = {
 };
 
 export type UnsignedTx = {
-  inputs: AttestedBoxFrame[];
+  inputs: AttestedBox[];
   dataInputBoxIds: string[];
-  tokens: Token[];
+  outputs: OutputBox[];
 };

@@ -1,6 +1,13 @@
 import type Transport from "@ledgerhq/hw-transport";
 import Device from "./interactions/common/device";
-import { AppName, InputBox, DerivedAddress, ExtendedPublicKey, Version } from "./types/public";
+import {
+  AppName,
+  InputBox,
+  DerivedAddress,
+  ExtendedPublicKey,
+  Version,
+  UnsignedTx,
+} from "./types/public";
 import { assert, isValidErgoPath } from "./validations";
 import AttestedBox from "./models/attestedBox";
 import {
@@ -12,6 +19,7 @@ import {
   attestInput,
 } from "./interactions";
 import Serialize from "./serialization/serialize";
+import { signTx } from "./interactions/signTx";
 
 export * from "./errors";
 export * from "./types/public";
@@ -34,6 +42,7 @@ export class ErgoApp {
       "deriveAddress",
       "showAddress",
       "attestInput",
+      "signTx",
     ];
     transport.decorateAppAPIMethods(this, methods, scrambleKey);
 
@@ -118,6 +127,10 @@ export class ErgoApp {
 
   public async attestInput(box: InputBox, useAuthToken = false): Promise<AttestedBox> {
     return attestInput(this._device, box, this.getAuthToken(useAuthToken));
+  }
+
+  public async signTx(tx: UnsignedTx, useAuthToken = false) {
+    signTx(this._device, tx, this.getAuthToken(useAuthToken));
   }
 
   private getAuthToken(useAuthToken: boolean): number | undefined {

@@ -65,4 +65,21 @@ export default class Serialize {
     assert(isHexString(data), "invalid hex string");
     return Buffer.from(data, "hex");
   }
+
+  public static array<T>(
+    data: T[],
+    maxPacketSize: number,
+    serializeCallback: (value: T) => Buffer
+  ): Buffer[] {
+    const packets = [];
+    for (let i = 0; i < Math.ceil(data.length / maxPacketSize); i++) {
+      const chunks = [];
+      for (let j = i * maxPacketSize; j < Math.min((i + 1) * maxPacketSize, data.length); j++) {
+        chunks.push(serializeCallback(data[j]));
+      }
+      packets.push(Buffer.concat(chunks));
+    }
+
+    return packets;
+  }
 }

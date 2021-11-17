@@ -25,6 +25,7 @@ import HidTransport from "@ledgerhq/hw-transport-webhid";
 import { Tokens } from "ergo-lib-wasm-browser";
 import Serialize from "../../../src/serialization/serialize";
 import { generate_block_headers } from "@/txUtils";
+import AttestedBox from "../../../src/models/attestedBox";
 
 const exampleBox = {
   id: "3e762407d99b006d53b6583adcca08ef690b42fb0b2ed7abf63179eb6b9033b2",
@@ -250,12 +251,25 @@ export default defineComponent({
         min_change_value
       );
       const tx = tx_builder.build();
+      console.log(
+        tx
+          .inputs()
+          .get(0)
+          .extension()
+          .sigma_serialize_bytes()
+      );
+      // console.log(
+      //   tx
+      //     .output_candidates()
+      //     .get(0)
+      //     .extension()
+      //     .sigma_serialize_bytes()
+      // );
       const tx_data_inputs = ErgoBoxes.from_boxes_json([]);
       const block_headers = await generate_block_headers();
       const pre_header = PreHeader.from_block_header(block_headers.get(0));
       const ctx = new ErgoStateContext(pre_header);
       const sks = new SecretKeys();
-
       sks.add(sk);
       const wallet = Wallet.from_secrets(sks);
       const signed_tx = wallet.sign_transaction(ctx, tx, unspent_boxes, tx_data_inputs);
