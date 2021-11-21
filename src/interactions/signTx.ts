@@ -1,6 +1,7 @@
 import AttestedBox from "../models/attestedBox";
+import Deserialize from "../serialization/deserialize";
 import Serialize from "../serialization/serialize";
-import { UnsignedTx } from "../types/public";
+import { OutputBox, SignTxResponse, Token, UnsignedTx } from "../types/public";
 import Device, { COMMAND } from "./common/device";
 
 const enum P1 {
@@ -24,13 +25,30 @@ const enum P2 {
   WITH_TOKEN = 0x02,
 }
 
-export async function signTx(device: Device, tx: UnsignedTx, authToken?: number) {
+export async function signTx(
+  device: Device,
+  tx: UnsignedTx,
+  path: string,
+  authToken?: number
+): Promise<SignTxResponse> {
   const uniqueTokenIds = getUniqueTokenIds(tx.inputs);
   const sessionId = await sendHeader(device, tx, uniqueTokenIds.length, authToken);
+
   if (uniqueTokenIds.length > 0) {
-    await sendTokensIds(device, uniqueTokenIds, sessionId);
+    await sendTokensIds(device, sessionId, uniqueTokenIds);
   }
-  await sendInputs(device, tx.inputs, sessionId);
+
+  await sendInputs(device, sessionId, tx.inputs);
+
+  if (tx.dataInputBoxIds.length > 0) {
+    await sendDataInputs(device, sessionId, tx.dataInputBoxIds);
+  }
+
+  await sendOutputs(device, sessionId, tx.outputs, uniqueTokenIds);
+  await sendConfirm(device, sessionId);
+  const sign = await sendP2PKSign(device, sessionId, path);
+
+  return { signature: Deserialize.hex(sign) };
 }
 
 async function sendHeader(
@@ -56,38 +74,148 @@ async function sendHeader(
   return response.data[0];
 }
 
-async function sendTokensIds(device: Device, ids: string[], sessionId: number): Promise<void> {
+async function sendTokensIds(device: Device, sessionId: number, ids: string[]): Promise<void> {
   const MAX_PACKET_SIZE = 10;
-  const packets = Serialize.array(ids, MAX_PACKET_SIZE, (id) => Serialize.hex(id));
+  const packets = Serialize.arrayAndChunk(ids, MAX_PACKET_SIZE, (id) => Serialize.hex(id));
 
   for (let p of packets) {
     await device.send(COMMAND.SIGN_TX, P1.ADD_TOKEN_IDS, sessionId, p);
   }
 }
 
-async function sendInputs(device: Device, inputBoxes: AttestedBox[], sessionId: number) {
+async function sendInputs(device: Device, sessionId: number, inputBoxes: AttestedBox[]) {
   for (let box of inputBoxes) {
     for (let frame of box.frames) {
-      await device.send(COMMAND.SIGN_TX, P1.ADD_INPUT_BOX_FRAME, sessionId, frame.raw);
+      const data = Buffer.concat([
+        Serialize.hex(frame.boxId),
+        Serialize.uint8(frame.framesCount),
+        Serialize.uint8(frame.frameIndex),
+        Serialize.uint64(frame.amount),
+        Serialize.uint8(frame.tokens.length),
+        Buffer.concat(
+          Serialize.arrayAndChunk(frame.tokens, 4, (t) =>
+            Buffer.concat([Serialize.hex(t.id), Serialize.uint64(t.amount)])
+          )
+        ),
+        Buffer.alloc(16),
+        Serialize.hex(frame.attestation),
+        frame.frameIndex === 0 && box.extension
+          ? Serialize.uint32(box.extension.length)
+          : Buffer.from([]),
+      ]);
+
+      await device.send(COMMAND.SIGN_TX, P1.ADD_INPUT_BOX_FRAME, sessionId, data);
     }
 
     if (box.extension !== undefined && box.extension.length > 0) {
-      sendBoxContextExtension(device, box.extension, sessionId);
+      sendBoxContextExtension(device, sessionId, box.extension);
     }
   }
 }
 
-async function sendBoxContextExtension(device: Device, extension: Buffer, sessionId: number) {
+async function sendBoxContextExtension(device: Device, sessionId: number, extension: Buffer) {
   device.sendData(COMMAND.SIGN_TX, P1.ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK, sessionId, extension);
 }
 
-async function sendDataInputs(device: Device, boxIds: string[], sessionId: number) {
+async function sendDataInputs(device: Device, sessionId: number, boxIds: string[]) {
   const MAX_PACKET_SIZE = 7;
-  const packets = Serialize.array(boxIds, MAX_PACKET_SIZE, (id) => Serialize.hex(id));
+  const packets = Serialize.arrayAndChunk(boxIds, MAX_PACKET_SIZE, (id) => Serialize.hex(id));
 
   for (let p of packets) {
     await device.send(COMMAND.SIGN_TX, P1.ADD_DATA_INPUTS, sessionId, p);
   }
+}
+
+async function sendOutputs(
+  device: Device,
+  sessionId: number,
+  boxes: OutputBox[],
+  tokenIds: string[]
+) {
+  for (let box of boxes) {
+    await device.send(
+      COMMAND.SIGN_TX,
+      P1.ADD_OUTPUT_BOX_START,
+      sessionId,
+      Buffer.concat([
+        Serialize.uint64(box.value),
+        Serialize.uint32(box.ergoTree.length),
+        Serialize.uint32(box.creationHeight),
+        Serialize.uint8(box.tokens.length),
+        Serialize.uint32(box.registers.length),
+      ])
+    );
+
+    if (box.ergoTree && box.ergoTree.length > 0) {
+      await addOutputBoxErgoTree(device, sessionId, box.ergoTree);
+    } else {
+      await addOutputBoxMinersFeeTree(device, sessionId);
+      await addOutputBoxChangeTree(device, sessionId, box.changePath);
+    }
+
+    if (tokenIds && tokenIds.length > 0) {
+      await addOutputBoxTokens(device, sessionId, box.tokens, tokenIds);
+    }
+
+    if (box.registers.length > 0) {
+      await addOutputBoxRegisters(device, sessionId, box.registers);
+    }
+  }
+}
+
+async function addOutputBoxErgoTree(device: Device, sessionId: number, ergoTree: Buffer) {
+  await device.sendData(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_ERGO_TREE_CHUNK, sessionId, ergoTree);
+}
+
+async function addOutputBoxMinersFeeTree(device: Device, sessionId: number) {
+  await device.send(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_MINERS_FEE_TREE, sessionId, Buffer.from([]));
+}
+
+async function addOutputBoxChangeTree(device: Device, sessionId: number, path?: string) {
+  if (!path) {
+    throw new Error("change path is not present");
+  }
+
+  await device.send(
+    COMMAND.SIGN_TX,
+    P1.ADD_OUTPUT_BOX_CHANGE_TREE,
+    sessionId,
+    Serialize.bip32Path(path)
+  );
+}
+
+async function addOutputBoxTokens(
+  device: Device,
+  sessionId: number,
+  tokens: Token[],
+  tokenIds: string[]
+) {
+  await device.send(
+    COMMAND.SIGN_TX,
+    P1.ADD_OUTPUT_BOX_TOKENS,
+    sessionId,
+    Serialize.array(tokens, (t) =>
+      Buffer.concat([Serialize.uint32(tokenIds.indexOf(t.id)), Serialize.uint64(t.amount)])
+    )
+  );
+}
+
+async function addOutputBoxRegisters(device: Device, sessionId: number, registers: Buffer) {
+  await device.sendData(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_REGISTERS_CHUNK, sessionId, registers);
+}
+
+async function sendConfirm(device: Device, sessionId: number) {
+  await device.send(COMMAND.SIGN_TX, P1.CONFIRM, sessionId, Buffer.from([]));
+}
+
+async function sendP2PKSign(device: Device, sessionId: number, path: string): Promise<Buffer> {
+  const response = await device.send(
+    COMMAND.SIGN_TX,
+    P1.P2PK_SIGN,
+    sessionId,
+    Serialize.bip32Path(path)
+  );
+  return response.data;
 }
 
 function getUniqueTokenIds(boxes: AttestedBox[]): string[] {

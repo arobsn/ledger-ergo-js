@@ -1,5 +1,6 @@
 import {
   assert,
+  isArray,
   isHexString,
   isUint16,
   isUint32,
@@ -13,10 +14,12 @@ import bip32Path from "bip32-path";
 const bs10 = basex("0123456789");
 
 export default class Serialize {
-  public static bip32Path(path: number[]): Buffer {
-    const buffer = Buffer.alloc(1 + path.length * 4);
-    buffer[0] = path.length;
-    path.forEach((element: any, index: number) => {
+  public static bip32Path(path: number[] | string): Buffer {
+    var pathArray = typeof path === "string" ? this.bip32PathAsArray(path) : path;
+
+    const buffer = Buffer.alloc(1 + pathArray.length * 4);
+    buffer[0] = pathArray.length;
+    pathArray.forEach((element: any, index: number) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
 
@@ -66,7 +69,16 @@ export default class Serialize {
     return Buffer.from(data, "hex");
   }
 
-  public static array<T>(
+  public static array<T>(data: T[], serializeCallback: (value: T) => Buffer): Buffer {
+    const chucks: Buffer[] = [];
+    for (let i = 0; i < data.length; i++) {
+      chucks.push(serializeCallback(data[i]));
+    }
+
+    return Buffer.concat(chucks);
+  }
+
+  public static arrayAndChunk<T>(
     data: T[],
     maxPacketSize: number,
     serializeCallback: (value: T) => Buffer

@@ -129,8 +129,8 @@ export class ErgoApp {
     return attestInput(this._device, box, this.getAuthToken(useAuthToken));
   }
 
-  public async signTx(tx: UnsignedTx, useAuthToken = false) {
-    signTx(this._device, tx, this.getAuthToken(useAuthToken));
+  public async signTx(tx: UnsignedTx, path: string, useAuthToken = false) {
+    signTx(this._device, tx, path, this.getAuthToken(useAuthToken));
   }
 
   private getAuthToken(useAuthToken: boolean): number | undefined {

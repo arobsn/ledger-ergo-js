@@ -57,9 +57,10 @@ export type InputBox = {
 export type OutputBox = {
   value: string;
   ergoTree: Buffer;
+  changePath?: string;
   creationHeight: number;
   tokens: Token[];
-  additionalRegisters: Buffer;
+  registers: Buffer;
 };
 
 export type AttestedBoxFrame = {
@@ -69,12 +70,14 @@ export type AttestedBoxFrame = {
   amount: string;
   tokens: Token[];
   attestation: string;
-  raw: Buffer;
-  extensionLength?: number;
 };
 
 export type UnsignedTx = {
   inputs: AttestedBox[];
   dataInputBoxIds: string[];
   outputs: OutputBox[];
+};
+
+export type SignTxResponse = {
+  signature: string;
 };

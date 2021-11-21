@@ -1,5 +1,4 @@
 import { AttestedBoxFrame, InputBox } from "../types/public";
-import { assert } from "../validations";
 
 export default class AttestedBox {
   private _box: InputBox;
@@ -24,15 +23,7 @@ export default class AttestedBox {
   }
 
   public setExtension(extension: Buffer): AttestedBox {
-    assert(!this._extension, "extension already present");
-
     this._extension = extension;
-    const firstFrame = this._frames[0];
-    firstFrame.extensionLength = extension.length;
-    const lengthBuffer = Buffer.alloc(4);
-    lengthBuffer.writeUInt32BE(extension.length, 0);
-    firstFrame.raw = Buffer.concat([firstFrame.raw, lengthBuffer]);
-
     return this;
   }
 }

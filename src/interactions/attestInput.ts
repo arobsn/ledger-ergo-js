@@ -69,7 +69,7 @@ async function sendErgoTree(device: Device, data: Buffer, sessionId: number): Pr
 
 async function sendTokens(device: Device, tokens: Token[], sessionId: number): Promise<number> {
   const MAX_PACKET_SIZE = 6;
-  const packets = Serialize.array(tokens, MAX_PACKET_SIZE, (t) =>
+  const packets = Serialize.arrayAndChunk(tokens, MAX_PACKET_SIZE, (t) =>
     Buffer.concat([Serialize.hex(t.id), Serialize.uint64(t.amount)])
   );
 
@@ -137,6 +137,5 @@ export function parseAttestedFrameResponse(frameBuff: Buffer): AttestedBoxFrame 
     amount,
     tokens,
     attestation,
-    raw: frameBuff,
   };
 }
