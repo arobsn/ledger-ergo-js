@@ -1,6 +1,6 @@
 import {
   assert,
-  isArray,
+  isArray
   isHexString,
   isUint16,
   isUint32,
