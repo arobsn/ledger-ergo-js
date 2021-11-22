@@ -1,8 +1,5 @@
 import type Transport from "@ledgerhq/hw-transport";
 import Device from "./interactions/common/device";
-import { AppName, InputBox, DerivedAddress, ExtendedPublicKey, Version } from "./types/public";
-import { assert, isValidErgoPath } from "./validations";
-import AttestedBox from "./models/attestedBox";
 import {
   AppName,
   InputBox,
@@ -20,9 +17,9 @@ import {
   deriveAddress,
   showAddress,
   attestInput,
+  signTx,
 } from "./interactions";
 import Serialize from "./serialization/serialize";
-import { signTx } from "./interactions/signTx";
 
 export * from "./errors";
 export * from "./types/public";
