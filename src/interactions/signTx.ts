@@ -97,7 +97,6 @@ async function sendInputs(device: Device, sessionId: number, inputBoxes: Atteste
             Buffer.concat([Serialize.hex(t.id), Serialize.uint64(t.amount)])
           )
         ),
-        Buffer.alloc(16),
         Serialize.hex(frame.attestation),
         frame.frameIndex === 0 && box.extension
           ? Serialize.uint32(box.extension.length)
