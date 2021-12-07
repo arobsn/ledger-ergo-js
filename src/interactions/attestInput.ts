@@ -136,6 +136,7 @@ export function parseAttestedFrameResponse(frameBuff: Buffer): AttestedBoxFrame 
     frameIndex: index,
     amount,
     tokens,
-    attestation
+    attestation,
+    buffer: frameBuff,
   };
 }

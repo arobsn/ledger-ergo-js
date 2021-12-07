@@ -70,6 +70,8 @@ export type AttestedBoxFrame = {
   amount: string;
   tokens: Token[];
   attestation: string;
+  extensionLength?: number;
+  buffer: Buffer;
 };
 
 export type UnsignedTx = {

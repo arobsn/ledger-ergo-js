@@ -86,24 +86,25 @@ async function sendTokensIds(device: Device, sessionId: number, ids: string[]): 
 async function sendInputs(device: Device, sessionId: number, inputBoxes: AttestedBox[]) {
   for (let box of inputBoxes) {
     for (let frame of box.frames) {
-      const data = Buffer.concat([
-        Serialize.hex(frame.boxId),
-        Serialize.uint8(frame.framesCount),
-        Serialize.uint8(frame.frameIndex),
-        Serialize.uint64(frame.amount),
-        Serialize.uint8(frame.tokens.length),
-        Buffer.concat(
-          Serialize.arrayAndChunk(frame.tokens, 4, (t) =>
-            Buffer.concat([Serialize.hex(t.id), Serialize.uint64(t.amount)])
-          )
-        ),
-        Serialize.hex(frame.attestation),
-        frame.frameIndex === 0 && box.extension
-          ? Serialize.uint32(box.extension.length)
-          : Buffer.from([]),
-      ]);
+      // const data = Buffer.concat([
+      //   Serialize.hex(frame.boxId),
+      //   Serialize.uint8(frame.framesCount),
+      //   Serialize.uint8(frame.frameIndex),
+      //   Serialize.uint64(frame.amount),
+      //   Serialize.uint8(frame.tokens.length),
+      //   Buffer.concat(
+      //     Serialize.arrayAndChunk(frame.tokens, 4, (t) =>
+      //       Buffer.concat([Serialize.hex(t.id), Serialize.uint64(t.amount)])
+      //     )
+      //   ),
+      //   Buffer.alloc(4),
+      //   Serialize.hex(frame.attestation),
+      //   frame.frameIndex === 0 && box.extension
+      //     ? Serialize.uint32(box.extension.length)
+      //     : Buffer.from([]),
+      // ]);
 
-      await device.send(COMMAND.SIGN_TX, P1.ADD_INPUT_BOX_FRAME, sessionId, data);
+      await device.send(COMMAND.SIGN_TX, P1.ADD_INPUT_BOX_FRAME, sessionId, frame.buffer);
     }
 
     if (box.extension !== undefined && box.extension.length > 0) {

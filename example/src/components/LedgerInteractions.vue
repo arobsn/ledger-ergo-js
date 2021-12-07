@@ -302,12 +302,11 @@ export default defineComponent({
           "m/44'/429'/0'",
           this.useAuthToken
         );
-        this.data = "signed";
       } catch (e) {
         this.data = (e as Error).message;
       }
       finally {
-        ergoApp.closeTransport();
+      ergoApp.closeTransport();
       }
     }
   }
