@@ -131,7 +131,7 @@ async function sendOutputs(
       await addOutputBoxMinersFeeTree(device, sessionId);
     }
 
-    if (tokenIds && tokenIds.length > 0) {
+    if (box.tokens && box.tokens.length > 0) {
       await addOutputBoxTokens(device, sessionId, box.tokens, tokenIds);
     }
 

@@ -300,7 +300,7 @@ export default defineComponent({
         await ergoApp.signTx(
           {
             inputs: attestedInputs,
-            dataInputBoxIds: ["2d554219a80c011cc51509e34fa4950965bb8e01de4d012536e766c9ca08bc2c"],
+            dataInputBoxIds: [],
             outputs
           },
           "m/44'/429'/0/0/0'",
