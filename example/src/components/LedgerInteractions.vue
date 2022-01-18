@@ -22,7 +22,7 @@
 import { defineComponent } from "vue";
 import { ErgoApp, InputBox, OutputBox, Token } from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
-import { ErgoBox, ErgoBoxes, Tokens, UnsignedInputs } from "ergo-lib-wasm-browser";
+import { ErgoBox, ErgoBoxes, Tokens } from "ergo-lib-wasm-browser";
 import Serialize from "../../../src/serialization/serialize";
 import AttestedBox from "../../../src/models/attestedBox";
 
@@ -160,7 +160,7 @@ export default defineComponent({
       const ergoApp = await this.createApp();
       this.data = "Awaiting approval on the device...";
       try {
-        const response = await ergoApp.deriveAddress("m/44'/429'/0'/1/0", this.useAuthToken);
+        const response = await ergoApp.deriveAddress("m/44'/429'/0'/0/0", this.useAuthToken);
         this.data = JSON.stringify(response, null, 2);
       } catch (e) {
         this.data = (e as Error).message;
@@ -175,7 +175,7 @@ export default defineComponent({
       const ergoApp = await this.createApp();
       this.data = "Check the address at device display...";
       try {
-        const response = await ergoApp.showAddress("m/44'/429'/0'/1/0", this.useAuthToken);
+        const response = await ergoApp.showAddress("m/44'/429'/0'/0/0", this.useAuthToken);
         this.data = JSON.stringify(response, null, 2);
       } catch (e) {
         this.data = (e as Error).message;
@@ -215,31 +215,27 @@ export default defineComponent({
         TxBuilder,
         BoxValue,
         I64,
-        SecretKey,
-        TxId,
+        Token,
         SimpleBoxSelector,
-        Tokens
+        Tokens,
+        TokenAmount,
+        TokenId
       } = await import("ergo-lib-wasm-browser");
 
-      const sk = SecretKey.random_dlog();
-      // simulate existing box guarded by the sk key
-      const input_contract = Contract.pay_to_address(sk.get_address());
-      const input_box = new ErgoBox(
-        BoxValue.from_i64(I64.from_str("1000000000")),
-        0,
-        input_contract,
-        TxId.zero(),
-        0,
-        new Tokens()
-      );
-      // create a transaction that spends the "simulated" box
+      const input_box = ErgoBox.from_json(JSON.stringify(exampleBox));
       const recipient = Address.from_testnet_str(
         "3WvsT2Gm4EpsM9Pg18PdY6XyhNNMqXDsvJTbbf6ihLvAmSb7u5RN"
       );
       const unspent_boxes = new ErgoBoxes(input_box);
       const contract = Contract.pay_to_address(recipient);
       const outbox_value = BoxValue.SAFE_USER_MIN();
-      const outbox = new ErgoBoxCandidateBuilder(outbox_value, contract, 0).build();
+      const outbox_builder = new ErgoBoxCandidateBuilder(outbox_value, contract, 0);
+      outbox_builder.add_token(
+        TokenId.from_str("bcd5db3a2872f279ef89edaa51a9344a6095ea1f03396874b695b5ba95ff602e"),
+        TokenAmount.from_i64(I64.from_str("100"))
+      );
+      const outbox = outbox_builder.build();
+
       const tx_outputs = new ErgoBoxCandidates(outbox);
       const fee = TxBuilder.SUGGESTED_TX_FEE();
       const change_address = Address.from_testnet_str(
@@ -248,7 +244,14 @@ export default defineComponent({
       const min_change_value = BoxValue.SAFE_USER_MIN();
       const box_selector = new SimpleBoxSelector();
       const target_balance = BoxValue.from_i64(outbox_value.as_i64().checked_add(fee.as_i64()));
-      const box_selection = box_selector.select(unspent_boxes, target_balance, new Tokens());
+      const tokens = new Tokens();
+      tokens.add(
+        new Token(
+          TokenId.from_str("bcd5db3a2872f279ef89edaa51a9344a6095ea1f03396874b695b5ba95ff602e"),
+          TokenAmount.from_i64(I64.from_str("100"))
+        )
+      );
+      const box_selection = box_selector.select(unspent_boxes, target_balance, tokens);
       const tx_builder = TxBuilder.new(
         box_selection,
         tx_outputs,
@@ -259,7 +262,6 @@ export default defineComponent({
       );
 
       const tx = tx_builder.build();
-
       const ergoApp = await this.createApp();
       const inputBoxes = mapBoxes(box_selection.boxes());
 
@@ -301,7 +303,7 @@ export default defineComponent({
             dataInputBoxIds: ["2d554219a80c011cc51509e34fa4950965bb8e01de4d012536e766c9ca08bc2c"],
             outputs
           },
-          "m/44'/429'/0'",
+          "m/44'/429'/0/0/0'",
           this.useAuthToken
         );
       } catch (e) {
