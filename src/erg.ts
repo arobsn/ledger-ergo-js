@@ -130,7 +130,7 @@ export class ErgoApp {
   }
 
   public async signTx(tx: UnsignedTx, path: string, useAuthToken = false) {
-      await signTx(this._device, tx, path, this.getAuthToken(useAuthToken));
+    return signTx(this._device, tx, path, this.getAuthToken(useAuthToken));
   }
 
   private getAuthToken(useAuthToken: boolean): number | undefined {

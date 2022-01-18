@@ -279,6 +279,7 @@ export default defineComponent({
           );
           attestedInputs.push(attestedBox);
         }
+
         const outputs: OutputBox[] = [];
         for (let i = 0; i < tx.output_candidates().len(); i++) {
           const wasmOutput = tx.output_candidates().get(i);
@@ -293,10 +294,11 @@ export default defineComponent({
             registers: Buffer.from([])
           });
         }
+
         await ergoApp.signTx(
           {
             inputs: attestedInputs,
-            dataInputBoxIds: [],
+            dataInputBoxIds: ["2d554219a80c011cc51509e34fa4950965bb8e01de4d012536e766c9ca08bc2c"],
             outputs
           },
           "m/44'/429'/0'",
@@ -304,9 +306,8 @@ export default defineComponent({
         );
       } catch (e) {
         this.data = (e as Error).message;
-      }
-      finally {
-      ergoApp.closeTransport();
+      } finally {
+        ergoApp.closeTransport();
       }
     }
   }

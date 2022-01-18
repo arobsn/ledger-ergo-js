@@ -26,11 +26,16 @@ export default class AttestedBox {
   public setExtension(extension: Buffer): AttestedBox {
     assert(!this._extension, "extension already present");
 
-    this._extension = extension;
-    const firstFrame = this._frames[0];
-    firstFrame.extensionLength = extension.length;
     const lengthBuffer = Buffer.alloc(4);
-    lengthBuffer.writeUInt32BE(extension.length, 0);
+    const firstFrame = this._frames[0];
+    if (extension.length === 1 && extension[0] === 0) {
+      lengthBuffer.writeUInt32BE(0, 0);
+    } else {
+      this._extension = extension;
+      firstFrame.extensionLength = extension.length;
+      lengthBuffer.writeUInt32BE(extension.length, 0);
+    }
+
     firstFrame.buffer = Buffer.concat([firstFrame.buffer, lengthBuffer]);
 
     return this;

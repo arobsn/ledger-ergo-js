@@ -32,18 +32,13 @@ export async function signTx(
   authToken?: number
 ): Promise<SignTxResponse> {
   const uniqueTokenIds = getUniqueTokenIds(tx.inputs);
-  const sessionId = await sendHeader(device, tx, uniqueTokenIds.length, authToken);
 
+  const sessionId = await sendHeader(device, tx, uniqueTokenIds.length, authToken);
   if (uniqueTokenIds.length > 0) {
     await sendTokensIds(device, sessionId, uniqueTokenIds);
   }
-
   await sendInputs(device, sessionId, tx.inputs);
-
-  if (tx.dataInputBoxIds.length > 0) {
-    await sendDataInputs(device, sessionId, tx.dataInputBoxIds);
-  }
-
+  await sendDataInputs(device, sessionId, tx.dataInputBoxIds);
   await sendOutputs(device, sessionId, tx.outputs, uniqueTokenIds);
   await sendConfirm(device, sessionId);
   const sign = await sendP2PKSign(device, sessionId, path);
@@ -86,29 +81,11 @@ async function sendTokensIds(device: Device, sessionId: number, ids: string[]): 
 async function sendInputs(device: Device, sessionId: number, inputBoxes: AttestedBox[]) {
   for (let box of inputBoxes) {
     for (let frame of box.frames) {
-      // const data = Buffer.concat([
-      //   Serialize.hex(frame.boxId),
-      //   Serialize.uint8(frame.framesCount),
-      //   Serialize.uint8(frame.frameIndex),
-      //   Serialize.uint64(frame.amount),
-      //   Serialize.uint8(frame.tokens.length),
-      //   Buffer.concat(
-      //     Serialize.arrayAndChunk(frame.tokens, 4, (t) =>
-      //       Buffer.concat([Serialize.hex(t.id), Serialize.uint64(t.amount)])
-      //     )
-      //   ),
-      //   Buffer.alloc(4),
-      //   Serialize.hex(frame.attestation),
-      //   frame.frameIndex === 0 && box.extension
-      //     ? Serialize.uint32(box.extension.length)
-      //     : Buffer.from([]),
-      // ]);
-
       await device.send(COMMAND.SIGN_TX, P1.ADD_INPUT_BOX_FRAME, sessionId, frame.buffer);
     }
 
     if (box.extension !== undefined && box.extension.length > 0) {
-      sendBoxContextExtension(device, sessionId, box.extension);
+      await sendBoxContextExtension(device, sessionId, box.extension);
     }
   }
 }
@@ -148,9 +125,10 @@ async function sendOutputs(
 
     if (box.ergoTree && box.ergoTree.length > 0) {
       await addOutputBoxErgoTree(device, sessionId, box.ergoTree);
+    } else if (box.changePath) {
+      await addOutputBoxChangeTree(device, sessionId, box.changePath);
     } else {
       await addOutputBoxMinersFeeTree(device, sessionId);
-      await addOutputBoxChangeTree(device, sessionId, box.changePath);
     }
 
     if (tokenIds && tokenIds.length > 0) {
