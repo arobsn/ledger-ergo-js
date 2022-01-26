@@ -7,6 +7,7 @@ import {
   ExtendedPublicKey,
   Version,
   UnsignedTx,
+  ChangeMap,
 } from "./types/public";
 import { assert, isValidErgoPath } from "./validations";
 import AttestedBox from "./models/attestedBox";
@@ -129,8 +130,8 @@ export class ErgoApp {
     return attestInput(this._device, box, this.getAuthToken(useAuthToken));
   }
 
-  public async signTx(tx: UnsignedTx, path: string, useAuthToken = false) {
-    return signTx(this._device, tx, path, this.getAuthToken(useAuthToken));
+  public async signTx(tx: UnsignedTx, useAuthToken = false) {
+    return signTx(this._device, tx, this.getAuthToken(useAuthToken));
   }
 
   private getAuthToken(useAuthToken: boolean): number | undefined {

@@ -1,8 +1,12 @@
 import AttestedBox from "../models/attestedBox";
 import Deserialize from "../serialization/deserialize";
 import Serialize from "../serialization/serialize";
-import { OutputBox, SignTxResponse, Token, UnsignedTx } from "../types/public";
+import { ChangeMap, OutputBox, SignTxResponse, Token, UnsignedTx } from "../types/public";
 import Device, { COMMAND } from "./common/device";
+import { Address, Network } from "@coinbarn/ergo-ts";
+
+const MINER_FEE_TREE =
+  "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
 
 const enum P1 {
   START_SIGNING = 0x01,
@@ -28,9 +32,8 @@ const enum P2 {
 export async function signTx(
   device: Device,
   tx: UnsignedTx,
-  path: string,
   authToken?: number
-): Promise<SignTxResponse> {
+): Promise<SignTxResponse[]> {
   const uniqueTokenIds = getUniqueTokenIds(tx.inputs);
 
   const sessionId = await sendHeader(device, tx, uniqueTokenIds.length, authToken);
@@ -39,11 +42,18 @@ export async function signTx(
   }
   await sendInputs(device, sessionId, tx.inputs);
   await sendDataInputs(device, sessionId, tx.dataInputBoxIds);
-  await sendOutputs(device, sessionId, tx.outputs, uniqueTokenIds);
+  await sendOutputs(device, sessionId, tx.outputs, tx.changeMap, uniqueTokenIds);
   await sendConfirm(device, sessionId);
-  const sign = await sendP2PKSign(device, sessionId, path);
 
-  return { signature: Deserialize.hex(sign) };
+  const signs = [] as SignTxResponse[];
+  for (const path of tx.signPaths) {
+    signs.push({
+      path,
+      signature: Deserialize.hex(await sendP2PKSign(device, sessionId, path)),
+    });
+  }
+
+  return signs;
 }
 
 async function sendHeader(
@@ -107,6 +117,7 @@ async function sendOutputs(
   device: Device,
   sessionId: number,
   boxes: OutputBox[],
+  changeMap: ChangeMap,
   tokenIds: string[]
 ) {
   for (let box of boxes) {
@@ -123,12 +134,16 @@ async function sendOutputs(
       ])
     );
 
-    if (box.ergoTree && box.ergoTree.length > 0) {
-      await addOutputBoxErgoTree(device, sessionId, box.ergoTree);
-    } else if (box.changePath) {
-      await addOutputBoxChangeTree(device, sessionId, box.changePath);
-    } else {
+    const tree = Deserialize.hex(box.ergoTree);
+    if (tree === MINER_FEE_TREE) {
       await addOutputBoxMinersFeeTree(device, sessionId);
+      console.debug("Add miner box");
+    } else if (Address.fromErgoTree(tree).address === changeMap.address) {
+      await addOutputBoxChangeTree(device, sessionId, changeMap.path);
+      console.debug("Add change box");
+    } else {
+      await addOutputBoxErgoTree(device, sessionId, box.ergoTree);
+      console.debug("Add custom box");
     }
 
     if (box.tokens && box.tokens.length > 0) {

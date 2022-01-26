@@ -78,8 +78,16 @@ export type UnsignedTx = {
   inputs: AttestedBox[];
   dataInputBoxIds: string[];
   outputs: OutputBox[];
+  changeMap: ChangeMap;
+  signPaths: string[];
+};
+
+export type ChangeMap = {
+  address: string;
+  path: string;
 };
 
 export type SignTxResponse = {
+  path: string;
   signature: string;
 };

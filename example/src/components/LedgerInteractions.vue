@@ -22,7 +22,7 @@
 import { defineComponent } from "vue";
 import { ErgoApp, InputBox, OutputBox, Token } from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
-import { ErgoBox, ErgoBoxes, Tokens } from "ergo-lib-wasm-browser";
+import { ErgoBox, ErgoBoxes, Tokens, Transaction } from "ergo-lib-wasm-browser";
 import Serialize from "../../../src/serialization/serialize";
 import AttestedBox from "../../../src/models/attestedBox";
 
@@ -223,8 +223,8 @@ export default defineComponent({
       } = await import("ergo-lib-wasm-browser");
 
       const input_box = ErgoBox.from_json(JSON.stringify(exampleBox));
-      const recipient = Address.from_testnet_str(
-        "3WvsT2Gm4EpsM9Pg18PdY6XyhNNMqXDsvJTbbf6ihLvAmSb7u5RN"
+      const recipient = Address.from_mainnet_str(
+        "9hcUZD6ELC5kCGhzQ3htLXdpUCm5VNXq8X5gqWobWM3skfPSmJA"
       );
       const unspent_boxes = new ErgoBoxes(input_box);
       const contract = Contract.pay_to_address(recipient);
@@ -232,25 +232,45 @@ export default defineComponent({
       const outbox_builder = new ErgoBoxCandidateBuilder(outbox_value, contract, 0);
       outbox_builder.add_token(
         TokenId.from_str("bcd5db3a2872f279ef89edaa51a9344a6095ea1f03396874b695b5ba95ff602e"),
-        TokenAmount.from_i64(I64.from_str("100"))
+        TokenAmount.from_i64(I64.from_str("99995619990"))
+      );
+      // outbox_builder.add_token(
+      //   TokenId.from_str("2d554219a80c011cc51509e34fa4950965bb8e01de4d012536e766c9ca08bc2c"),
+      //   TokenAmount.from_i64(I64.from_str("9999999999"))
+      // );
+      outbox_builder.add_token(
+        TokenId.from_str("9f90c012e03bf99397e363fb1571b7999941e0862a217307e3467ee80cf53af7"),
+        TokenAmount.from_i64(I64.from_str("1"))
       );
       const outbox = outbox_builder.build();
-
-      const tx_outputs = new ErgoBoxCandidates(outbox);
-      const fee = TxBuilder.SUGGESTED_TX_FEE();
-      const change_address = Address.from_testnet_str(
-        "3WvsT2Gm4EpsM9Pg18PdY6XyhNNMqXDsvJTbbf6ihLvAmSb7u5RN"
-      );
-      const min_change_value = BoxValue.SAFE_USER_MIN();
-      const box_selector = new SimpleBoxSelector();
-      const target_balance = BoxValue.from_i64(outbox_value.as_i64().checked_add(fee.as_i64()));
       const tokens = new Tokens();
       tokens.add(
         new Token(
           TokenId.from_str("bcd5db3a2872f279ef89edaa51a9344a6095ea1f03396874b695b5ba95ff602e"),
-          TokenAmount.from_i64(I64.from_str("100"))
+          TokenAmount.from_i64(I64.from_str("99995619990"))
         )
       );
+      tokens.add(
+        new Token(
+          TokenId.from_str("2d554219a80c011cc51509e34fa4950965bb8e01de4d012536e766c9ca08bc2c"),
+          TokenAmount.from_i64(I64.from_str("99999999998"))
+        )
+      );
+      tokens.add(
+        new Token(
+          TokenId.from_str("9f90c012e03bf99397e363fb1571b7999941e0862a217307e3467ee80cf53af7"),
+          TokenAmount.from_i64(I64.from_str("1"))
+        )
+      );
+      const tx_outputs = new ErgoBoxCandidates(outbox);
+
+      const fee = TxBuilder.SUGGESTED_TX_FEE();
+      const change_address = Address.from_mainnet_str(
+        "9hTmYEiroHijeRidJcvT98tAZefpHz2di5sHkAiQbGE5DQVhPk8"
+      );
+      const min_change_value = BoxValue.SAFE_USER_MIN();
+      const box_selector = new SimpleBoxSelector();
+      const target_balance = BoxValue.from_i64(outbox_value.as_i64().checked_add(fee.as_i64()));
       const box_selection = box_selector.select(unspent_boxes, target_balance, tokens);
       const tx_builder = TxBuilder.new(
         box_selection,
@@ -281,6 +301,7 @@ export default defineComponent({
           );
           attestedInputs.push(attestedBox);
         }
+        console.log(tx.to_json());
 
         const outputs: OutputBox[] = [];
         for (let i = 0; i < tx.output_candidates().len(); i++) {
@@ -297,15 +318,21 @@ export default defineComponent({
           });
         }
 
-        await ergoApp.signTx(
+        const sign = await ergoApp.signTx(
           {
             inputs: attestedInputs,
             dataInputBoxIds: [],
-            outputs
+            outputs,
+            changeMap: {
+              address: "9hTmYEiroHijeRidJcvT98tAZefpHz2di5sHkAiQbGE5DQVhPk8",
+              path: "m/44'/429'/0'/0/0"
+            },
+            signPaths: ["m/44'/429'/0'/0/0", "m/44'/429'/0'/0/1"]
           },
-          "m/44'/429'/0/0/0'",
           this.useAuthToken
         );
+        this.data = JSON.stringify(sign, null, 2);
+        // console.log(sign);
       } catch (e) {
         this.data = (e as Error).message;
       } finally {
