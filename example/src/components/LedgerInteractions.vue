@@ -20,22 +20,21 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ErgoApp, UnsignedBox, BoxCandidate, Token } from "../../../src/erg";
+import { ErgoLedgerApp, UnsignedBox, BoxCandidate, Token } from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
-import { ErgoBox, ErgoBoxes, Tokens, Transaction } from "ergo-lib-wasm-browser";
+import { ErgoBox, ErgoBoxes, Tokens, UnsignedInput, UnsignedInputs } from "ergo-lib-wasm-browser";
 import Serialize from "../../../src/serialization/serialize";
-import AttestedBox from "../../../src/models/attestedBox";
 
-function mapBoxes(boxes: ErgoBoxes): UnsignedBox[] {
+function mapBoxes(boxes: ErgoBoxes, inputs: UnsignedInputs): UnsignedBox[] {
   const mappedBoxes: UnsignedBox[] = [];
   for (let i = 0; i < boxes.len(); i++) {
-    mappedBoxes.push(mapBox(boxes.get(i)));
+    mappedBoxes.push(mapBox(boxes.get(i), inputs.get(i)));
   }
 
   return mappedBoxes;
 }
 
-function mapBox(box: ErgoBox): UnsignedBox {
+function mapBox(box: ErgoBox, inputs?: UnsignedInput): UnsignedBox {
   return {
     txId: box.box_id().to_str(),
     index: 0,
@@ -46,7 +45,8 @@ function mapBox(box: ErgoBox): UnsignedBox {
     ergoTree: Buffer.from(box.ergo_tree().sigma_serialize_bytes()),
     creationHeight: box.creation_height(),
     tokens: mapTokens(box.tokens()),
-    additionalRegisters: Buffer.from(box.serialized_additional_registers())
+    additionalRegisters: Buffer.from(box.serialized_additional_registers()),
+    extension: inputs ? Buffer.from(inputs.extension().sigma_serialize_bytes()) : Buffer.from([])
   };
 }
 
@@ -146,7 +146,7 @@ export default defineComponent({
     },
     async getExtendedPublicKey() {
       const ergoApp = await this.createApp();
-      this.data = "Awaiting approval on the device...";
+      this.data = "Awaiting approval on device...";
       try {
         const response = await ergoApp.getExtendedPublicKey("m/44'/429'/0'", this.useAuthToken);
         this.data = JSON.stringify(response, null, 2);
@@ -158,7 +158,7 @@ export default defineComponent({
     },
     async deriveAddress() {
       const ergoApp = await this.createApp();
-      this.data = "Awaiting approval on the device...";
+      this.data = "Awaiting approval on device...";
       try {
         const response = await ergoApp.deriveAddress("m/44'/429'/0'/0/0", this.useAuthToken);
         this.data = JSON.stringify(response, null, 2);
@@ -183,14 +183,14 @@ export default defineComponent({
         ergoApp.transport.close();
       }
     },
-    async createApp(): Promise<ErgoApp> {
-      return new ErgoApp(await HidTransport.create(), this.useAuthToken ? this.authToken : 0);
+    async createApp(): Promise<ErgoLedgerApp> {
+      return new ErgoLedgerApp(await HidTransport.create(), this.useAuthToken ? this.authToken : 0);
     },
     async attestInput() {
       const { ErgoBoxes } = await import("ergo-lib-wasm-browser");
       const box = ErgoBoxes.from_boxes_json([exampleBox]).get(0);
       const ergoApp = await this.createApp();
-      this.data = "Awaiting approval on the device...";
+      this.data = "Awaiting approval on device...";
 
       try {
         const response = await ergoApp.attestInput(mapBox(box), this.useAuthToken);
@@ -203,7 +203,7 @@ export default defineComponent({
       }
     },
     async signTx() {
-      this.data = "Awaiting approval on the device...";
+      this.data = "Awaiting approval on device...";
 
       const {
         Address,
@@ -283,26 +283,9 @@ export default defineComponent({
 
       const tx = tx_builder.build();
       const ergoApp = await this.createApp();
-      const inputBoxes = mapBoxes(box_selection.boxes());
+      const inputBoxes = mapBoxes(box_selection.boxes(), tx.inputs());
 
       try {
-        this.data = "Attesting boxes...";
-        const attestedInputs: AttestedBox[] = [];
-        for (let i = 0; i < inputBoxes.length; i++) {
-          const attestedBox = await ergoApp.attestInput(inputBoxes[i], this.useAuthToken);
-          attestedBox.setExtension(
-            Buffer.from(
-              tx
-                .inputs()
-                .get(i)
-                .extension()
-                .sigma_serialize_bytes()
-            )
-          );
-          attestedInputs.push(attestedBox);
-        }
-        console.log(tx.to_json());
-
         const outputs: BoxCandidate[] = [];
         for (let i = 0; i < tx.output_candidates().len(); i++) {
           const wasmOutput = tx.output_candidates().get(i);
@@ -320,8 +303,8 @@ export default defineComponent({
 
         const sign = await ergoApp.signTx(
           {
-            inputs: attestedInputs,
-            dataInputBoxIds: [],
+            inputs: inputBoxes,
+            dataInputs: [],
             outputs,
             changeMap: {
               address: "9hTmYEiroHijeRidJcvT98tAZefpHz2di5sHkAiQbGE5DQVhPk8",
@@ -332,7 +315,6 @@ export default defineComponent({
           this.useAuthToken
         );
         this.data = JSON.stringify(sign, null, 2);
-        // console.log(sign);
       } catch (e) {
         this.data = (e as Error).message;
       } finally {

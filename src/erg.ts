@@ -7,6 +7,7 @@ import {
   ExtendedPublicKey,
   Version,
   UnsignedTx,
+  AttestedTx,
 } from "./types/public";
 import { assert, isValidErgoPath } from "./validations";
 import AttestedBox from "./models/attestedBox";
@@ -30,7 +31,7 @@ const CHANGE_PATH_INDEX = 3;
 /**
  * Ergo's Ledger hardware wallet API
  */
-export class ErgoApp {
+export class ErgoLedgerApp {
   private _device: Device;
   private _authToken: number;
 
@@ -136,11 +137,30 @@ export class ErgoApp {
   }
 
   public async attestInput(box: UnsignedBox, useAuthToken = false): Promise<AttestedBox> {
+    return this._attestInput(box, useAuthToken);
+  }
+
+  private async _attestInput(box: UnsignedBox, useAuthToken = false): Promise<AttestedBox> {
     return attestInput(this._device, box, this.getAuthToken(useAuthToken));
   }
 
   public async signTx(tx: UnsignedTx, useAuthToken = false) {
-    return signTx(this._device, tx, this.getAuthToken(useAuthToken));
+    const attestedBoxes: AttestedBox[] = [];
+    for (const box of tx.inputs) {
+      const attestedBox = await this._attestInput(box, useAuthToken);
+      attestedBox.setExtension(box.extension);
+      attestedBoxes.push(attestedBox);
+    }
+
+    const attestedTx: AttestedTx = {
+      inputs: attestedBoxes,
+      dataInputs: tx.dataInputs,
+      outputs: tx.outputs,
+      changeMap: tx.changeMap,
+      signPaths: tx.signPaths,
+    };
+
+    return signTx(this._device, attestedTx, this.getAuthToken(useAuthToken));
   }
 
   private getAuthToken(useAuthToken: boolean): number | undefined {

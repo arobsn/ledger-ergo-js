@@ -1,7 +1,7 @@
 import AttestedBox from "../models/attestedBox";
 import Deserialize from "../serialization/deserialize";
 import Serialize from "../serialization/serialize";
-import { ChangeMap, BoxCandidate, SignTxResponse, Token, UnsignedTx } from "../types/public";
+import { ChangeMap, BoxCandidate, SignTxResponse, Token, AttestedTx } from "../types/public";
 import Device, { COMMAND } from "./common/device";
 import { Address } from "@coinbarn/ergo-ts";
 
@@ -31,7 +31,7 @@ const enum P2 {
 
 export async function signTx(
   device: Device,
-  tx: UnsignedTx,
+  tx: AttestedTx,
   authToken?: number
 ): Promise<SignTxResponse[]> {
   const uniqueTokenIds = getUniqueTokenIds(tx.inputs);
@@ -41,7 +41,7 @@ export async function signTx(
     await sendTokensIds(device, sessionId, uniqueTokenIds);
   }
   await sendInputs(device, sessionId, tx.inputs);
-  await sendDataInputs(device, sessionId, tx.dataInputBoxIds);
+  await sendDataInputs(device, sessionId, tx.dataInputs);
   await sendOutputs(device, sessionId, tx.outputs, tx.changeMap, uniqueTokenIds);
   await sendConfirm(device, sessionId);
 
@@ -58,13 +58,13 @@ export async function signTx(
 
 async function sendHeader(
   device: Device,
-  tx: UnsignedTx,
+  tx: AttestedTx,
   uniqueTokenIdsCount: number,
   authToken?: number
 ): Promise<number> {
   const header = Buffer.concat([
     Serialize.uint16(tx.inputs.length),
-    Serialize.uint16(tx.dataInputBoxIds.length),
+    Serialize.uint16(tx.dataInputs.length),
     Serialize.uint8(uniqueTokenIdsCount),
     Serialize.uint16(tx.outputs.length),
     authToken ? Serialize.uint32(authToken) : Buffer.alloc(0),

@@ -52,6 +52,7 @@ export type UnsignedBox = {
   creationHeight: number;
   tokens: Token[];
   additionalRegisters: Buffer;
+  extension: Buffer;
 };
 
 export type BoxCandidate = {
@@ -74,8 +75,16 @@ export type AttestedBoxFrame = {
 };
 
 export type UnsignedTx = {
+  inputs: UnsignedBox[];
+  dataInputs: string[];
+  outputs: BoxCandidate[];
+  changeMap: ChangeMap;
+  signPaths: string[];
+};
+
+export type AttestedTx = {
   inputs: AttestedBox[];
-  dataInputBoxIds: string[];
+  dataInputs: string[];
   outputs: BoxCandidate[];
   changeMap: ChangeMap;
   signPaths: string[];
