@@ -1,4 +1,4 @@
-import { AttestedBoxFrame, InputBox, Token } from "../types/public";
+import { AttestedBoxFrame, UnsignedBox, Token } from "../types/public";
 import Device, { COMMAND } from "./common/device";
 import type { DeviceResponse } from "../types/internal";
 import AttestedBox from "../models/attestedBox";
@@ -20,7 +20,7 @@ const enum P2 {
 
 export async function attestInput(
   device: Device,
-  box: InputBox,
+  box: UnsignedBox,
   authToken?: number
 ): Promise<AttestedBox> {
   const sessionId = await sendHeader(device, box, authToken);
@@ -35,7 +35,7 @@ export async function attestInput(
   return new AttestedBox(box, await getAttestedFrames(device, frameCount, sessionId));
 }
 
-async function sendHeader(device: Device, box: InputBox, authToken?: number): Promise<number> {
+async function sendHeader(device: Device, box: UnsignedBox, authToken?: number): Promise<number> {
   const header = Buffer.concat([
     Serialize.hex(box.txId),
     Serialize.uint16(box.index),

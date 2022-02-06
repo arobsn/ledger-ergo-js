@@ -44,7 +44,7 @@ export type Token = {
   amount: string;
 };
 
-export type InputBox = {
+export type UnsignedBox = {
   txId: string;
   index: number;
   value: string;
@@ -54,10 +54,9 @@ export type InputBox = {
   additionalRegisters: Buffer;
 };
 
-export type OutputBox = {
+export type BoxCandidate = {
   value: string;
   ergoTree: Buffer;
-  changePath?: string;
   creationHeight: number;
   tokens: Token[];
   registers: Buffer;
@@ -77,7 +76,7 @@ export type AttestedBoxFrame = {
 export type UnsignedTx = {
   inputs: AttestedBox[];
   dataInputBoxIds: string[];
-  outputs: OutputBox[];
+  outputs: BoxCandidate[];
   changeMap: ChangeMap;
   signPaths: string[];
 };

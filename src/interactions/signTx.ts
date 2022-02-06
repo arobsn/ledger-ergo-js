@@ -1,9 +1,9 @@
 import AttestedBox from "../models/attestedBox";
 import Deserialize from "../serialization/deserialize";
 import Serialize from "../serialization/serialize";
-import { ChangeMap, OutputBox, SignTxResponse, Token, UnsignedTx } from "../types/public";
+import { ChangeMap, BoxCandidate, SignTxResponse, Token, UnsignedTx } from "../types/public";
 import Device, { COMMAND } from "./common/device";
-import { Address, Network } from "@coinbarn/ergo-ts";
+import { Address } from "@coinbarn/ergo-ts";
 
 const MINER_FEE_TREE =
   "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
@@ -116,7 +116,7 @@ async function sendDataInputs(device: Device, sessionId: number, boxIds: string[
 async function sendOutputs(
   device: Device,
   sessionId: number,
-  boxes: OutputBox[],
+  boxes: BoxCandidate[],
   changeMap: ChangeMap,
   tokenIds: string[]
 ) {
@@ -213,7 +213,7 @@ async function sendP2PKSign(device: Device, sessionId: number, path: string): Pr
 
 function getUniqueTokenIds(boxes: AttestedBox[]): string[] {
   return boxes
-    .map((b) => b.frames.map((f) => f.tokens.map((t) => t.id)))
-    .flat(2)
+    .map((b) => b.box.tokens.map((t) => t.id))
+    .flat()
     .filter((v, i, a) => a.indexOf(v) === i);
 }

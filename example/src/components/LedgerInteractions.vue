@@ -20,14 +20,14 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ErgoApp, InputBox, OutputBox, Token } from "../../../src/erg";
+import { ErgoApp, UnsignedBox, BoxCandidate, Token } from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
 import { ErgoBox, ErgoBoxes, Tokens, Transaction } from "ergo-lib-wasm-browser";
 import Serialize from "../../../src/serialization/serialize";
 import AttestedBox from "../../../src/models/attestedBox";
 
-function mapBoxes(boxes: ErgoBoxes): InputBox[] {
-  const mappedBoxes: InputBox[] = [];
+function mapBoxes(boxes: ErgoBoxes): UnsignedBox[] {
+  const mappedBoxes: UnsignedBox[] = [];
   for (let i = 0; i < boxes.len(); i++) {
     mappedBoxes.push(mapBox(boxes.get(i)));
   }
@@ -35,7 +35,7 @@ function mapBoxes(boxes: ErgoBoxes): InputBox[] {
   return mappedBoxes;
 }
 
-function mapBox(box: ErgoBox): InputBox {
+function mapBox(box: ErgoBox): UnsignedBox {
   return {
     txId: box.box_id().to_str(),
     index: 0,
@@ -303,7 +303,7 @@ export default defineComponent({
         }
         console.log(tx.to_json());
 
-        const outputs: OutputBox[] = [];
+        const outputs: BoxCandidate[] = [];
         for (let i = 0; i < tx.output_candidates().len(); i++) {
           const wasmOutput = tx.output_candidates().get(i);
           outputs.push({

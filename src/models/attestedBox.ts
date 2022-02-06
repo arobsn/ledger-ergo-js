@@ -1,17 +1,17 @@
-import { AttestedBoxFrame, InputBox } from "../types/public";
+import { AttestedBoxFrame, UnsignedBox } from "../types/public";
 import { assert } from "../validations";
 
 export default class AttestedBox {
-  private _box: InputBox;
+  private _box: UnsignedBox;
   private _frames: AttestedBoxFrame[];
   private _extension?: Buffer;
 
-  constructor(box: InputBox, frames: AttestedBoxFrame[]) {
+  constructor(box: UnsignedBox, frames: AttestedBoxFrame[]) {
     this._box = box;
     this._frames = frames;
   }
 
-  public get box(): InputBox {
+  public get box(): UnsignedBox {
     return this._box;
   }
 

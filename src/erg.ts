@@ -2,7 +2,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import Device from "./interactions/common/device";
 import {
   AppName,
-  InputBox,
+  UnsignedBox,
   DerivedAddress,
   ExtendedPublicKey,
   Version,
@@ -135,7 +135,7 @@ export class ErgoApp {
     return pathArray;
   }
 
-  public async attestInput(box: InputBox, useAuthToken = false): Promise<AttestedBox> {
+  public async attestInput(box: UnsignedBox, useAuthToken = false): Promise<AttestedBox> {
     return attestInput(this._device, box, this.getAuthToken(useAuthToken));
   }
 
