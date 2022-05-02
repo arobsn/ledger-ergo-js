@@ -21,7 +21,7 @@ export default class Device {
   private _transport: Transport;
   private _cla: number;
 
-  public get Transport(): Transport {
+  public get transport(): Transport {
     return this._transport;
   }
 
@@ -55,7 +55,7 @@ export default class Device {
     }
 
     const apdu = this.mountApdu(this._cla, ins, p1, p2, data);
-    const response = await this.Transport.exchange(apdu);
+    const response = await this.transport.exchange(apdu);
 
     if (response.length < MIN_RESPONSE_LENGTH) {
       throw new DeviceError(RETURN_CODE.WRONG_RESPONSE_LENGTH);

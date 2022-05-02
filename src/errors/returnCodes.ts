@@ -39,7 +39,7 @@ export const enum RETURN_CODE {
   OK = 0x9000,
 }
 
-const RETURN_MESSAGES = {
+export const RETURN_MESSAGES = {
   [RETURN_CODE.DENIED]: "Operation denied by user",
   [RETURN_CODE.WRONG_P1P2]: "Incorrect P1 or P2",
   [RETURN_CODE.WRONG_APDU_DATA_LENGTH]: "Bad APDU length",

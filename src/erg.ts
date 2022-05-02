@@ -1,6 +1,14 @@
 import type Transport from "@ledgerhq/hw-transport";
 import Device from "./interactions/common/device";
-import { AppName, InputBox, DerivedAddress, ExtendedPublicKey, Version } from "./types/public";
+import {
+  AppName,
+  UnsignedBox,
+  DerivedAddress,
+  ExtendedPublicKey,
+  Version,
+  UnsignedTx,
+  AttestedTx,
+} from "./types/public";
 import { assert, isValidErgoPath } from "./validations";
 import AttestedBox from "./models/attestedBox";
 import {
@@ -10,6 +18,7 @@ import {
   deriveAddress,
   showAddress,
   attestInput,
+  signTx,
 } from "./interactions";
 import Serialize from "./serialization/serialize";
 
@@ -22,35 +31,46 @@ const CHANGE_PATH_INDEX = 3;
 /**
  * Ergo's Ledger hardware wallet API
  */
-export class ErgoApp {
+export class ErgoLedgerApp {
   private _device: Device;
   private _authToken: number;
 
-  constructor(transport: Transport, authToken = 0, scrambleKey = "ERG") {
-    const methods = [
-      "getAppVersion",
-      "getAppName",
-      "getExtendedPublicKey",
-      "deriveAddress",
-      "showAddress",
-      "attestInput",
-    ];
-    transport.decorateAppAPIMethods(this, methods, scrambleKey);
-
-    this._device = new Device(transport, CLA);
-    this._authToken = authToken;
-    if (this._authToken == 0) {
-      this.newAuthToken();
-    }
+  public get authToken(): number {
+    return this._authToken;
   }
 
-  private newAuthToken(): void {
+  public get transport(): Transport {
+    return this._device.transport;
+  }
+
+  constructor(transaport: Transport);
+  constructor(transport: Transport, authToken: number);
+  constructor(transport: Transport, authToken?: number, scrambleKey = "ERG") {
+    transport.decorateAppAPIMethods(
+      this,
+      [
+        "getAppVersion",
+        "getAppName",
+        "getExtendedPublicKey",
+        "deriveAddress",
+        "showAddress",
+        "attestInput",
+        "signTx",
+      ],
+      scrambleKey
+    );
+
+    this._device = new Device(transport, CLA);
+    this._authToken = !authToken ? this.newAuthToken() : authToken;
+  }
+
+  private newAuthToken(): number {
     let newToken = 0;
     do {
       newToken = Math.floor(Math.random() * 0xffffffff) + 1;
     } while (newToken === this._authToken);
 
-    this._authToken = newToken;
+    return newToken;
   }
 
   /**
@@ -116,19 +136,34 @@ export class ErgoApp {
     return pathArray;
   }
 
-  public async attestInput(box: InputBox, useAuthToken = false): Promise<AttestedBox> {
+  public async attestInput(box: UnsignedBox, useAuthToken = false): Promise<AttestedBox> {
+    return this._attestInput(box, useAuthToken);
+  }
+
+  private async _attestInput(box: UnsignedBox, useAuthToken = false): Promise<AttestedBox> {
     return attestInput(this._device, box, this.getAuthToken(useAuthToken));
+  }
+
+  public async signTx(tx: UnsignedTx, useAuthToken = false) {
+    const attestedBoxes: AttestedBox[] = [];
+    for (const box of tx.inputs) {
+      const attestedBox = await this._attestInput(box, useAuthToken);
+      attestedBox.setExtension(box.extension);
+      attestedBoxes.push(attestedBox);
+    }
+
+    const attestedTx: AttestedTx = {
+      inputs: attestedBoxes,
+      dataInputs: tx.dataInputs,
+      outputs: tx.outputs,
+      changeMap: tx.changeMap,
+      signPaths: tx.signPaths,
+    };
+
+    return signTx(this._device, attestedTx, this.getAuthToken(useAuthToken));
   }
 
   private getAuthToken(useAuthToken: boolean): number | undefined {
     return useAuthToken ? this._authToken : undefined;
-  }
-
-  /**
-   * Close device transport.
-   * @return a Promise that end when the transport is closed.
-   */
-  public closeTransport(): Promise<void> {
-    return this._device.Transport.close();
   }
 }

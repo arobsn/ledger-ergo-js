@@ -1,3 +1,5 @@
+import AttestedBox from "../models/attestedBox";
+
 /**
  * Device app flags
  */
@@ -42,7 +44,7 @@ export type Token = {
   amount: string;
 };
 
-export type InputBox = {
+export type UnsignedBox = {
   txId: string;
   index: number;
   value: string;
@@ -50,6 +52,15 @@ export type InputBox = {
   creationHeight: number;
   tokens: Token[];
   additionalRegisters: Buffer;
+  extension: Buffer;
+};
+
+export type BoxCandidate = {
+  value: string;
+  ergoTree: Buffer;
+  creationHeight: number;
+  tokens: Token[];
+  registers: Buffer;
 };
 
 export type AttestedBoxFrame = {
@@ -59,12 +70,32 @@ export type AttestedBoxFrame = {
   amount: string;
   tokens: Token[];
   attestation: string;
-  raw: Buffer;
   extensionLength?: number;
+  buffer: Buffer;
 };
 
 export type UnsignedTx = {
-  inputs: AttestedBoxFrame[];
-  dataInputBoxIds: string[];
-  tokens: Token[];
+  inputs: UnsignedBox[];
+  dataInputs: string[];
+  outputs: BoxCandidate[];
+  changeMap: ChangeMap;
+  signPaths: string[];
+};
+
+export type AttestedTx = {
+  inputs: AttestedBox[];
+  dataInputs: string[];
+  outputs: BoxCandidate[];
+  changeMap: ChangeMap;
+  signPaths: string[];
+};
+
+export type ChangeMap = {
+  address: string;
+  path: string;
+};
+
+export type SignTxResponse = {
+  path: string;
+  signature: string;
 };

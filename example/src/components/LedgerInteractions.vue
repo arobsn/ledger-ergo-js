@@ -11,6 +11,7 @@
     <button @click="deriveAddress()">deriveAddress</button>
     <button @click="showAddress()">showAddress</button>
     <button @click="attestInput()">attestInput</button>
+    <button @click="signTx()">signTx</button>
   </p>
   <p>
     <code>{{ data }}</code>
@@ -19,10 +20,54 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ErgoApp, Token } from "../../../src/erg";
+import { ErgoLedgerApp, UnsignedBox, BoxCandidate, Token } from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
-import { Tokens } from "ergo-lib-wasm-browser";
+import { ErgoBox, ErgoBoxes, Tokens, UnsignedInput, UnsignedInputs } from "ergo-lib-wasm-browser";
 import Serialize from "../../../src/serialization/serialize";
+
+function mapBoxes(boxes: ErgoBoxes, inputs: UnsignedInputs): UnsignedBox[] {
+  const mappedBoxes: UnsignedBox[] = [];
+  for (let i = 0; i < boxes.len(); i++) {
+    mappedBoxes.push(mapBox(boxes.get(i), inputs.get(i)));
+  }
+
+  return mappedBoxes;
+}
+
+function mapBox(box: ErgoBox, inputs?: UnsignedInput): UnsignedBox {
+  return {
+    txId: box.box_id().to_str(),
+    index: 0,
+    value: box
+      .value()
+      .as_i64()
+      .to_str(),
+    ergoTree: Buffer.from(box.ergo_tree().sigma_serialize_bytes()),
+    creationHeight: box.creation_height(),
+    tokens: mapTokens(box.tokens()),
+    additionalRegisters: Buffer.from(box.serialized_additional_registers()),
+    extension: inputs ? Buffer.from(inputs.extension().sigma_serialize_bytes()) : Buffer.from([])
+  };
+}
+
+function mapTokens(tokens: Tokens): Token[] {
+  const result = [] as Token[];
+  for (let i = 0; tokens.len() > i; i++) {
+    result.push({
+      id: tokens
+        .get(i)
+        .id()
+        .to_str(),
+      amount: tokens
+        .get(i)
+        .amount()
+        .as_i64()
+        .to_str()
+    });
+  }
+
+  return result;
+}
 
 const exampleBox = {
   id: "3e762407d99b006d53b6583adcca08ef690b42fb0b2ed7abf63179eb6b9033b2",
@@ -78,116 +123,202 @@ export default defineComponent({
   },
   methods: {
     async getVersion() {
-      var ergoApp = await this.createApp();
+      const ergoApp = await this.createApp();
       try {
         const response = await ergoApp.getAppVersion();
         this.data = JSON.stringify(response, null, 2);
       } catch (e) {
         this.data = (e as Error).message;
       } finally {
-        ergoApp.closeTransport();
+        ergoApp.transport.close();
       }
     },
     async getAppName() {
-      var ergoApp = await this.createApp();
+      const ergoApp = await this.createApp();
       try {
         const response = await ergoApp.getAppName();
         this.data = JSON.stringify(response, null, 2);
       } catch (e) {
         this.data = (e as Error).message;
       } finally {
-        ergoApp.closeTransport();
+        ergoApp.transport.close();
       }
     },
     async getExtendedPublicKey() {
-      var ergoApp = await this.createApp();
-      this.data = "Awaiting approval on the device...";
+      const ergoApp = await this.createApp();
+      this.data = "Awaiting approval on device...";
       try {
         const response = await ergoApp.getExtendedPublicKey("m/44'/429'/0'", this.useAuthToken);
         this.data = JSON.stringify(response, null, 2);
       } catch (e) {
         this.data = (e as Error).message;
       } finally {
-        ergoApp.closeTransport();
+        ergoApp.transport.close();
       }
     },
     async deriveAddress() {
-      var ergoApp = await this.createApp();
-      this.data = "Awaiting approval on the device...";
+      const ergoApp = await this.createApp();
+      this.data = "Awaiting approval on device...";
       try {
-        const response = await ergoApp.deriveAddress("m/44'/429'/0'/1/0", this.useAuthToken);
+        const response = await ergoApp.deriveAddress("m/44'/429'/0'/0/0", this.useAuthToken);
         this.data = JSON.stringify(response, null, 2);
       } catch (e) {
         this.data = (e as Error).message;
       } finally {
-        ergoApp.closeTransport();
+        ergoApp.transport.close();
       }
     },
     newToken() {
       this.authToken = Math.floor(Math.random() * 0xffffffff) + 1;
     },
     async showAddress() {
-      var ergoApp = await this.createApp();
+      const ergoApp = await this.createApp();
       this.data = "Check the address at device display...";
       try {
-        const response = await ergoApp.showAddress("m/44'/429'/0'/1/0", this.useAuthToken);
+        const response = await ergoApp.showAddress("m/44'/429'/0'/0/0", this.useAuthToken);
         this.data = JSON.stringify(response, null, 2);
       } catch (e) {
         this.data = (e as Error).message;
       } finally {
-        ergoApp.closeTransport();
+        ergoApp.transport.close();
       }
     },
-    async createApp(): Promise<ErgoApp> {
-      return new ErgoApp(await HidTransport.create(), this.useAuthToken ? this.authToken : 0);
+    async createApp(): Promise<ErgoLedgerApp> {
+      return new ErgoLedgerApp(await HidTransport.create(), this.useAuthToken ? this.authToken : 0);
     },
     async attestInput() {
       const { ErgoBoxes } = await import("ergo-lib-wasm-browser");
       const box = ErgoBoxes.from_boxes_json([exampleBox]).get(0);
-      var ergoApp = await this.createApp();
-      this.data = "Awaiting approval on the device...";
+      const ergoApp = await this.createApp();
+      this.data = "Awaiting approval on device...";
 
       try {
-        const response = await ergoApp.attestInput(
-          {
-            txId: box.box_id().to_str(),
-            index: 0,
-            value: box
-              .value()
-              .as_i64()
-              .to_str(),
-            ergoTree: Buffer.from(box.ergo_tree().sigma_serialize_bytes()),
-            creationHeight: box.creation_height(),
-            tokens: mapTokens(box.tokens()),
-            additionalRegisters: Buffer.from(box.serialized_additional_registers())
-          },
-          this.useAuthToken
-        );
+        const response = await ergoApp.attestInput(mapBox(box), this.useAuthToken);
 
         this.data = JSON.stringify(response.frames, null, 2);
-
-        function mapTokens(tokens: Tokens) {
-          const result = [] as Token[];
-          for (let i = 0; tokens.len() > i; i++) {
-            result.push({
-              id: tokens
-                .get(i)
-                .id()
-                .to_str(),
-              amount: tokens
-                .get(i)
-                .amount()
-                .as_i64()
-                .to_str()
-            });
-          }
-
-          return result;
-        }
       } catch (e) {
         this.data = (e as Error).message;
       } finally {
-        ergoApp.closeTransport();
+        ergoApp.transport.close();
+      }
+    },
+    async signTx() {
+      this.data = "Awaiting approval on device...";
+
+      const {
+        Address,
+        ErgoBox,
+        ErgoBoxCandidateBuilder,
+        Contract,
+        ErgoBoxes,
+        ErgoBoxCandidates,
+        TxBuilder,
+        BoxValue,
+        I64,
+        Token,
+        SimpleBoxSelector,
+        Tokens,
+        TokenAmount,
+        TokenId
+      } = await import("ergo-lib-wasm-browser");
+
+      const input_box = ErgoBox.from_json(JSON.stringify(exampleBox));
+      const recipient = Address.from_mainnet_str(
+        "9hcUZD6ELC5kCGhzQ3htLXdpUCm5VNXq8X5gqWobWM3skfPSmJA"
+      );
+      const unspent_boxes = new ErgoBoxes(input_box);
+      const contract = Contract.pay_to_address(recipient);
+      const outbox_value = BoxValue.from_i64(I64.from_str("1190000000")); // BoxValue.SAFE_USER_MIN();
+      const outbox_builder = new ErgoBoxCandidateBuilder(outbox_value, contract, 0);
+      outbox_builder.add_token(
+        TokenId.from_str("bcd5db3a2872f279ef89edaa51a9344a6095ea1f03396874b695b5ba95ff602e"),
+        TokenAmount.from_i64(I64.from_str("99995619990"))
+      );
+      outbox_builder.add_token(
+        TokenId.from_str("2d554219a80c011cc51509e34fa4950965bb8e01de4d012536e766c9ca08bc2c"),
+        TokenAmount.from_i64(I64.from_str("99999999998"))
+      );
+      outbox_builder.add_token(
+        TokenId.from_str("9f90c012e03bf99397e363fb1571b7999941e0862a217307e3467ee80cf53af7"),
+        TokenAmount.from_i64(I64.from_str("1"))
+      );
+      const outbox = outbox_builder.build();
+      const tokens = new Tokens();
+      tokens.add(
+        new Token(
+          TokenId.from_str("bcd5db3a2872f279ef89edaa51a9344a6095ea1f03396874b695b5ba95ff602e"),
+          TokenAmount.from_i64(I64.from_str("99995619990"))
+        )
+      );
+      tokens.add(
+        new Token(
+          TokenId.from_str("2d554219a80c011cc51509e34fa4950965bb8e01de4d012536e766c9ca08bc2c"),
+          TokenAmount.from_i64(I64.from_str("99999999998"))
+        )
+      );
+      tokens.add(
+        new Token(
+          TokenId.from_str("9f90c012e03bf99397e363fb1571b7999941e0862a217307e3467ee80cf53af7"),
+          TokenAmount.from_i64(I64.from_str("1"))
+        )
+      );
+      const tx_outputs = new ErgoBoxCandidates(outbox);
+
+      const fee = TxBuilder.SUGGESTED_TX_FEE();
+      const change_address = Address.from_mainnet_str(
+        "9hTmYEiroHijeRidJcvT98tAZefpHz2di5sHkAiQbGE5DQVhPk8"
+      );
+      const min_change_value = BoxValue.SAFE_USER_MIN();
+      const box_selector = new SimpleBoxSelector();
+      const target_balance = BoxValue.from_i64(outbox_value.as_i64().checked_add(fee.as_i64()));
+      const box_selection = box_selector.select(unspent_boxes, target_balance, tokens);
+      const tx_builder = TxBuilder.new(
+        box_selection,
+        tx_outputs,
+        0,
+        fee,
+        change_address,
+        min_change_value
+      );
+
+      const tx = tx_builder.build();
+      const ergoApp = await this.createApp();
+      const inputBoxes = mapBoxes(box_selection.boxes(), tx.inputs());
+
+      try {
+        const outputs: BoxCandidate[] = [];
+        for (let i = 0; i < tx.output_candidates().len(); i++) {
+          const wasmOutput = tx.output_candidates().get(i);
+          outputs.push({
+            value: wasmOutput
+              .value()
+              .as_i64()
+              .to_str(),
+            ergoTree: Buffer.from(wasmOutput.ergo_tree().sigma_serialize_bytes()),
+            creationHeight: wasmOutput.creation_height(),
+            tokens: mapTokens(wasmOutput.tokens()),
+            registers: Buffer.from([])
+          });
+        }
+
+        const sign = await ergoApp.signTx(
+          {
+            inputs: inputBoxes,
+            dataInputs: [],
+            outputs,
+            changeMap: {
+              address: "9hTmYEiroHijeRidJcvT98tAZefpHz2di5sHkAiQbGE5DQVhPk8",
+              path: "m/44'/429'/0'/0/0"
+            },
+            signPaths: ["m/44'/429'/0'/0/0", "m/44'/429'/0'/0/1"]
+          },
+          this.useAuthToken
+        );
+        this.data = JSON.stringify(sign, null, 2);
+      } catch (e) {
+        this.data = (e as Error).message;
+      } finally {
+        ergoApp.transport.close();
       }
     }
   }

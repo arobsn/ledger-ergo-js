@@ -1,4 +1,4 @@
-import { AttestedBoxFrame, InputBox, Token } from "../types/public";
+import { AttestedBoxFrame, UnsignedBox, Token } from "../types/public";
 import Device, { COMMAND } from "./common/device";
 import type { DeviceResponse } from "../types/internal";
 import AttestedBox from "../models/attestedBox";
@@ -20,7 +20,7 @@ const enum P2 {
 
 export async function attestInput(
   device: Device,
-  box: InputBox,
+  box: UnsignedBox,
   authToken?: number
 ): Promise<AttestedBox> {
   const sessionId = await sendHeader(device, box, authToken);
@@ -35,7 +35,7 @@ export async function attestInput(
   return new AttestedBox(box, await getAttestedFrames(device, frameCount, sessionId));
 }
 
-async function sendHeader(device: Device, box: InputBox, authToken?: number): Promise<number> {
+async function sendHeader(device: Device, box: UnsignedBox, authToken?: number): Promise<number> {
   const header = Buffer.concat([
     Serialize.hex(box.txId),
     Serialize.uint16(box.index),
@@ -68,17 +68,10 @@ async function sendErgoTree(device: Device, data: Buffer, sessionId: number): Pr
 }
 
 async function sendTokens(device: Device, tokens: Token[], sessionId: number): Promise<number> {
-  const packets = [];
-  for (let i = 0; i < Math.ceil(tokens.length / 6); i++) {
-    const chunks = [];
-    for (let j = i * 6; j < Math.min((i + 1) * 6, tokens.length); j++) {
-      const token = tokens[j];
-      const id = Serialize.hex(token.id);
-      const value = Serialize.uint64(token.amount);
-      chunks.push(Buffer.concat([id, value]));
-    }
-    packets.push(Buffer.concat(chunks));
-  }
+  const MAX_PACKET_SIZE = 6;
+  const packets = Serialize.arrayAndChunk(tokens, MAX_PACKET_SIZE, (t) =>
+    Buffer.concat([Serialize.hex(t.id), Serialize.uint64(t.amount)])
+  );
 
   const results: DeviceResponse[] = [];
   for (let p of packets) {
@@ -144,6 +137,6 @@ export function parseAttestedFrameResponse(frameBuff: Buffer): AttestedBoxFrame 
     amount,
     tokens,
     attestation,
-    raw: frameBuff,
+    buffer: frameBuff,
   };
 }
