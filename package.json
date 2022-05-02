@@ -1,6 +1,6 @@
 {
   "name": "ledgerjs-hw-app-ergo",
-  "version": "0.0.11",
+  "version": "0.0.13",
   "license": "Apache-2.0",
   "author": "anon-br",
   "description": "An Ergo Platform JS Library for communication with Ledger Hardware Wallets.",
