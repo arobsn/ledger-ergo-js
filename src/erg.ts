@@ -23,7 +23,6 @@ import {
 } from "./interactions";
 import Serialize from "./serialization/serialize";
 import { AttestedTx, SignTxResponse } from "./types/internal";
-import { RecipientRequired } from "@ledgerhq/errors";
 
 export * from "./errors";
 export * from "./types/public";
