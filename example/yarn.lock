@@ -69,44 +69,44 @@
     "cssnano-preset-default" "^4.0.0"
     "postcss" "^7.0.0"
 
-"@ledgerhq/devices@^6.7.0":
-  "integrity" "sha512-FWJfmdl8V300++OXLgBLpIi+IJoR/srWvxpXrWkc9hd3cNMxgeCl9opm84Y0oJDLBQL9AaERMrb+Cb1nZZR9Tw=="
-  "resolved" "https://registry.npmjs.org/@ledgerhq/devices/-/devices-6.7.0.tgz"
-  "version" "6.7.0"
+"@ledgerhq/devices@^6.27.1":
+  "integrity" "sha512-jX++oy89jtv7Dp2X6gwt3MMkoajel80JFWcdc0HCouwDsV1mVJ3SQdwl/bQU0zd8HI6KebvUP95QTwbQLLK/RQ=="
+  "resolved" "https://registry.npmjs.org/@ledgerhq/devices/-/devices-6.27.1.tgz"
+  "version" "6.27.1"
   dependencies:
-    "@ledgerhq/errors" "^6.2.0"
-    "@ledgerhq/logs" "^6.2.0"
+    "@ledgerhq/errors" "^6.10.0"
+    "@ledgerhq/logs" "^6.10.0"
     "rxjs" "6"
     "semver" "^7.3.5"
 
-"@ledgerhq/errors@^6.2.0":
-  "integrity" "sha512-eO03x8HJmG60WtlrMuahigW/rwywFdcGzCnihta/MjkM8BD9A660cKVkyIuheCcpaB7UV/r+QsRl9abHbjjaag=="
-  "resolved" "https://registry.npmjs.org/@ledgerhq/errors/-/errors-6.2.0.tgz"
-  "version" "6.2.0"
+"@ledgerhq/errors@^6.10.0":
+  "integrity" "sha512-fQFnl2VIXh9Yd41lGjReCeK+Q2hwxQJvLZfqHnKqWapTz68NHOv5QcI0OHuZVNEbv0xhgdLhi5b65kgYeQSUVg=="
+  "resolved" "https://registry.npmjs.org/@ledgerhq/errors/-/errors-6.10.0.tgz"
+  "version" "6.10.0"
 
-"@ledgerhq/hw-transport-webhid@^6.7.0":
-  "integrity" "sha512-FmTQUKENVEIwEM2XT6PIBDbXvdyFjmz3g+Oq5Gn8c4m3knT3h0ehb+Mx5dKlYEg/6Y7vESGUiNZdEQGGieUI/Q=="
-  "resolved" "https://registry.npmjs.org/@ledgerhq/hw-transport-webhid/-/hw-transport-webhid-6.7.0.tgz"
-  "version" "6.7.0"
+"@ledgerhq/hw-transport-webhid@^6.27.1":
+  "integrity" "sha512-u74rBYlibpbyGblSn74fRs2pMM19gEAkYhfVibq0RE1GNFjxDMFC1n7Sb+93Jqmz8flyfB4UFJsxs8/l1tm2Kw=="
+  "resolved" "https://registry.npmjs.org/@ledgerhq/hw-transport-webhid/-/hw-transport-webhid-6.27.1.tgz"
+  "version" "6.27.1"
   dependencies:
-    "@ledgerhq/devices" "^6.7.0"
-    "@ledgerhq/errors" "^6.2.0"
-    "@ledgerhq/hw-transport" "^6.7.0"
-    "@ledgerhq/logs" "^6.2.0"
+    "@ledgerhq/devices" "^6.27.1"
+    "@ledgerhq/errors" "^6.10.0"
+    "@ledgerhq/hw-transport" "^6.27.1"
+    "@ledgerhq/logs" "^6.10.0"
 
-"@ledgerhq/hw-transport@^6.7.0":
-  "integrity" "sha512-w+PhW6Y4KXYdoCykkE1zt0VL6Ryf72RP8sZP8OH1O90hX/R/q9BMYKl8VNqTbqlrOrORgATlKkbmIJBjbngZew=="
-  "resolved" "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.7.0.tgz"
-  "version" "6.7.0"
+"@ledgerhq/hw-transport@^6.27.1":
+  "integrity" "sha512-hnE4/Fq1YzQI4PA1W0H8tCkI99R3UWDb3pJeZd6/Xs4Qw/q1uiQO+vNLC6KIPPhK0IajUfuI/P2jk0qWcMsuAQ=="
+  "resolved" "https://registry.npmjs.org/@ledgerhq/hw-transport/-/hw-transport-6.27.1.tgz"
+  "version" "6.27.1"
   dependencies:
-    "@ledgerhq/devices" "^6.7.0"
-    "@ledgerhq/errors" "^6.2.0"
+    "@ledgerhq/devices" "^6.27.1"
+    "@ledgerhq/errors" "^6.10.0"
     "events" "^3.3.0"
 
-"@ledgerhq/logs@^6.2.0":
-  "integrity" "sha512-SLyFyD7ElMhgKWPYedFGCT/ilcbGPgL5hXXYHxOM79Fs5fWi0zaUpt5oGqGMsOAAFaMa9/rbun0pokzPhEFz8A=="
-  "resolved" "https://registry.npmjs.org/@ledgerhq/logs/-/logs-6.2.0.tgz"
-  "version" "6.2.0"
+"@ledgerhq/logs@^6.10.0":
+  "integrity" "sha512-lLseUPEhSFUXYTKj6q7s2O3s2vW2ebgA11vMAlKodXGf5AFw4zUoEbTz9CoFOC9jS6xY4Qr8BmRnxP/odT4Uuw=="
+  "resolved" "https://registry.npmjs.org/@ledgerhq/logs/-/logs-6.10.0.tgz"
+  "version" "6.10.0"
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   "integrity" "sha512-bPHp6Ji8b41szTOcaP63VlnbbO5Ny6dwAATtY6JTjh5N2OLrb5Qk/Th5cRkRQhkWCt+EJsYrNB0MiL+Gpn6e3g=="
@@ -6041,9 +6041,9 @@
     "lru-cache" "^6.0.0"
 
 "semver@^7.3.5":
-  "integrity" "sha512-PoeGJYh8HK4BTO/a9Tf6ZG3veo/A7ZVsYrSA6J8ny9nb3B1VrpkuN+z9OE5wfE5p6H4LchYZsegiQgbJD94ZFQ=="
-  "resolved" "https://registry.npmjs.org/semver/-/semver-7.3.5.tgz"
-  "version" "7.3.5"
+  "integrity" "sha512-QlYTucUYOews+WeEujDoEGziz4K6c47V/Bd+LjSSYcA94p+DmINdf7ncaUinThfvZyu13lN9OY1XDxt8C0Tw0g=="
+  "resolved" "https://registry.npmjs.org/semver/-/semver-7.3.7.tgz"
+  "version" "7.3.7"
   dependencies:
     "lru-cache" "^6.0.0"
 
