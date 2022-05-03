@@ -5,6 +5,12 @@ import resolve from "rollup-plugin-node-resolve";
 import uglify from "@lopatnov/rollup-plugin-uglify";
 
 import pkg from "./package.json";
+const globals = {
+  lodash: "lodash",
+  "bip32-path": "bip32Path",
+  "base-x": "basex",
+  "@coinbarn/ergo-ts": "ergoTs",
+};
 
 export default [
   {
@@ -15,11 +21,13 @@ export default [
         format: "umd",
         name: pkg.umdName,
         sourcemap: true,
+        globals,
       },
       {
         file: pkg.module,
         format: "es",
         sourcemap: true,
+        globals,
       },
     ],
     external: [...Object.keys(pkg.devDependencies || {}), ...Object.keys(pkg.dependencies || {})],
@@ -39,6 +47,7 @@ export default [
       name: pkg.umdName,
       format: "umd",
       sourcemap: true,
+      globals,
     },
     external: [...Object.keys(pkg.devDependencies || {}), ...Object.keys(pkg.dependencies || {})],
     plugins: [
