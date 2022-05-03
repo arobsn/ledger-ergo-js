@@ -8,6 +8,7 @@ import {
   Version,
   UnsignedTx,
   AttestedTx,
+  Network,
 } from "./types/public";
 import { assert, isValidErgoPath } from "./validations";
 import AttestedBox from "./models/attestedBox";
@@ -144,7 +145,7 @@ export class ErgoLedgerApp {
     return attestInput(this._device, box, this.getAuthToken(useAuthToken));
   }
 
-  public async signTx(tx: UnsignedTx, useAuthToken = false) {
+  public async signTx(tx: UnsignedTx, network: Network, useAuthToken = false) {
     const attestedBoxes: AttestedBox[] = [];
     for (const box of tx.inputs) {
       const attestedBox = await this._attestInput(box, useAuthToken);
@@ -160,7 +161,7 @@ export class ErgoLedgerApp {
       signPaths: tx.signPaths,
     };
 
-    return signTx(this._device, attestedTx, this.getAuthToken(useAuthToken));
+    return signTx(this._device, attestedTx, network, this.getAuthToken(useAuthToken));
   }
 
   private getAuthToken(useAuthToken: boolean): number | undefined {

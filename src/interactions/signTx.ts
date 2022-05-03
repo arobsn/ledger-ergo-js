@@ -1,27 +1,35 @@
 import AttestedBox from "../models/attestedBox";
 import Deserialize from "../serialization/deserialize";
 import Serialize from "../serialization/serialize";
-import { ChangeMap, BoxCandidate, SignTxResponse, Token, AttestedTx } from "../types/public";
+import {
+  ChangeMap,
+  BoxCandidate,
+  SignTxResponse,
+  Token,
+  AttestedTx,
+  Network,
+} from "../types/public";
 import Device, { COMMAND } from "./common/device";
 import { Address } from "@coinbarn/ergo-ts";
+import { BtcUnmatchedApp } from "@ledgerhq/errors";
 
 const MINER_FEE_TREE =
   "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
 
 const enum P1 {
   START_SIGNING = 0x01,
-  ADD_TOKEN_IDS = 0x02,
-  ADD_INPUT_BOX_FRAME = 0x03,
-  ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK = 0x04,
-  ADD_DATA_INPUTS = 0x05,
-  ADD_OUTPUT_BOX_START = 0x06,
-  ADD_OUTPUT_BOX_ERGO_TREE_CHUNK = 0x07,
-  ADD_OUTPUT_BOX_MINERS_FEE_TREE = 0x08,
-  ADD_OUTPUT_BOX_CHANGE_TREE = 0x09,
-  ADD_OUTPUT_BOX_TOKENS = 0x0a,
-  ADD_OUTPUT_BOX_REGISTERS_CHUNK = 0x0b,
-  CONFIRM = 0x0c,
-  P2PK_SIGN = 0x0d,
+  START_TRANSACTION = 0x10,
+  ADD_TOKEN_IDS = 0x11,
+  ADD_INPUT_BOX_FRAME = 0x12,
+  ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK = 0x13,
+  ADD_DATA_INPUTS = 0x14,
+  ADD_OUTPUT_BOX_START = 0x15,
+  ADD_OUTPUT_BOX_ERGO_TREE_CHUNK = 0x16,
+  ADD_OUTPUT_BOX_MINERS_FEE_TREE = 0x17,
+  ADD_OUTPUT_BOX_CHANGE_TREE = 0x18,
+  ADD_OUTPUT_BOX_TOKENS = 0x19,
+  ADD_OUTPUT_BOX_REGISTERS_CHUNK = 0x1a,
+  CONFIRM_AND_SIGN = 0x20,
 }
 
 const enum P2 {
@@ -32,50 +40,59 @@ const enum P2 {
 export async function signTx(
   device: Device,
   tx: AttestedTx,
+  network: Network,
   authToken?: number
 ): Promise<SignTxResponse[]> {
   const uniqueTokenIds = getUniqueTokenIds(tx.inputs);
 
-  const sessionId = await sendHeader(device, tx, uniqueTokenIds.length, authToken);
+  const sessionId = await sendHeader(device, tx.signPaths[0], authToken);
+  await sendStartTx(device, sessionId, tx, uniqueTokenIds.length);
   if (uniqueTokenIds.length > 0) {
     await sendTokensIds(device, sessionId, uniqueTokenIds);
   }
   await sendInputs(device, sessionId, tx.inputs);
   await sendDataInputs(device, sessionId, tx.dataInputs);
-  await sendOutputs(device, sessionId, tx.outputs, tx.changeMap, uniqueTokenIds);
-  await sendConfirm(device, sessionId);
+  await sendOutputs(device, sessionId, tx.outputs, tx.changeMap, uniqueTokenIds, network);
+  const signBytes = await sendConfirmAndSign(device, sessionId);
+  const sign = {
+    path: tx.signPaths[0],
+    signature: Deserialize.hex(signBytes),
+  };
 
-  const signs = [] as SignTxResponse[];
-  for (const path of tx.signPaths) {
-    signs.push({
-      path,
-      signature: Deserialize.hex(await sendP2PKSign(device, sessionId, path)),
-    });
-  }
-
-  return signs;
+  return [sign];
 }
 
-async function sendHeader(
-  device: Device,
-  tx: AttestedTx,
-  uniqueTokenIdsCount: number,
-  authToken?: number
-): Promise<number> {
-  const header = Buffer.concat([
-    Serialize.uint16(tx.inputs.length),
-    Serialize.uint16(tx.dataInputs.length),
-    Serialize.uint8(uniqueTokenIdsCount),
-    Serialize.uint16(tx.outputs.length),
-    authToken ? Serialize.uint32(authToken) : Buffer.alloc(0),
-  ]);
-
+async function sendHeader(device: Device, path: string, authToken?: number): Promise<number> {
   const response = await device.send(
     COMMAND.SIGN_TX,
     P1.START_SIGNING,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
-    header
+    Buffer.concat([
+      Serialize.bip32Path(path),
+      authToken ? Serialize.uint32(authToken) : Buffer.alloc(0),
+    ])
   );
+  return response.data[0];
+}
+
+async function sendStartTx(
+  device: Device,
+  sessionId: number,
+  tx: AttestedTx,
+  uniqueTokenIdsCount: number
+): Promise<number> {
+  const response = await device.send(
+    COMMAND.SIGN_TX,
+    P1.START_TRANSACTION,
+    sessionId,
+    Buffer.concat([
+      Serialize.uint16(tx.inputs.length),
+      Serialize.uint16(tx.dataInputs.length),
+      Serialize.uint8(uniqueTokenIdsCount),
+      Serialize.uint16(tx.outputs.length),
+    ])
+  );
+
   return response.data[0];
 }
 
@@ -118,7 +135,8 @@ async function sendOutputs(
   sessionId: number,
   boxes: BoxCandidate[],
   changeMap: ChangeMap,
-  tokenIds: string[]
+  tokenIds: string[],
+  network: Network
 ) {
   for (let box of boxes) {
     await device.send(
@@ -135,8 +153,10 @@ async function sendOutputs(
     );
 
     const tree = Deserialize.hex(box.ergoTree);
+    console.log(tree);
     if (tree === MINER_FEE_TREE) {
-      await addOutputBoxMinersFeeTree(device, sessionId);
+      console.log("miner fee");
+      await addOutputBoxMinersFeeTree(device, sessionId, network);
       console.debug("Add miner box");
     } else if (Address.fromErgoTree(tree).address === changeMap.address) {
       await addOutputBoxChangeTree(device, sessionId, changeMap.path);
@@ -160,8 +180,13 @@ async function addOutputBoxErgoTree(device: Device, sessionId: number, ergoTree:
   await device.sendData(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_ERGO_TREE_CHUNK, sessionId, ergoTree);
 }
 
-async function addOutputBoxMinersFeeTree(device: Device, sessionId: number) {
-  await device.send(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_MINERS_FEE_TREE, sessionId, Buffer.from([]));
+async function addOutputBoxMinersFeeTree(device: Device, sessionId: number, network: Network) {
+  await device.send(
+    COMMAND.SIGN_TX,
+    P1.ADD_OUTPUT_BOX_MINERS_FEE_TREE,
+    sessionId,
+    Buffer.from([network])
+  );
 }
 
 async function addOutputBoxChangeTree(device: Device, sessionId: number, path?: string) {
@@ -197,17 +222,14 @@ async function addOutputBoxRegisters(device: Device, sessionId: number, register
   await device.sendData(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_REGISTERS_CHUNK, sessionId, registers);
 }
 
-async function sendConfirm(device: Device, sessionId: number) {
-  await device.send(COMMAND.SIGN_TX, P1.CONFIRM, sessionId, Buffer.from([]));
-}
-
-async function sendP2PKSign(device: Device, sessionId: number, path: string): Promise<Buffer> {
+async function sendConfirmAndSign(device: Device, sessionId: number): Promise<Buffer> {
   const response = await device.send(
     COMMAND.SIGN_TX,
-    P1.P2PK_SIGN,
+    P1.CONFIRM_AND_SIGN,
     sessionId,
-    Serialize.bip32Path(path)
+    Buffer.from([])
   );
+
   return response.data;
 }
 

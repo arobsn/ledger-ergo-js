@@ -99,3 +99,8 @@ export type SignTxResponse = {
   path: string;
   signature: string;
 };
+
+export enum Network {
+  Mainnet = 0x01,
+  Testnet = 0x02,
+}

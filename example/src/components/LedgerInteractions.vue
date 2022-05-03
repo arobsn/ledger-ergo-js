@@ -20,7 +20,7 @@
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import { ErgoLedgerApp, UnsignedBox, BoxCandidate, Token } from "../../../src/erg";
+import { ErgoLedgerApp, UnsignedBox, BoxCandidate, Token, Network } from "../../../src/erg";
 import HidTransport from "@ledgerhq/hw-transport-webhid";
 import { ErgoBox, ErgoBoxes, Tokens, UnsignedInput, UnsignedInputs } from "ergo-lib-wasm-browser";
 import Serialize from "../../../src/serialization/serialize";
@@ -312,6 +312,7 @@ export default defineComponent({
             },
             signPaths: ["m/44'/429'/0'/0/0", "m/44'/429'/0'/0/1"]
           },
+          Network.Mainnet,
           this.useAuthToken
         );
         this.data = JSON.stringify(sign, null, 2);
