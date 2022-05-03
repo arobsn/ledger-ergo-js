@@ -60,7 +60,7 @@ export default class Serialize {
     assert(data.length <= 8, "excessive data");
 
     const padding = Buffer.alloc(8 - data.length);
-    return Buffer.concat([padding, data]);
+    return Buffer.concat([padding, Buffer.from(data)]);
   }
 
   public static hex(data: string): Buffer {
