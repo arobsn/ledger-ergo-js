@@ -6,8 +6,10 @@ import Device, { COMMAND } from "./common/device";
 import { Address } from "@coinbarn/ergo-ts";
 import { AttestedTx } from "../types/internal";
 
-const MINER_FEE_TREE =
+const MAINNET_MINER_FEE_TREE =
   "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
+const TESTNET_FEE_TREE =
+  "1005040004000e36100204900108cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
 
 const enum P1 {
   START_SIGNING = 0x01,
@@ -146,15 +148,12 @@ async function sendOutputs(
     );
 
     const tree = Deserialize.hex(box.ergoTree);
-    if (tree === MINER_FEE_TREE) {
+    if (tree === MAINNET_MINER_FEE_TREE || tree === TESTNET_FEE_TREE) {
       await addOutputBoxMinersFeeTree(device, sessionId, network);
-      console.debug("Add miner box");
     } else if (Address.fromErgoTree(tree).address === changeMap.address) {
       await addOutputBoxChangeTree(device, sessionId, changeMap.path);
-      console.debug("Add change box");
     } else {
       await addOutputBoxErgoTree(device, sessionId, box.ergoTree);
-      console.debug("Add custom box");
     }
 
     if (box.tokens && box.tokens.length > 0) {
