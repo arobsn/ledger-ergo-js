@@ -28,16 +28,16 @@ import Serialize from "../../../src/serialization/serialize";
 function mapBoxes(boxes: ErgoBoxes, inputs: UnsignedInputs): UnsignedBox[] {
   const mappedBoxes: UnsignedBox[] = [];
   for (let i = 0; i < boxes.len(); i++) {
-    mappedBoxes.push(mapBox(boxes.get(i), inputs.get(i)));
+    mappedBoxes.push(mapBox(boxes.get(i), inputs.get(i), i));
   }
 
   return mappedBoxes;
 }
 
-function mapBox(box: ErgoBox, inputs?: UnsignedInput): UnsignedBox {
+function mapBox(box: ErgoBox, input?: UnsignedInput, index?: number): UnsignedBox {
   return {
     txId: box.box_id().to_str(),
-    index: 0,
+    index: index ?? 0,
     value: box
       .value()
       .as_i64()
@@ -46,7 +46,8 @@ function mapBox(box: ErgoBox, inputs?: UnsignedInput): UnsignedBox {
     creationHeight: box.creation_height(),
     tokens: mapTokens(box.tokens()),
     additionalRegisters: Buffer.from(box.serialized_additional_registers()),
-    extension: inputs ? Buffer.from(inputs.extension().sigma_serialize_bytes()) : Buffer.from([])
+    extension: input ? Buffer.from(input.extension().sigma_serialize_bytes()) : Buffer.from([]),
+    signPath: (index ?? 0) % 0 ? "m/44'/429'/0'/0/0" : "m/44'/429'/0'/0/0"
   };
 }
 
@@ -306,11 +307,11 @@ export default defineComponent({
             inputs: inputBoxes,
             dataInputs: [],
             outputs,
+            distinctTokenIds: tx.distinct_token_ids(),
             changeMap: {
               address: "9hTmYEiroHijeRidJcvT98tAZefpHz2di5sHkAiQbGE5DQVhPk8",
               path: "m/44'/429'/0'/0/0"
-            },
-            signPaths: ["m/44'/429'/0'/0/0", "m/44'/429'/0'/0/1"]
+            }
           },
           Network.Mainnet,
           this.useAuthToken

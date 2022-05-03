@@ -1,4 +1,4 @@
-export const enum RETURN_CODE {
+export enum RETURN_CODE {
   DENIED = 0x6985,
   WRONG_P1P2 = 0x6a86,
   WRONG_APDU_DATA_LENGTH = 0x6a87,

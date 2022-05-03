@@ -53,6 +53,7 @@ export type UnsignedBox = {
   tokens: Token[];
   additionalRegisters: Buffer;
   extension: Buffer;
+  signPath: string;
 };
 
 export type BoxCandidate = {
@@ -78,26 +79,13 @@ export type UnsignedTx = {
   inputs: UnsignedBox[];
   dataInputs: string[];
   outputs: BoxCandidate[];
+  distinctTokenIds: Uint8Array[];
   changeMap: ChangeMap;
-  signPaths: string[];
-};
-
-export type AttestedTx = {
-  inputs: AttestedBox[];
-  dataInputs: string[];
-  outputs: BoxCandidate[];
-  changeMap: ChangeMap;
-  signPaths: string[];
 };
 
 export type ChangeMap = {
   address: string;
   path: string;
-};
-
-export type SignTxResponse = {
-  path: string;
-  signature: string;
 };
 
 export enum Network {

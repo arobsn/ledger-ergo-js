@@ -1,6 +1,6 @@
 {
   "name": "ledgerjs-hw-app-ergo",
-  "version": "0.0.14",
+  "version": "0.0.17",
   "license": "Apache-2.0",
   "author": "anon-br",
   "description": "An Ergo Platform JS Library for communication with Ledger Hardware Wallets.",
@@ -42,6 +42,7 @@
   "devDependencies": {
     "@lopatnov/rollup-plugin-uglify": "^2.1.1",
     "@types/jest": "^27.0.2",
+    "@types/lodash": "^4.14.182",
     "@types/typescript": "^2.0.0",
     "jest": "^27.3.1",
     "jest-config": "^27.3.1",
@@ -59,6 +60,7 @@
     "@coinbarn/ergo-ts": "^0.3.0",
     "@ledgerhq/hw-transport": "^6.11.0",
     "base-x": "^3.0.9",
-    "bip32-path": "^0.4.2"
+    "bip32-path": "^0.4.2",
+    "lodash": "^4.17.21"
   }
 }

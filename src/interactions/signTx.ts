@@ -1,17 +1,10 @@
 import AttestedBox from "../models/attestedBox";
 import Deserialize from "../serialization/deserialize";
 import Serialize from "../serialization/serialize";
-import {
-  ChangeMap,
-  BoxCandidate,
-  SignTxResponse,
-  Token,
-  AttestedTx,
-  Network,
-} from "../types/public";
+import { ChangeMap, BoxCandidate, Token, Network } from "../types/public";
 import Device, { COMMAND } from "./common/device";
 import { Address } from "@coinbarn/ergo-ts";
-import { BtcUnmatchedApp } from "@ledgerhq/errors";
+import { AttestedTx } from "../types/internal";
 
 const MINER_FEE_TREE =
   "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
@@ -40,26 +33,19 @@ const enum P2 {
 export async function signTx(
   device: Device,
   tx: AttestedTx,
+  signPath: string,
   network: Network,
   authToken?: number
-): Promise<SignTxResponse[]> {
-  const uniqueTokenIds = getUniqueTokenIds(tx.inputs);
-
-  const sessionId = await sendHeader(device, tx.signPaths[0], authToken);
-  await sendStartTx(device, sessionId, tx, uniqueTokenIds.length);
-  if (uniqueTokenIds.length > 0) {
-    await sendTokensIds(device, sessionId, uniqueTokenIds);
-  }
+): Promise<Uint8Array> {
+  const sessionId = await sendHeader(device, signPath, authToken);
+  await sendStartTx(device, sessionId, tx, tx.distinctTokenIds.length);
+  await sendDistinctTokensIds(device, sessionId, tx.distinctTokenIds);
   await sendInputs(device, sessionId, tx.inputs);
   await sendDataInputs(device, sessionId, tx.dataInputs);
-  await sendOutputs(device, sessionId, tx.outputs, tx.changeMap, uniqueTokenIds, network);
+  await sendOutputs(device, sessionId, tx.outputs, tx.changeMap, tx.distinctTokenIds, network);
   const signBytes = await sendConfirmAndSign(device, sessionId);
-  const sign = {
-    path: tx.signPaths[0],
-    signature: Deserialize.hex(signBytes),
-  };
 
-  return [sign];
+  return new Uint8Array(signBytes);
 }
 
 async function sendHeader(device: Device, path: string, authToken?: number): Promise<number> {
@@ -72,6 +58,7 @@ async function sendHeader(device: Device, path: string, authToken?: number): Pro
       authToken ? Serialize.uint32(authToken) : Buffer.alloc(0),
     ])
   );
+
   return response.data[0];
 }
 
@@ -96,9 +83,13 @@ async function sendStartTx(
   return response.data[0];
 }
 
-async function sendTokensIds(device: Device, sessionId: number, ids: string[]): Promise<void> {
-  const MAX_PACKET_SIZE = 10;
-  const packets = Serialize.arrayAndChunk(ids, MAX_PACKET_SIZE, (id) => Serialize.hex(id));
+async function sendDistinctTokensIds(device: Device, sessionId: number, ids: Uint8Array[]) {
+  if (ids.length === 0) {
+    return;
+  }
+
+  const MAX_PACKET_SIZE = 7;
+  const packets = Serialize.arrayAndChunk(ids, MAX_PACKET_SIZE, (id) => Buffer.from(id));
 
   for (let p of packets) {
     await device.send(COMMAND.SIGN_TX, P1.ADD_TOKEN_IDS, sessionId, p);
@@ -135,9 +126,11 @@ async function sendOutputs(
   sessionId: number,
   boxes: BoxCandidate[],
   changeMap: ChangeMap,
-  tokenIds: string[],
+  distinctTokenIds: Uint8Array[],
   network: Network
 ) {
+  const distinctTokenIdsStr = distinctTokenIds.map((t) => Buffer.from(t).toString("hex"));
+
   for (let box of boxes) {
     await device.send(
       COMMAND.SIGN_TX,
@@ -153,9 +146,7 @@ async function sendOutputs(
     );
 
     const tree = Deserialize.hex(box.ergoTree);
-    console.log(tree);
     if (tree === MINER_FEE_TREE) {
-      console.log("miner fee");
       await addOutputBoxMinersFeeTree(device, sessionId, network);
       console.debug("Add miner box");
     } else if (Address.fromErgoTree(tree).address === changeMap.address) {
@@ -167,7 +158,7 @@ async function sendOutputs(
     }
 
     if (box.tokens && box.tokens.length > 0) {
-      await addOutputBoxTokens(device, sessionId, box.tokens, tokenIds);
+      await addOutputBoxTokens(device, sessionId, box.tokens, distinctTokenIdsStr);
     }
 
     if (box.registers.length > 0) {
@@ -206,14 +197,14 @@ async function addOutputBoxTokens(
   device: Device,
   sessionId: number,
   tokens: Token[],
-  tokenIds: string[]
+  distinctTokenIds: string[]
 ) {
   await device.send(
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_TOKENS,
     sessionId,
     Serialize.array(tokens, (t) =>
-      Buffer.concat([Serialize.uint32(tokenIds.indexOf(t.id)), Serialize.uint64(t.amount)])
+      Buffer.concat([Serialize.uint32(distinctTokenIds.indexOf(t.id)), Serialize.uint64(t.amount)])
     )
   );
 }
@@ -231,11 +222,4 @@ async function sendConfirmAndSign(device: Device, sessionId: number): Promise<Bu
   );
 
   return response.data;
-}
-
-function getUniqueTokenIds(boxes: AttestedBox[]): string[] {
-  return boxes
-    .map((b) => b.box.tokens.map((t) => t.id))
-    .flat()
-    .filter((v, i, a) => a.indexOf(v) === i);
 }
