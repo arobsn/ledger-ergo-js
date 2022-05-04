@@ -36,9 +36,11 @@ const CHANGE_PATH_INDEX = 3;
 export class ErgoLedgerApp {
   private _device: Device;
   private _authToken: number;
+  private _useAuthToken: boolean;
+  private _logging: boolean;
 
-  public get authToken(): number {
-    return this._authToken;
+  public get authToken(): number | undefined {
+    return this._useAuthToken ? this._authToken : undefined;
   }
 
   public get transport(): Transport {
@@ -64,6 +66,28 @@ export class ErgoLedgerApp {
 
     this._device = new Device(transport, CLA);
     this._authToken = !authToken ? this.newAuthToken() : authToken;
+    this._useAuthToken = true;
+    this._logging = false;
+  }
+
+  /**
+   * Use authorization token to keep session opened.
+   * @param use
+   * @returns
+   */
+  public useAuthToken(use = true): ErgoLedgerApp {
+    this._useAuthToken = use;
+    return this;
+  }
+
+  /**
+   * Enable or disable logging.
+   * @param enable
+   * @returns
+   */
+  public enableDebugMode(enable = true): ErgoLedgerApp {
+    this._logging = enable;
+    return this;
   }
 
   private newAuthToken(): number {
@@ -94,36 +118,33 @@ export class ErgoLedgerApp {
   /**
    * Get the extended public key.
    * @param path BIP32 path.
-   * @param useAuthToken use an authorization token to keep session opened.
    * @returns a Promise with the **chain code** and the **public key** for provided BIP32 path.
    */
-  public async getExtendedPublicKey(path: string, useAuthToken = true): Promise<ExtendedPublicKey> {
+  public async getExtendedPublicKey(path: string): Promise<ExtendedPublicKey> {
     const pathArray = Serialize.bip32PathAsArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
 
-    return getExtendedPublicKey(this._device, pathArray, this._getAuthToken(useAuthToken));
+    return getExtendedPublicKey(this._device, pathArray, this.authToken);
   }
 
   /**
    * Derive the address for a given Bip44 path.
    * @param path Bip44 path.
-   * @param useAuthToken use an authorization token to keep session opened.
    * @returns a Promise with the derived address in hex format.
    */
-  public async deriveAddress(path: string, useAuthToken = true): Promise<DerivedAddress> {
+  public async deriveAddress(path: string): Promise<DerivedAddress> {
     const pathArray = this.getDerivationPathArray(path);
-    return deriveAddress(this._device, pathArray, this._getAuthToken(useAuthToken));
+    return deriveAddress(this._device, pathArray, this.authToken);
   }
 
   /**
    * Derive and show the address on device screen for a given Bip44 path.
    * @param path Bip44 path.
-   * @param useAuthToken use an authorization token to keep session opened.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
-  public async showAddress(path: string, useAuthToken = true): Promise<boolean> {
+  public async showAddress(path: string): Promise<boolean> {
     const pathArray = this.getDerivationPathArray(path);
-    return showAddress(this._device, pathArray, this._getAuthToken(useAuthToken));
+    return showAddress(this._device, pathArray, this.authToken);
   }
 
   private getDerivationPathArray(path: string) {
@@ -135,20 +156,16 @@ export class ErgoLedgerApp {
     return pathArray;
   }
 
-  public async attestInput(box: UnsignedBox, useAuthToken = true): Promise<AttestedBox> {
-    return this._attestInput(box, useAuthToken);
+  public async attestInput(box: UnsignedBox): Promise<AttestedBox> {
+    return this._attestInput(box);
   }
 
-  private async _attestInput(box: UnsignedBox, useAuthToken = true): Promise<AttestedBox> {
-    return attestInput(this._device, box, this._getAuthToken(useAuthToken));
+  private async _attestInput(box: UnsignedBox): Promise<AttestedBox> {
+    return attestInput(this._device, box, this.authToken);
   }
 
-  public async signTx(
-    tx: UnsignedTx,
-    network: Network,
-    useAuthToken = true
-  ): Promise<Uint8Array[]> {
-    const attestedInputs = await this._attestInputs(tx.inputs, useAuthToken);
+  public async signTx(tx: UnsignedTx, network: Network): Promise<Uint8Array[]> {
+    const attestedInputs = await this._attestInputs(tx.inputs);
     const signPaths = uniq(tx.inputs.map((i) => i.signPath));
 
     const attestedTx: AttestedTx = {
@@ -161,13 +178,7 @@ export class ErgoLedgerApp {
 
     const signatures: SignTxResponse = {};
     for (let path of signPaths) {
-      signatures[path] = await signTx(
-        this._device,
-        attestedTx,
-        path,
-        network,
-        this._getAuthToken(useAuthToken)
-      );
+      signatures[path] = await signTx(this._device, attestedTx, path, network, this.authToken);
     }
 
     const signBytes: Uint8Array[] = [];
@@ -178,21 +189,14 @@ export class ErgoLedgerApp {
     return signBytes;
   }
 
-  private async _attestInputs(
-    inputs: UnsignedBox[],
-    useAuthToken: boolean
-  ): Promise<AttestedBox[]> {
+  private async _attestInputs(inputs: UnsignedBox[]): Promise<AttestedBox[]> {
     const attestedBoxes: AttestedBox[] = [];
     for (const box of inputs) {
-      const attestedBox = await this._attestInput(box, useAuthToken);
+      const attestedBox = await this._attestInput(box);
       attestedBox.setExtension(box.extension);
       attestedBoxes.push(attestedBox);
     }
 
     return attestedBoxes;
-  }
-
-  private _getAuthToken(useAuthToken: boolean): number | undefined {
-    return useAuthToken ? this._authToken : undefined;
   }
 }
