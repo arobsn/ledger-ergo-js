@@ -5,8 +5,8 @@ import {
   isUint32,
   isUint64String,
   isUint8,
-  isValidBip32Path,
-} from "../validations";
+  isValidBip32Path
+} from "@/validations";
 import basex from "base-x";
 import bip32Path from "bip32-path";
 

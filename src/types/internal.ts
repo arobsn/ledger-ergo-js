@@ -1,5 +1,5 @@
 import { RETURN_CODE } from "../errors";
-import AttestedBox from "../models/attestedBox";
+import AttestedBox from "@/models/attestedBox";
 import { BoxCandidate, ChangeMap } from "./public";
 
 export type DeviceResponse = {

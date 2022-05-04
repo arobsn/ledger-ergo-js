@@ -1,6 +1,10 @@
-import { assert, isArray, isBuffer, isInteger } from "../validations";
+import { assert, isArray, isBuffer, isInteger } from "@/validations";
 
 const sum = (arr: Array<number>) => arr.reduce((x, y) => x + y, 0);
+
+export function uniq<T>(array: T[]): T[] {
+  return [...new Set(array)];
+}
 
 export function chunkBy(data: Buffer, chunkLengths: Array<number>) {
   assert(isBuffer(data), "invalid buffer");

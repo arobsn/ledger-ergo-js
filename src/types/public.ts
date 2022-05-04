@@ -1,4 +1,4 @@
-import AttestedBox from "../models/attestedBox";
+import AttestedBox from "@/models/attestedBox";
 
 /**
  * Device app flags
@@ -90,5 +90,5 @@ export type ChangeMap = {
 
 export enum Network {
   Mainnet = 0x01,
-  Testnet = 0x02,
+  Testnet = 0x02
 }

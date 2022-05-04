@@ -1,8 +1,8 @@
 import type Transport from "@ledgerhq/hw-transport";
-import { DeviceError } from "../../errors/deviceError";
-import { RETURN_CODE } from "../../errors";
-import { DeviceResponse } from "../../types/internal";
-import Serialize from "../../serialization/serialize";
+import { DeviceError } from "@/errors/deviceError";
+import { RETURN_CODE } from "@/errors";
+import { DeviceResponse } from "@/types/internal";
+import Serialize from "@/serialization/serialize";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -11,7 +11,7 @@ export const enum COMMAND {
   GET_EXTENTED_PUB_KEY = 0x10,
   DERIVE_ADDRESS = 0x11,
   ATTEST_INPUT = 0x20,
-  SIGN_TX = 0x21,
+  SIGN_TX = 0x21
 }
 
 const MAX_DATA_LENGTH = 255;
@@ -76,7 +76,7 @@ export default class Device {
       Serialize.uint8(p1),
       Serialize.uint8(p2),
       Serialize.uint8(data.length),
-      data,
+      data
     ]);
   }
 }

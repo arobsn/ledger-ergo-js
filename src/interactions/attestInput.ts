@@ -1,21 +1,21 @@
-import { AttestedBoxFrame, UnsignedBox, Token } from "../types/public";
+import { AttestedBoxFrame, UnsignedBox, Token } from "@/types/public";
 import Device, { COMMAND } from "./common/device";
-import type { DeviceResponse } from "../types/internal";
-import AttestedBox from "../models/attestedBox";
-import Serialize from "../serialization/serialize";
-import Deserialize from "../serialization/deserialize";
+import type { DeviceResponse } from "@/types/internal";
+import AttestedBox from "@/models/attestedBox";
+import Serialize from "@/serialization/serialize";
+import Deserialize from "@/serialization/deserialize";
 
 const enum P1 {
   BOX_START = 0x01,
   ADD_ERGO_TREE_CHUNK = 0x02,
   ADD_TOKENS = 0x03,
   ADD_REGISTERS_CHUNK = 0x04,
-  GET_ATTESTED_BOX_FRAME = 0x05,
+  GET_ATTESTED_BOX_FRAME = 0x05
 }
 
 const enum P2 {
   WITHOUT_TOKEN = 0x01,
-  WITH_TOKEN = 0x02,
+  WITH_TOKEN = 0x02
 }
 
 export async function attestInput(
@@ -44,7 +44,7 @@ async function sendHeader(device: Device, box: UnsignedBox, authToken?: number):
     Serialize.uint32(box.creationHeight),
     Serialize.uint8(box.tokens.length),
     Serialize.uint32(box.additionalRegisters.length),
-    authToken ? Serialize.uint32(authToken) : Buffer.alloc(0),
+    authToken ? Serialize.uint32(authToken) : Buffer.alloc(0)
   ]);
 
   const response = await device.send(
@@ -124,7 +124,7 @@ export function parseAttestedFrameResponse(frameBuff: Buffer): AttestedBoxFrame 
   for (let i = 0; i < tokenCount; i++) {
     tokens.push({
       id: Deserialize.hex(frameBuff.slice(offset, (offset += 32))),
-      amount: Deserialize.uint64(frameBuff.slice(offset, (offset += 8))),
+      amount: Deserialize.uint64(frameBuff.slice(offset, (offset += 8)))
     });
   }
 
@@ -137,6 +137,6 @@ export function parseAttestedFrameResponse(frameBuff: Buffer): AttestedBoxFrame 
     amount,
     tokens,
     attestation,
-    buffer: frameBuff,
+    buffer: frameBuff
   };
 }

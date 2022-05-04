@@ -1,6 +1,5 @@
 import type Transport from "@ledgerhq/hw-transport";
-import { uniqBy } from "lodash";
-import Device from "./interactions/common/device";
+import Device from "@/interactions/common/device";
 import {
   AppName,
   UnsignedBox,
@@ -8,10 +7,10 @@ import {
   ExtendedPublicKey,
   Version,
   UnsignedTx,
-  Network,
-} from "./types/public";
-import { assert, isValidErgoPath } from "./validations";
-import AttestedBox from "./models/attestedBox";
+  Network
+} from "@/types/public";
+import { assert, isValidErgoPath } from "@/validations";
+import AttestedBox from "@/models/attestedBox";
 import {
   getAppName,
   getExtendedPublicKey,
@@ -19,13 +18,14 @@ import {
   deriveAddress,
   showAddress,
   attestInput,
-  signTx,
-} from "./interactions";
-import Serialize from "./serialization/serialize";
-import { AttestedTx, SignTxResponse } from "./types/internal";
+  signTx
+} from "@/interactions";
+import Serialize from "@/serialization/serialize";
+import { AttestedTx, SignTxResponse } from "@/types/internal";
+import { uniq } from "@/serialization/utils";
 
-export * from "./errors";
-export * from "./types/public";
+export * from "@/errors";
+export * from "@/types/public";
 export const CLA = 0xe0;
 
 const CHANGE_PATH_INDEX = 3;
@@ -57,7 +57,7 @@ export class ErgoLedgerApp {
         "deriveAddress",
         "showAddress",
         "attestInput",
-        "signTx",
+        "signTx"
       ],
       scrambleKey
     );
@@ -149,14 +149,14 @@ export class ErgoLedgerApp {
     useAuthToken = true
   ): Promise<Uint8Array[]> {
     const attestedInputs = await this._attestInputs(tx.inputs, useAuthToken);
-    const signPaths = uniqBy(tx.inputs, (i) => i.signPath).map((i) => i.signPath);
+    const signPaths = uniq(tx.inputs.map((i) => i.signPath));
 
     const attestedTx: AttestedTx = {
       inputs: attestedInputs,
       dataInputs: tx.dataInputs,
       outputs: tx.outputs,
       distinctTokenIds: tx.distinctTokenIds,
-      changeMap: tx.changeMap,
+      changeMap: tx.changeMap
     };
 
     const signatures: SignTxResponse = {};

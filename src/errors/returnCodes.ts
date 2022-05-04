@@ -37,7 +37,7 @@ export enum RETURN_CODE {
   BIP32_FORMATTING_FAILED = 0xe101,
   ADDRESS_FORMATTING_FAILED = 0xe102,
   STACK_OVERFLOW = 0xffff,
-  OK = 0x9000,
+  OK = 0x9000
 }
 
 export const RETURN_MESSAGES = {
@@ -79,7 +79,7 @@ export const RETURN_MESSAGES = {
   [RETURN_CODE.BIP32_FORMATTING_FAILED]: "Can't display Bip32 path",
   [RETURN_CODE.ADDRESS_FORMATTING_FAILED]: "Can't display address",
   [RETURN_CODE.STACK_OVERFLOW]: "Stack overflow",
-  [RETURN_CODE.OK]: "Ok",
+  [RETURN_CODE.OK]: "Ok"
 };
 
 export function getReturnMessage(code: RETURN_CODE): string {

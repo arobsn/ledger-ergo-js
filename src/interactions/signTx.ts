@@ -1,10 +1,10 @@
-import AttestedBox from "../models/attestedBox";
-import Deserialize from "../serialization/deserialize";
-import Serialize from "../serialization/serialize";
-import { ChangeMap, BoxCandidate, Token, Network } from "../types/public";
+import AttestedBox from "@/models/attestedBox";
+import Deserialize from "@/serialization/deserialize";
+import Serialize from "@/serialization/serialize";
+import { ChangeMap, BoxCandidate, Token, Network } from "@/types/public";
 import Device, { COMMAND } from "./common/device";
 import { Address } from "@coinbarn/ergo-ts";
-import { AttestedTx } from "../types/internal";
+import { AttestedTx } from "@/types/internal";
 
 const MAINNET_MINER_FEE_TREE =
   "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
@@ -24,12 +24,12 @@ const enum P1 {
   ADD_OUTPUT_BOX_CHANGE_TREE = 0x18,
   ADD_OUTPUT_BOX_TOKENS = 0x19,
   ADD_OUTPUT_BOX_REGISTERS_CHUNK = 0x1a,
-  CONFIRM_AND_SIGN = 0x20,
+  CONFIRM_AND_SIGN = 0x20
 }
 
 const enum P2 {
   WITHOUT_TOKEN = 0x01,
-  WITH_TOKEN = 0x02,
+  WITH_TOKEN = 0x02
 }
 
 export async function signTx(
@@ -57,7 +57,7 @@ async function sendHeader(device: Device, path: string, authToken?: number): Pro
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
     Buffer.concat([
       Serialize.bip32Path(path),
-      authToken ? Serialize.uint32(authToken) : Buffer.alloc(0),
+      authToken ? Serialize.uint32(authToken) : Buffer.alloc(0)
     ])
   );
 
@@ -78,7 +78,7 @@ async function sendStartTx(
       Serialize.uint16(tx.inputs.length),
       Serialize.uint16(tx.dataInputs.length),
       Serialize.uint8(uniqueTokenIdsCount),
-      Serialize.uint16(tx.outputs.length),
+      Serialize.uint16(tx.outputs.length)
     ])
   );
 
@@ -143,7 +143,7 @@ async function sendOutputs(
         Serialize.uint32(box.ergoTree.length),
         Serialize.uint32(box.creationHeight),
         Serialize.uint8(box.tokens.length),
-        Serialize.uint32(box.registers.length),
+        Serialize.uint32(box.registers.length)
       ])
     );
 

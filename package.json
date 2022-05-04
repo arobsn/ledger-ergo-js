@@ -42,7 +42,6 @@
   "devDependencies": {
     "@lopatnov/rollup-plugin-uglify": "^2.1.2",
     "@types/jest": "^27.5.0",
-    "@types/lodash": "^4.14.182",
     "@types/typescript": "^2.0.0",
     "jest": "^28.0.3",
     "jest-config": "^28.0.3",
@@ -60,7 +59,6 @@
     "@coinbarn/ergo-ts": "github:capt-nemo429/ergo-ts",
     "@ledgerhq/hw-transport": "^6.27.1",
     "base-x": "^4.0.0",
-    "bip32-path": "^0.4.2",
-    "lodash": "^4.17.21"
+    "bip32-path": "^0.4.2"
   }
 }

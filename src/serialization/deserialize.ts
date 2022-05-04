@@ -1,5 +1,5 @@
 import basex from "base-x";
-import { assert } from "../validations";
+import { assert } from "@/validations";
 
 const bs10 = basex("0123456789");
 

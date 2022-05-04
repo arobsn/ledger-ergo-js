@@ -1,14 +1,14 @@
-import { Version } from "../types/public";
+import { Version } from "@/types/public";
 import Device, { COMMAND } from "./common/device";
 
 const FLAG_IS_DEBUG = 0x01;
 
 const enum P1 {
-  UNUSED = 0x00,
+  UNUSED = 0x00
 }
 
 const enum P2 {
-  UNUSED = 0x00,
+  UNUSED = 0x00
 }
 
 export async function getAppVersion(device: Device): Promise<Version> {
@@ -23,6 +23,6 @@ export async function getAppVersion(device: Device): Promise<Version> {
     major: response.data[0],
     minor: response.data[1],
     patch: response.data[2],
-    flags: { isDebug: response.data[3] == FLAG_IS_DEBUG },
+    flags: { isDebug: response.data[3] == FLAG_IS_DEBUG }
   };
 }

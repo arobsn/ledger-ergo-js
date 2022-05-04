@@ -1,16 +1,16 @@
 import Device, { COMMAND } from "./common/device";
-import { ExtendedPublicKey } from "../types/public";
-import { chunkBy } from "../serialization/utils";
-import Serialize from "../serialization/serialize";
-import Deserialize from "../serialization/deserialize";
+import { ExtendedPublicKey } from "@/types/public";
+import { chunkBy } from "@/serialization/utils";
+import Serialize from "@/serialization/serialize";
+import Deserialize from "@/serialization/deserialize";
 
 const enum P1 {
   WITHOUT_TOKEN = 0x01,
-  WITH_TOKEN = 0x02,
+  WITH_TOKEN = 0x02
 }
 
 const enum P2 {
-  UNUSED = 0x00,
+  UNUSED = 0x00
 }
 
 export async function getExtendedPublicKey(
@@ -29,6 +29,6 @@ export async function getExtendedPublicKey(
 
   return {
     publicKey: Deserialize.hex(publicKey),
-    chainCode: Deserialize.hex(chainCode),
+    chainCode: Deserialize.hex(chainCode)
   };
 }

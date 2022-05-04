@@ -1,28 +1,28 @@
 import Device, { COMMAND } from "./common/device";
-import { DerivedAddress } from "../types/public";
-import { DeviceResponse } from "../types/internal";
-import { RETURN_CODE } from "../errors";
-import Serialize from "../serialization/serialize";
-import Deserialize from "../serialization/deserialize";
+import { DerivedAddress } from "@/types/public";
+import { DeviceResponse } from "@/types/internal";
+import { RETURN_CODE } from "@/errors";
+import Serialize from "@/serialization/serialize";
+import Deserialize from "@/serialization/deserialize";
 
 const enum ReturnType {
   Return,
-  Display,
+  Display
 }
 
 const enum P1 {
   RETURN = 0x01,
-  DISPLAY = 0x02,
+  DISPLAY = 0x02
 }
 
 const enum P2 {
   WITHOUT_TOKEN = 0x01,
-  WITH_TOKEN = 0x02,
+  WITH_TOKEN = 0x02
 }
 
 const enum Network {
   Mainnet = 0 << 4,
-  Testnet = 1 << 4,
+  Testnet = 1 << 4
 }
 
 function sendDeriveAddress(
