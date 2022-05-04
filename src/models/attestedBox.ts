@@ -1,5 +1,5 @@
-import { AttestedBoxFrame, UnsignedBox } from "@/types/public";
-import { assert } from "@/validations";
+import { AttestedBoxFrame, UnsignedBox } from "../types/public";
+import { assert } from "../validations";
 
 export default class AttestedBox {
   private _box: UnsignedBox;

@@ -15,18 +15,18 @@ describe("attestInput test", () => {
       tokens: [
         {
           id: "2d554219a80c011cc51509e34fa4950965bb8e01de4d012536e766c9ca08bc2c",
-          amount: "99999999998",
+          amount: "99999999998"
         },
         {
           id: "bcd5db3a2872f279ef89edaa51a9344a6095ea1f03396874b695b5ba95ff602e",
-          amount: "99995619990",
+          amount: "99995619990"
         },
         {
           id: "9f90c012e03bf99397e363fb1571b7999941e0862a217307e3467ee80cf53af7",
-          amount: "1",
-        },
+          amount: "1"
+        }
       ],
-      attestation: "2f5151af1796a5827de6df5339ddca7a",
+      attestation: "2f5151af1796a5827de6df5339ddca7a"
     });
   });
 });

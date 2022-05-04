@@ -1,4 +1,4 @@
-import { Version } from "@/types/public";
+import { Version } from "../types/public";
 import Device, { COMMAND } from "./common/device";
 
 const FLAG_IS_DEBUG = 0x01;

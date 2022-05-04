@@ -1,5 +1,5 @@
 import type Transport from "@ledgerhq/hw-transport";
-import Device from "@/interactions/common/device";
+import Device from "./interactions/common/device";
 import {
   AppName,
   UnsignedBox,
@@ -8,9 +8,9 @@ import {
   Version,
   UnsignedTx,
   Network
-} from "@/types/public";
-import { assert, isValidErgoPath } from "@/validations";
-import AttestedBox from "@/models/attestedBox";
+} from "./types/public";
+import { assert, isValidErgoPath } from "./validations";
+import AttestedBox from "./models/attestedBox";
 import {
   getAppName,
   getExtendedPublicKey,
@@ -19,13 +19,13 @@ import {
   showAddress,
   attestInput,
   signTx
-} from "@/interactions";
-import Serialize from "@/serialization/serialize";
-import { AttestedTx, SignTxResponse } from "@/types/internal";
-import { uniq } from "@/serialization/utils";
+} from "./interactions";
+import Serialize from "./serialization/serialize";
+import { AttestedTx, SignTxResponse } from "./types/internal";
+import { uniq } from "./serialization/utils";
 
-export * from "@/errors";
-export * from "@/types/public";
+export * from "./errors";
+export * from "./types/public";
 export const CLA = 0xe0;
 
 const CHANGE_PATH_INDEX = 3;

@@ -1,4 +1,4 @@
-import AttestedBox from "@/models/attestedBox";
+import AttestedBox from "../models/attestedBox";
 
 /**
  * Device app flags

@@ -1,6 +1,6 @@
 import Device, { COMMAND } from "./common/device";
-import { AppName } from "@/types/public";
-import Deserialize from "@/serialization/deserialize";
+import { AppName } from "../types/public";
+import Deserialize from "../serialization/deserialize";
 
 const enum P1 {
   UNUSED = 0x00

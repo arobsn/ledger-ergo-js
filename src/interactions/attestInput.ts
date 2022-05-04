@@ -1,9 +1,9 @@
-import { AttestedBoxFrame, UnsignedBox, Token } from "@/types/public";
 import Device, { COMMAND } from "./common/device";
-import type { DeviceResponse } from "@/types/internal";
-import AttestedBox from "@/models/attestedBox";
-import Serialize from "@/serialization/serialize";
-import Deserialize from "@/serialization/deserialize";
+import { AttestedBoxFrame, UnsignedBox, Token } from "../types/public";
+import type { DeviceResponse } from "../types/internal";
+import AttestedBox from "../models/attestedBox";
+import Serialize from "../serialization/serialize";
+import Deserialize from "../serialization/deserialize";
 
 const enum P1 {
   BOX_START = 0x01,

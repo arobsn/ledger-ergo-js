@@ -1,9 +1,9 @@
 import Device, { COMMAND } from "./common/device";
-import { DerivedAddress } from "@/types/public";
-import { DeviceResponse } from "@/types/internal";
-import { RETURN_CODE } from "@/errors";
-import Serialize from "@/serialization/serialize";
-import Deserialize from "@/serialization/deserialize";
+import { DerivedAddress } from "../types/public";
+import { DeviceResponse } from "../types/internal";
+import { RETURN_CODE } from "../errors";
+import Serialize from "../serialization/serialize";
+import Deserialize from "../serialization/deserialize";
 
 const enum ReturnType {
   Return,

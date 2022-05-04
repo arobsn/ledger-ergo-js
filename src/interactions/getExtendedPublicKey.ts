@@ -1,8 +1,8 @@
 import Device, { COMMAND } from "./common/device";
-import { ExtendedPublicKey } from "@/types/public";
-import { chunkBy } from "@/serialization/utils";
-import Serialize from "@/serialization/serialize";
-import Deserialize from "@/serialization/deserialize";
+import { ExtendedPublicKey } from "../types/public";
+import { chunkBy } from "../serialization/utils";
+import Serialize from "../serialization/serialize";
+import Deserialize from "../serialization/deserialize";
 
 const enum P1 {
   WITHOUT_TOKEN = 0x01,

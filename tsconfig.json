@@ -15,10 +15,7 @@
     "declarationDir": "dist",
     "outDir": "dist/lib",
     "typeRoots": ["node_modules/@types"],
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "baseUrl": "."
   },
   "include": ["src", "bip32-path.d.ts"]
 }

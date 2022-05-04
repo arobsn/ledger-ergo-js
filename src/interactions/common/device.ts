@@ -1,8 +1,8 @@
 import type Transport from "@ledgerhq/hw-transport";
-import { DeviceError } from "@/errors/deviceError";
-import { RETURN_CODE } from "@/errors";
-import { DeviceResponse } from "@/types/internal";
-import Serialize from "@/serialization/serialize";
+import { DeviceError } from "../../errors/deviceError";
+import { RETURN_CODE } from "../../errors";
+import { DeviceResponse } from "../../types/internal";
+import Serialize from "../../serialization/serialize";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
