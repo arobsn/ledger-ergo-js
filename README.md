@@ -1,7 +1,7 @@
-[![npm](https://badgen.net/npm/v/ledgerjs-hw-app-ergo)](https://www.npmjs.com/package/ledgerjs-hw-app-ergo)
-[![License](https://badgen.net/github/license/anon-br/ledgerjs-hw-app-ergo)](https://github.com/anon-br/ledgerjs-hw-app-ergo/blob/master/LICENSE)
+[![npm](https://badgen.net/npm/v/ledger-ergo-js)](https://www.npmjs.com/package/ledger-ergo-js)
+[![License](https://badgen.net/github/license/anon-br/ledger-ergo-js)](https://github.com/anon-br/ledger-ergo-js/blob/master/LICENSE)
 
-# ledgerjs-hw-app-ergo
+# ledger-ergo-js
 
 JS Library for communication with Ledger Hardware Wallets.
 This library is compatible with the [Ledger Ergo Application](https://github.com/tesseract-one/ledger-app-ergo).

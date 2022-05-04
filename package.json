@@ -1,6 +1,6 @@
 {
-  "name": "ledgerjs-hw-app-ergo",
-  "version": "0.0.24",
+  "name": "ledger-ergo-js",
+  "version": "0.0.25",
   "license": "MIT",
   "author": "anon-br",
   "description": "An Ergo Platform JS Library for communication with Ledger Hardware Wallets.",
@@ -12,7 +12,7 @@
     "hardwallet",
     "wallet"
   ],
-  "umdName": "ledgerjs-hw-app-ergo",
+  "umdName": "ledger-ergo-js",
   "libraryFile": "erg",
   "main": "dist/erg.js",
   "module": "dist/erg.es.js",
@@ -22,10 +22,10 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/anon-br/ledgerjs-hw-app-ergo.git"
+    "url": "git+https://github.com/anon-br/ledger-ergo-js.git"
   },
   "bugs": {
-    "url": "https://github.com/anon-br/ledgerjs-hw-app-ergo/issues"
+    "url": "https://github.com/anon-br/ledger-ergo-js/issues"
   },
   "scripts": {
     "build": "rollup -c rollup.config.ts",
