@@ -104,6 +104,7 @@ export class ErgoLedgerApp {
    * @returns a Promise with the Ledger Application version.
    */
   public async getAppVersion(): Promise<Version> {
+    this._debug("getAppVersion");
     return getAppVersion(this._device);
   }
 
@@ -112,6 +113,7 @@ export class ErgoLedgerApp {
    * @returns a Promise with the Ledger Application name.
    */
   public async getAppName(): Promise<AppName> {
+    this._debug("getAppName");
     return getAppName(this._device);
   }
 
@@ -121,9 +123,10 @@ export class ErgoLedgerApp {
    * @returns a Promise with the **chain code** and the **public key** for provided BIP32 path.
    */
   public async getExtendedPublicKey(path: string): Promise<ExtendedPublicKey> {
+    this._debug("getExtendedPublicKey", path);
+
     const pathArray = Serialize.bip32PathAsArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
-
     return getExtendedPublicKey(this._device, pathArray, this.authToken);
   }
 
@@ -133,6 +136,8 @@ export class ErgoLedgerApp {
    * @returns a Promise with the derived address in hex format.
    */
   public async deriveAddress(path: string): Promise<DerivedAddress> {
+    this._debug("deriveAddress", path);
+
     const pathArray = this.getDerivationPathArray(path);
     return deriveAddress(this._device, pathArray, this.authToken);
   }
@@ -143,6 +148,8 @@ export class ErgoLedgerApp {
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
   public async showAddress(path: string): Promise<boolean> {
+    this._debug("showAddress", path);
+
     const pathArray = this.getDerivationPathArray(path);
     return showAddress(this._device, pathArray, this.authToken);
   }
@@ -157,6 +164,7 @@ export class ErgoLedgerApp {
   }
 
   public async attestInput(box: UnsignedBox): Promise<AttestedBox> {
+    this._debug("attestInput", box);
     return this._attestInput(box);
   }
 
@@ -165,9 +173,10 @@ export class ErgoLedgerApp {
   }
 
   public async signTx(tx: UnsignedTx, network: Network): Promise<Uint8Array[]> {
+    this._debug("signTx", { tx, network });
+
     const attestedInputs = await this._attestInputs(tx.inputs);
     const signPaths = uniq(tx.inputs.map((i) => i.signPath));
-
     const attestedTx: AttestedTx = {
       inputs: attestedInputs,
       dataInputs: tx.dataInputs,
@@ -198,5 +207,15 @@ export class ErgoLedgerApp {
     }
 
     return attestedBoxes;
+  }
+
+  private _debug(caller: string, message: any = "") {
+    if (!this._logging) {
+      return;
+    }
+
+    console.debug(
+      `[ledger-ergo-js][${caller}]${message ? ": " : ""}${message ? JSON.stringify(message) : ""}`
+    );
   }
 }
