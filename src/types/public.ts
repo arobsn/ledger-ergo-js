@@ -1,5 +1,3 @@
-import AttestedBox from "../models/attestedBox";
-
 /**
  * Device app flags
  */

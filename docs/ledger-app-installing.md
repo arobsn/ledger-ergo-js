@@ -16,7 +16,7 @@ To install the [Ergo Ledger App](https://github.com/tesseract-one/ledger-app-erg
    pip3 install virtualenv
    ```
 
-2. Download and extract the latest Ergo Ledger App binary files from https://github.com/tesseract-one/ledger-app-ergo/suites/6379480485/artifacts/231511927;
+2. Download and extract the latest Ergo Ledger App binary files from https://github.com/tesseract-one/ledger-app-ergo/actions/runs/2277253172;
 
 3. Connect your Ledger Nano S device to your computer;
 
