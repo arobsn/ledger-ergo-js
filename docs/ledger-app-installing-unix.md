@@ -1,4 +1,4 @@
-# Sideloading Ergo Ledger App into a Ledger Nano S device
+# Sideloading Ergo Ledger App into a Ledger Nano S device on Linux/MacOS
 
 To install the [Ergo Ledger App](https://github.com/tesseract-one/ledger-app-ergo) we need [virtualenv](https://docs.python.org/3/library/venv.html), this module provides support for creating lightweight “virtual environments”, optionally isolated from the system.
 
@@ -16,9 +16,9 @@ To install the [Ergo Ledger App](https://github.com/tesseract-one/ledger-app-erg
    pip3 install virtualenv
    ```
 
-2. Download and extract the latest Ergo Ledger App binary files from https://github.com/tesseract-one/ledger-app-ergo/actions/runs/2277253172;
+2. Download and extract the latest Ergo Ledger App binary files from https://github.com/tesseract-one/ledger-app-ergo/actions/runs/2315938025;
 
-3. Connect your Ledger Nano S device to your computer;
+3. Connect and unlock your Ledger Nano S device to your computer;
 
 4. Navigate to extracted Ledger App folder;
 

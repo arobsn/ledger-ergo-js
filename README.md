@@ -8,4 +8,5 @@ This library is compatible with the [Ledger Ergo Application](https://github.com
 
 ## Docs
 
-[Sideloading Ergo Ledger App into a Ledger Nano S device](/docs/ledger-app-installing.md)
+- [[Windows] Sideloading Ergo Ledger App into a Ledger Nano S device](/docs/ledger-app-installing-windows.md)
+- [[Linux/MacOS] Sideloading Ergo Ledger App into a Ledger Nano S device](/docs/ledger-app-installing-unix.md)
