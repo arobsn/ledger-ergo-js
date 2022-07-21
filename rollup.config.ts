@@ -8,7 +8,7 @@ import pkg from "./package.json";
 const globals = {
   "bip32-path": "bip32Path",
   "base-x": "basex",
-  "@coinbarn/ergo-ts": "ergoTs"
+  "@nautilus-wallet/ergo-ts": "ergoTs"
 };
 
 export default [

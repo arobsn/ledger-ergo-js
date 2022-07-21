@@ -3,7 +3,7 @@ import Deserialize from "../serialization/deserialize";
 import Serialize from "../serialization/serialize";
 import { ChangeMap, BoxCandidate, Token, Network } from "../types/public";
 import Device, { COMMAND } from "./common/device";
-import { Address } from "@coinbarn/ergo-ts";
+import { Address } from "@nautilus-wallet/ergo-ts";
 import { AttestedTx } from "../types/internal";
 
 const MAINNET_MINER_FEE_TREE =
