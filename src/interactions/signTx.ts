@@ -3,7 +3,7 @@ import Deserialize from "../serialization/deserialize";
 import Serialize from "../serialization/serialize";
 import { ChangeMap, BoxCandidate, Token, Network } from "../types/public";
 import Device, { COMMAND } from "./common/device";
-import { Address } from "@nautilus-wallet/ergo-ts";
+import { ErgoAddress } from "@fleet-sdk/core";
 import { AttestedTx } from "../types/internal";
 
 const MAINNET_MINER_FEE_TREE =
@@ -150,7 +150,7 @@ async function sendOutputs(
     const tree = Deserialize.hex(box.ergoTree);
     if (tree === MAINNET_MINER_FEE_TREE || tree === TESTNET_FEE_TREE) {
       await addOutputBoxMinersFeeTree(device, sessionId, network);
-    } else if (Address.fromErgoTree(tree).address === changeMap.address) {
+    } else if (ErgoAddress.fromErgoTree(tree).toString() === changeMap.address) {
       await addOutputBoxChangeTree(device, sessionId, changeMap.path);
     } else {
       await addOutputBoxErgoTree(device, sessionId, box.ergoTree);
