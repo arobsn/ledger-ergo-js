@@ -107,3 +107,5 @@ typings/
 
 # dist/ directory
 dist/
+
+.npmrc
