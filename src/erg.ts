@@ -47,7 +47,7 @@ export class ErgoLedgerApp {
     return this._device.transport;
   }
 
-  constructor(transaport: Transport);
+  constructor(transport: Transport);
   constructor(transport: Transport, authToken: number);
   constructor(transport: Transport, authToken?: number, scrambleKey = "ERG") {
     transport.decorateAppAPIMethods(
@@ -157,7 +157,7 @@ export class ErgoLedgerApp {
   private getDerivationPathArray(path: string) {
     const pathArray = Serialize.bip32PathAsArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
-    assert(pathArray.length >= 5, "Invalid path lenght.");
+    assert(pathArray.length >= 5, "Invalid path length.");
     assert(pathArray[CHANGE_PATH_INDEX] in [0, 1], "Invalid change path value.");
 
     return pathArray;
