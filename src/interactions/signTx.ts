@@ -111,7 +111,12 @@ async function sendInputs(device: Device, sessionId: number, inputBoxes: Atteste
 }
 
 async function sendBoxContextExtension(device: Device, sessionId: number, extension: Buffer) {
-  device.sendData(COMMAND.SIGN_TX, P1.ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK, sessionId, extension);
+  await device.sendData(
+    COMMAND.SIGN_TX,
+    P1.ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK,
+    sessionId,
+    extension
+  );
 }
 
 async function sendDataInputs(device: Device, sessionId: number, boxIds: string[]) {
