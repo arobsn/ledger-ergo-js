@@ -87,6 +87,6 @@ export type ChangeMap = {
 };
 
 export enum Network {
-  Mainnet = 0x01,
-  Testnet = 0x02
+  Mainnet = 0x00,
+  Testnet = 0x10
 }

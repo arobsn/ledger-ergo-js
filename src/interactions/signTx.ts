@@ -6,10 +6,8 @@ import Device, { COMMAND } from "./common/device";
 import { ErgoAddress } from "@fleet-sdk/core";
 import { AttestedTx } from "../types/internal";
 
-const MAINNET_MINER_FEE_TREE =
+const MINER_FEE_TREE =
   "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
-const TESTNET_FEE_TREE =
-  "1005040004000e36100204900108cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
 
 const enum P1 {
   START_SIGNING = 0x01,
@@ -39,23 +37,29 @@ export async function signTx(
   network: Network,
   authToken?: number
 ): Promise<Uint8Array> {
-  const sessionId = await sendHeader(device, signPath, authToken);
+  const sessionId = await sendHeader(device, network, signPath, authToken);
   await sendStartTx(device, sessionId, tx, tx.distinctTokenIds.length);
   await sendDistinctTokensIds(device, sessionId, tx.distinctTokenIds);
   await sendInputs(device, sessionId, tx.inputs);
   await sendDataInputs(device, sessionId, tx.dataInputs);
-  await sendOutputs(device, sessionId, tx.outputs, tx.changeMap, tx.distinctTokenIds, network);
+  await sendOutputs(device, sessionId, tx.outputs, tx.changeMap, tx.distinctTokenIds);
   const signBytes = await sendConfirmAndSign(device, sessionId);
 
   return new Uint8Array(signBytes);
 }
 
-async function sendHeader(device: Device, path: string, authToken?: number): Promise<number> {
+async function sendHeader(
+  device: Device,
+  network: Network,
+  path: string,
+  authToken?: number
+): Promise<number> {
   const response = await device.send(
     COMMAND.SIGN_TX,
     P1.START_SIGNING,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
     Buffer.concat([
+      Serialize.uint8(network),
       Serialize.bip32Path(path),
       authToken ? Serialize.uint32(authToken) : Buffer.alloc(0)
     ])
@@ -133,8 +137,7 @@ async function sendOutputs(
   sessionId: number,
   boxes: BoxCandidate[],
   changeMap: ChangeMap,
-  distinctTokenIds: Uint8Array[],
-  network: Network
+  distinctTokenIds: Uint8Array[]
 ) {
   const distinctTokenIdsStr = distinctTokenIds.map((t) => Buffer.from(t).toString("hex"));
 
@@ -153,8 +156,8 @@ async function sendOutputs(
     );
 
     const tree = Deserialize.hex(box.ergoTree);
-    if (tree === MAINNET_MINER_FEE_TREE || tree === TESTNET_FEE_TREE) {
-      await addOutputBoxMinersFeeTree(device, sessionId, network);
+    if (tree === MINER_FEE_TREE) {
+      await addOutputBoxMinersFeeTree(device, sessionId);
     } else if (ErgoAddress.fromErgoTree(tree).toString() === changeMap.address) {
       await addOutputBoxChangeTree(device, sessionId, changeMap.path);
     } else {
@@ -175,13 +178,8 @@ async function addOutputBoxErgoTree(device: Device, sessionId: number, ergoTree:
   await device.sendData(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_ERGO_TREE_CHUNK, sessionId, ergoTree);
 }
 
-async function addOutputBoxMinersFeeTree(device: Device, sessionId: number, network: Network) {
-  await device.send(
-    COMMAND.SIGN_TX,
-    P1.ADD_OUTPUT_BOX_MINERS_FEE_TREE,
-    sessionId,
-    Buffer.from([network])
-  );
+async function addOutputBoxMinersFeeTree(device: Device, sessionId: number) {
+  await device.send(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_MINERS_FEE_TREE, sessionId, Buffer.from([]));
 }
 
 async function addOutputBoxChangeTree(device: Device, sessionId: number, path?: string) {
