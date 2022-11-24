@@ -109,3 +109,4 @@ typings/
 dist/
 
 .npmrc
+.DS_Store
