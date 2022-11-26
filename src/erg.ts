@@ -135,11 +135,11 @@ export class ErgoLedgerApp {
    * @param path Bip44 path.
    * @returns a Promise with the derived address in hex format.
    */
-  public async deriveAddress(path: string): Promise<DerivedAddress> {
+  public async deriveAddress(path: string, network = Network.Mainnet): Promise<DerivedAddress> {
     this._debug("deriveAddress", path);
 
     const pathArray = this.getDerivationPathArray(path);
-    return deriveAddress(this._device, pathArray, this.authToken);
+    return deriveAddress(this._device, network, pathArray, this.authToken);
   }
 
   /**
@@ -147,11 +147,11 @@ export class ErgoLedgerApp {
    * @param path Bip44 path.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
-  public async showAddress(path: string): Promise<boolean> {
+  public async showAddress(path: string, network = Network.Mainnet): Promise<boolean> {
     this._debug("showAddress", path);
 
     const pathArray = this.getDerivationPathArray(path);
-    return showAddress(this._device, pathArray, this.authToken);
+    return showAddress(this._device, network, pathArray, this.authToken);
   }
 
   private getDerivationPathArray(path: string) {
@@ -172,7 +172,7 @@ export class ErgoLedgerApp {
     return attestInput(this._device, box, this.authToken);
   }
 
-  public async signTx(tx: UnsignedTx, network: Network): Promise<Uint8Array[]> {
+  public async signTx(tx: UnsignedTx, network = Network.Mainnet): Promise<Uint8Array[]> {
     this._debug("signTx", { tx, network });
 
     const attestedInputs = await this._attestInputs(tx.inputs);

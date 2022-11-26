@@ -1,5 +1,5 @@
 import Device, { COMMAND } from "./common/device";
-import { DerivedAddress } from "../types/public";
+import { DerivedAddress, Network } from "../types/public";
 import { DeviceResponse } from "../types/internal";
 import { RETURN_CODE } from "../errors";
 import Serialize from "../serialization/serialize";
@@ -20,18 +20,14 @@ const enum P2 {
   WITH_TOKEN = 0x02
 }
 
-const enum Network {
-  Mainnet = 0 << 4,
-  Testnet = 1 << 4
-}
-
 function sendDeriveAddress(
   device: Device,
+  network: Network,
   path: number[],
   returnType: ReturnType,
   authToken?: number
 ): Promise<DeviceResponse> {
-  const data = Buffer.concat([Buffer.alloc(1, Network.Mainnet), Serialize.bip32Path(path)]);
+  const data = Buffer.concat([Buffer.alloc(1, network), Serialize.bip32Path(path)]);
   return device.send(
     COMMAND.DERIVE_ADDRESS,
     returnType == ReturnType.Return ? P1.RETURN : P1.DISPLAY,
@@ -42,18 +38,20 @@ function sendDeriveAddress(
 
 export async function deriveAddress(
   device: Device,
+  network: Network,
   path: number[],
   authToken?: number
 ): Promise<DerivedAddress> {
-  const response = await sendDeriveAddress(device, path, ReturnType.Return, authToken);
+  const response = await sendDeriveAddress(device, network, path, ReturnType.Return, authToken);
   return { addressHex: Deserialize.hex(response.data) };
 }
 
 export async function showAddress(
   device: Device,
+  network: Network,
   path: number[],
   authToken?: number
 ): Promise<boolean> {
-  const response = await sendDeriveAddress(device, path, ReturnType.Display, authToken);
+  const response = await sendDeriveAddress(device, network, path, ReturnType.Display, authToken);
   return response.returnCode === RETURN_CODE.OK;
 }

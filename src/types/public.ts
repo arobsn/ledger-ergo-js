@@ -86,7 +86,7 @@ export type ChangeMap = {
   path: string;
 };
 
-export enum Network {
-  Mainnet = 0x00,
-  Testnet = 0x10
+export const enum Network {
+  Mainnet = 0 << 4,
+  Testnet = 1 << 4
 }
