@@ -23,6 +23,7 @@ import {
 import Serialize from "./serialization/serialize";
 import { AttestedTx, SignTxResponse } from "./types/internal";
 import { uniq } from "./serialization/utils";
+import { DeviceError, RETURN_CODE } from "./errors";
 
 export * from "./errors";
 export * from "./types/public";
@@ -174,6 +175,10 @@ export class ErgoLedgerApp {
 
   public async signTx(tx: UnsignedTx, network = Network.Mainnet): Promise<Uint8Array[]> {
     this._debug("signTx", { tx, network });
+
+    if (!tx.inputs || tx.inputs.length === 0) {
+      throw new DeviceError(RETURN_CODE.BAD_INPUT_COUNT);
+    }
 
     const attestedInputs = await this._attestInputs(tx.inputs);
     const signPaths = uniq(tx.inputs.map((i) => i.signPath));
