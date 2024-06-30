@@ -16,18 +16,19 @@
     "node": ">=18",
     "pnpm": ">=9"
   },
-  "main": "./dist/erg.js",
-  "module": "./dist/erg.mjs",
+  "type": "module",
+  "main": "./dist/erg.cjs",
+  "module": "./dist/erg.js",
   "types": "./dist/erg.d.ts",
   "exports": {
     ".": {
       "import": {
-        "types": "./dist/erg.d.mts",
-        "default": "./dist/erg.mjs"
+        "types": "./dist/erg.d.ts",
+        "default": "./dist/erg.js"
       },
       "require": {
         "types": "./dist/erg.d.ts",
-        "default": "./dist/erg.js"
+        "default": "./dist/erg.cjs"
       }
     }
   },
