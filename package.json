@@ -12,15 +12,23 @@
     "hardwallet",
     "wallet"
   ],
-  "type": "module",
-  "main": "dist/erg.js",
-  "module": "dist/erg.es.js",
-  "types": "dist/erg.d.ts",
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=9"
+  },
+  "main": "./dist/erg.js",
+  "module": "./dist/erg.mjs",
+  "types": "./dist/erg.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/erg.es.js",
-      "require": "./dist/erg.js",
-      "types": "./dist/erg.d.ts"
+      "import": {
+        "types": "./dist/erg.d.mts",
+        "default": "./dist/erg.mjs"
+      },
+      "require": {
+        "types": "./dist/erg.d.ts",
+        "default": "./dist/erg.js"
+      }
     }
   },
   "files": [
@@ -34,6 +42,7 @@
     "url": "https://github.com/anon-br/ledger-ergo-js/issues"
   },
   "scripts": {
+    "build": "tsup",
     "test": "jest",
     "fix:format": "biome format --write",
     "fix:lint": "biome lint --write",
@@ -51,20 +60,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
-    "@lopatnov/rollup-plugin-uglify": "^2.1.2",
     "@types/jest": "^27.5.2",
     "@types/typescript": "^2.0.0",
     "jest": "^28.1.3",
     "jest-config": "^28.1.3",
-    "rollup": "^2.79.1",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-sourcemaps": "^0.4.2",
-    "rollup-plugin-typescript2": "^0.31.2",
-    "terser": "^5.16.0",
     "ts-jest": "^28.0.8",
     "tsup": "^8.1.0",
-    "typescript": "^4.9.3"
+    "typescript": "^5.5.2"
   }
 }
