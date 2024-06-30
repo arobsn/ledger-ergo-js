@@ -1,4 +1,5 @@
-import { chunkBy, uniq } from "../src/serialization/utils";
+import { describe, expect, it } from "vitest";
+import { chunkBy, uniq } from "./utils";
 
 describe("Utils test", () => {
   it("should chunk buffers", () => {

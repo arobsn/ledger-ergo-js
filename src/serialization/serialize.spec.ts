@@ -1,11 +1,14 @@
-import Serialize from "../src/serialization/serialize";
+import { describe, expect, it } from "vitest";
+import Serialize from "./serialize";
 
 describe("serializations", () => {
   describe("serialize class", () => {
     it("should serialize and split", () => {
       const MAX_CHUNK_LENGTH = 3;
       const arr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-      const chunks = Serialize.arrayAndChunk(arr, MAX_CHUNK_LENGTH, (n) => Serialize.uint8(n));
+      const chunks = Serialize.arrayAndChunk(arr, MAX_CHUNK_LENGTH, (n) =>
+        Serialize.uint8(n)
+      );
 
       expect(chunks).toHaveLength(4);
       expect(chunks[0]).toHaveLength(MAX_CHUNK_LENGTH);

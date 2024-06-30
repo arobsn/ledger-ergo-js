@@ -12,11 +12,26 @@
     "hardwallet",
     "wallet"
   ],
-  "umdName": "ledger-ergo-js",
-  "libraryFile": "erg",
-  "main": "dist/erg.js",
-  "module": "dist/erg.es.js",
-  "types": "dist/erg.d.ts",
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=9"
+  },
+  "type": "module",
+  "main": "./dist/erg.cjs",
+  "module": "./dist/erg.js",
+  "types": "./dist/erg.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/erg.d.ts",
+        "default": "./dist/erg.js"
+      },
+      "require": {
+        "types": "./dist/erg.d.ts",
+        "default": "./dist/erg.cjs"
+      }
+    }
+  },
   "files": [
     "dist"
   ],
@@ -28,36 +43,29 @@
     "url": "https://github.com/anon-br/ledger-ergo-js/issues"
   },
   "scripts": {
-    "build": "rollup -c rollup.config.ts",
-    "watch": "rollup -cw rollup.config.ts",
-    "increment-version": "npm version patch -git-tag-version false -allow-same-version true",
-    "configure-npm": "node ./set-registry.js -s https://registry.npmjs.org",
-    "configure-gpr": "node ./set-registry.js -s https://npm.pkg.github.com",
-    "test": "jest"
+    "build": "tsup",
+    "fix:format": "biome format --write",
+    "fix:lint": "biome lint --write",
+    "test:lint": "biome lint",
+    "test:format": "biome format",
+    "test:unit": "vitest run --no-coverage --environment=node",
+    "watch:unit": "vitest --no-coverage --reporter=dot"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "devDependencies": {
-    "@lopatnov/rollup-plugin-uglify": "^2.1.2",
-    "@types/jest": "^27.5.2",
-    "@types/typescript": "^2.0.0",
-    "jest": "^28.1.3",
-    "jest-config": "^28.1.3",
-    "rollup": "^2.79.1",
-    "rollup-plugin-commonjs": "^10.1.0",
-    "rollup-plugin-json": "^4.0.0",
-    "rollup-plugin-node-resolve": "^5.2.0",
-    "rollup-plugin-sourcemaps": "^0.4.2",
-    "rollup-plugin-typescript2": "^0.31.2",
-    "terser": "^5.16.0",
-    "ts-jest": "^28.0.8",
-    "typescript": "^4.9.3"
   },
   "dependencies": {
     "@fleet-sdk/core": "0.1.0-alpha.12",
     "@ledgerhq/hw-transport": "^6.27.7",
     "base-x": "^4.0.0",
     "bip32-path": "^0.4.2"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^1.8.3",
+    "@types/node": "^20.14.9",
+    "@types/typescript": "^2.0.0",
+    "tsup": "^8.1.0",
+    "typescript": "^5.5.2",
+    "vitest": "^1.6.0"
   }
 }
