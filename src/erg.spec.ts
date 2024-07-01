@@ -175,6 +175,64 @@ describe("transaction signing", () => {
       expect(result).to.deep.equal(proofs);
     }
   );
+
+  it("Should attest input", async () => {
+    const transport = await openTransportReplayer(
+      RecordStore.fromString(`
+        => e02001023b7eb901e0e7a3b2c2a4795851fc40c58b71a31ba114dedacf467eda3d3902f09e00000000000005f5e100000000240013d0e80000000001670dc113
+        <= e09000
+
+        => e02002e0240008cd02a51a0c5e6b456c2c8e71f238dc02f5345aad9a7c5b8c655dd24bc5e419c4212d
+        <= 9000
+
+        => e02004e00100
+        <= 019000
+
+        => e02005e00100
+        <= 2bb2f3111e33ad9d9ab1fa3ae184fc1f06a6ac5a71d40a825997f6637b44784f01000000000005f5e100008c2d9e1dcd467155df32bf1ded8007109000
+      `)
+    );
+
+    const authToken = Number("0x670dc113");
+    const app = new ErgoLedgerApp(transport, authToken).useAuthToken();
+
+    const box = {
+      txId: "7eb901e0e7a3b2c2a4795851fc40c58b71a31ba114dedacf467eda3d3902f09e",
+      index: 0,
+      value: "100000000",
+      ergoTree: Buffer.from([
+        0, 8, 205, 2, 165, 26, 12, 94, 107, 69, 108, 44, 142, 113, 242, 56, 220,
+        2, 245, 52, 90, 173, 154, 124, 91, 140, 101, 93, 210, 75, 197, 228, 25,
+        196, 33, 45
+      ]),
+      creationHeight: 1298664,
+      tokens: [],
+      additionalRegisters: Buffer.from([0]),
+      extension: Buffer.from([0]),
+      signPath: "m/44'/429'/0'/0/0"
+    };
+
+    const attestedBox = await app.attestInput(box);
+
+    expect(attestedBox.box).to.be.equal(box);
+    expect(attestedBox.frames).to.deep.equal([
+      {
+        amount: "100000000",
+        attestation: "8c2d9e1dcd467155df32bf1ded800710",
+        boxId:
+          "2bb2f3111e33ad9d9ab1fa3ae184fc1f06a6ac5a71d40a825997f6637b44784f",
+        buffer: Buffer.from([
+          43, 178, 243, 17, 30, 51, 173, 157, 154, 177, 250, 58, 225, 132, 252,
+          31, 6, 166, 172, 90, 113, 212, 10, 130, 89, 151, 246, 99, 123, 68,
+          120, 79, 1, 0, 0, 0, 0, 0, 5, 245, 225, 0, 0, 140, 45, 158, 29, 205,
+          70, 113, 85, 223, 50, 191, 29, 237, 128, 7, 16
+        ]),
+        frameIndex: 0,
+        framesCount: 1,
+        tokens: []
+      }
+    ]);
+  });
 });
 
 const txTestVectors = [
