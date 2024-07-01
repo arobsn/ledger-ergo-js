@@ -59,8 +59,7 @@
   "dependencies": {
     "@fleet-sdk/core": "0.1.0-alpha.12",
     "base-x": "^4.0.0",
-    "bip32-path": "^0.4.2",
-    "buffer": "^6.0.3"
+    "bip32-path": "^0.4.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
