@@ -29,7 +29,8 @@
       },
       "suspicious": {
         "noConsoleLog": { "level": "error" },
-        "noAssignInExpressions": { "level": "off" }
+        "noAssignInExpressions": { "level": "off" },
+        "noConstEnum": { "level": "off" }
       }
     }
   }
