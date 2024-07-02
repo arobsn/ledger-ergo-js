@@ -29,17 +29,10 @@ export async function attestInput(
     frameCount = await sendTokens(device, box.tokens, sessionId);
   }
   if (box.additionalRegisters.length > 0) {
-    frameCount = await sendRegisters(
-      device,
-      box.additionalRegisters,
-      sessionId
-    );
+    frameCount = await sendRegisters(device, box.additionalRegisters, sessionId);
   }
 
-  return new AttestedBox(
-    box,
-    await getAttestedFrames(device, frameCount, sessionId)
-  );
+  return new AttestedBox(box, await getAttestedFrames(device, frameCount, sessionId));
 }
 
 async function sendHeader(
@@ -94,9 +87,7 @@ async function sendTokens(
 
   const results: DeviceResponse[] = [];
   for (const p of packets) {
-    results.push(
-      await device.send(COMMAND.ATTEST_INPUT, P1.ADD_TOKENS, sessionId, p)
-    );
+    results.push(await device.send(COMMAND.ATTEST_INPUT, P1.ADD_TOKENS, sessionId, p));
   }
 
   /* v8 ignore next */

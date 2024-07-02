@@ -7,9 +7,7 @@ const MAX_UINT32_VALUE = 4294967295;
 const MAX_UINT16_VALUE = 65535;
 const MAX_UNIT8_VALUE = 255;
 
-const [ERGO_PURPOSE, ERGO_COIN_TYPE] = bip32Path
-  .fromString("m/44'/429'")
-  .toPathArray();
+const [ERGO_PURPOSE, ERGO_COIN_TYPE] = bip32Path.fromString("m/44'/429'").toPathArray();
 
 export function assert(cond: boolean, errMsg: string): asserts cond {
   if (!cond) {

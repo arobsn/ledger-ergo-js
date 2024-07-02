@@ -20,10 +20,7 @@ import {
   signTx
 } from "./interactions";
 import { uniq } from "@fleet-sdk/common";
-import type {
-  AttestedTransaction,
-  SignTransactionResponse
-} from "./types/internal";
+import type { AttestedTransaction, SignTransactionResponse } from "./types/internal";
 
 export { DeviceError, RETURN_CODE };
 export * from "./types/public";
@@ -145,10 +142,7 @@ export class ErgoLedgerApp {
    * @param path Bip44 path.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
-  public async showAddress(
-    path: string,
-    network = Network.Mainnet
-  ): Promise<boolean> {
+  public async showAddress(path: string, network = Network.Mainnet): Promise<boolean> {
     this._debug("showAddress", path);
     return showAddress(this._device, network, path, this.authToken);
   }
@@ -162,10 +156,7 @@ export class ErgoLedgerApp {
     return attestInput(this._device, box, this.authToken);
   }
 
-  public async signTx(
-    tx: UnsignedTx,
-    network = Network.Mainnet
-  ): Promise<Uint8Array[]> {
+  public async signTx(tx: UnsignedTx, network = Network.Mainnet): Promise<Uint8Array[]> {
     this._debug("signTx", { tx, network });
 
     if (!tx.inputs || tx.inputs.length === 0) {

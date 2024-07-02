@@ -83,11 +83,7 @@ export const serialize = {
     const packets = [];
     for (let i = 0; i < Math.ceil(data.length / maxSize); i++) {
       const chunks = [];
-      for (
-        let j = i * maxSize;
-        j < Math.min((i + 1) * maxSize, data.length);
-        j++
-      ) {
+      for (let j = i * maxSize; j < Math.min((i + 1) * maxSize, data.length); j++) {
         chunks.push(encode(data[j]));
       }
 
