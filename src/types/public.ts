@@ -46,20 +46,20 @@ export type UnsignedBox = {
   txId: string;
   index: number;
   value: string;
-  ergoTree: Buffer;
+  ergoTree: Uint8Array;
   creationHeight: number;
   tokens: Token[];
-  additionalRegisters: Buffer;
-  extension: Buffer;
+  additionalRegisters: Uint8Array;
+  extension: Uint8Array;
   signPath: string;
 };
 
 export type BoxCandidate = {
   value: string;
-  ergoTree: Buffer;
+  ergoTree: Uint8Array;
   creationHeight: number;
   tokens: Token[];
-  registers: Buffer;
+  registers: Uint8Array;
 };
 
 export type AttestedBoxFrame = {
@@ -70,7 +70,7 @@ export type AttestedBoxFrame = {
   tokens: Token[];
   attestation: string;
   extensionLength?: number;
-  bytes: Buffer;
+  bytes: Uint8Array;
 };
 
 export type UnsignedTransaction = {

@@ -4,6 +4,7 @@ import type { DeviceResponse } from "../types/internal";
 import { pathToArray, serialize } from "../serialization/serialize";
 import { deserialize } from "../serialization/deserialize";
 import type { Network } from "@fleet-sdk/common";
+import { Buffer } from "buffer";
 
 const enum ReturnType {
   Return = 0x01,

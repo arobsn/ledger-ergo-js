@@ -4,6 +4,7 @@ import type { DeviceResponse } from "../types/internal";
 import { serialize } from "../serialization/serialize";
 import { deserialize } from "../serialization/deserialize";
 import { AttestedBox } from "../types/attestedBox";
+import { Buffer } from "buffer";
 
 const enum P1 {
   BOX_START = 0x01,
@@ -62,14 +63,14 @@ async function sendHeader(
 
 async function sendErgoTree(
   device: Device,
-  data: Buffer,
+  data: Uint8Array,
   sessionId: number
 ): Promise<number> {
   const results = await device.sendData(
     COMMAND.ATTEST_INPUT,
     P1.ADD_ERGO_TREE_CHUNK,
     sessionId,
-    data
+    Buffer.from(data)
   );
 
   return results.pop()?.data[0] || 0;
@@ -96,14 +97,14 @@ async function sendTokens(
 
 async function sendRegisters(
   device: Device,
-  data: Buffer,
+  data: Uint8Array,
   sessionId: number
 ): Promise<number> {
   const results = await device.sendData(
     COMMAND.ATTEST_INPUT,
     P1.ADD_REGISTERS_CHUNK,
     sessionId,
-    data
+    Buffer.from(data)
   );
 
   /* v8 ignore next */
@@ -132,21 +133,21 @@ async function getAttestedFrames(
 
 export function decodeAttestedFrameResponse(bytes: Buffer): AttestedBoxFrame {
   let offset = 0;
-  const boxId = deserialize.hex(bytes.subarray(offset, (offset += 32)));
-  const count = deserialize.uint8(bytes.subarray(offset, (offset += 1)));
-  const index = deserialize.uint8(bytes.subarray(offset, (offset += 1)));
-  const amount = deserialize.uint64(bytes.subarray(offset, (offset += 8)));
-  const tokenCount = deserialize.uint8(bytes.subarray(offset, (offset += 1)));
+  const boxId = deserialize.hex(bytes.slice(offset, (offset += 32)));
+  const count = deserialize.uint8(bytes.slice(offset, (offset += 1)));
+  const index = deserialize.uint8(bytes.slice(offset, (offset += 1)));
+  const amount = deserialize.uint64(bytes.slice(offset, (offset += 8)));
+  const tokenCount = deserialize.uint8(bytes.slice(offset, (offset += 1)));
 
   const tokens: Token[] = [];
   for (let i = 0; i < tokenCount; i++) {
     tokens.push({
-      id: deserialize.hex(bytes.subarray(offset, (offset += 32))),
-      amount: deserialize.uint64(bytes.subarray(offset, (offset += 8)))
+      id: deserialize.hex(bytes.slice(offset, (offset += 32))),
+      amount: deserialize.uint64(bytes.slice(offset, (offset += 8)))
     });
   }
 
-  const attestation = deserialize.hex(bytes.subarray(offset, (offset += 16)));
+  const attestation = deserialize.hex(bytes.slice(offset, (offset += 16)));
 
   return {
     boxId,

@@ -8,7 +8,6 @@
     "declaration": true,
     "esModuleInterop": true,
     "importHelpers": true,
-    "allowSyntheticDefaultImports": true,
     "baseUrl": "."
   },
   "include": ["src"]

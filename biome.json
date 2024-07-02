@@ -25,7 +25,8 @@
     "rules": {
       "recommended": true,
       "style": {
-        "noParameterAssign": { "level": "off" }
+        "noParameterAssign": { "level": "off" },
+        "useNodejsImportProtocol": { "level": "off" }
       },
       "suspicious": {
         "noConsoleLog": { "level": "error" },

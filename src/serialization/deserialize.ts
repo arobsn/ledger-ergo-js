@@ -1,5 +1,6 @@
 import { assert } from "@fleet-sdk/common";
 import { base10 } from "./utils";
+import type { Buffer } from "buffer";
 
 export const deserialize = {
   hex(buffer: Buffer): string {

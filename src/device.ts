@@ -1,6 +1,7 @@
 import type Transport from "@ledgerhq/hw-transport";
 import type { DeviceResponse } from "./types/internal";
 import { serialize } from "./serialization/serialize";
+import { Buffer } from "buffer";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -36,7 +37,7 @@ export class Device {
   ): Promise<DeviceResponse[]> {
     const responses: DeviceResponse[] = [];
     for (let i = 0; i < Math.ceil(data.length / MAX_DATA_LENGTH); i++) {
-      const chunk = data.subarray(
+      const chunk = data.slice(
         i * MAX_DATA_LENGTH,
         Math.min((i + 1) * MAX_DATA_LENGTH, data.length)
       );

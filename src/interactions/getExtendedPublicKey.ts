@@ -2,7 +2,8 @@ import { COMMAND, type Device } from "../device";
 import type { ExtendedPublicKey } from "../types/public";
 import { chunkBy } from "../serialization/utils";
 import { serialize } from "../serialization/serialize";
-import { deserialize } from "../serialization/deserialize";
+import { Buffer } from "buffer";
+import { hex } from "@fleet-sdk/crypto";
 
 const enum P1 {
   WITHOUT_TOKEN = 0x01,
@@ -28,7 +29,7 @@ export async function getExtendedPublicKey(
   const [publicKey, chainCode] = chunkBy(response.data, [33, 32]);
 
   return {
-    publicKey: deserialize.hex(publicKey),
-    chainCode: deserialize.hex(chainCode)
+    publicKey: hex.encode(publicKey),
+    chainCode: hex.encode(chainCode)
   };
 }

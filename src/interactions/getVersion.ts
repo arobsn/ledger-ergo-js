@@ -1,5 +1,6 @@
 import type { Version } from "../types/public";
 import { COMMAND, type Device } from "../device";
+import { Buffer } from "buffer";
 
 const IS_DEBUG_FLAG = 0x01;
 

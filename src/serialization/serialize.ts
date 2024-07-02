@@ -2,6 +2,7 @@ import { isHex, assert } from "@fleet-sdk/common";
 import { isUint16, isUint32, isUint64String, isUint8, isErgoPath } from "../assertions";
 import bip32Path from "bip32-path";
 import { base10 } from "./utils";
+import { Buffer } from "buffer";
 
 export const serialize = {
   path(path: number[] | string): Buffer {

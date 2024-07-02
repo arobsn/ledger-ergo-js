@@ -5,7 +5,7 @@ export const base10 = base("0123456789");
 
 const sum = (arr: number[]) => arr.reduce((x, y) => x + y, 0);
 
-export function chunkBy(data: Buffer, chunkLengths: number[]) {
+export function chunkBy(data: Uint8Array, chunkLengths: number[]) {
   assert(data.length >= sum(chunkLengths), "data is too small");
 
   let offset = 0;

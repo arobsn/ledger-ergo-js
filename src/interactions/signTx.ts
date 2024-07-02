@@ -1,10 +1,11 @@
-import { deserialize } from "../serialization/deserialize";
 import { serialize } from "../serialization/serialize";
 import type { ChangeMap, BoxCandidate, Token } from "../types/public";
 import { COMMAND, type Device } from "../device";
 import { ErgoAddress, type Network } from "@fleet-sdk/core";
 import type { AttestedTransaction } from "../types/internal";
 import type { AttestedBox } from "../types/attestedBox";
+import { hex } from "@fleet-sdk/crypto";
+import { Buffer } from "buffer";
 
 const MINER_FEE_TREE =
   "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
@@ -109,7 +110,12 @@ async function sendDistinctTokensIds(
 async function sendInputs(device: Device, sessionId: number, inputs: AttestedBox[]) {
   for (const input of inputs) {
     for (const frame of input.frames) {
-      await device.send(COMMAND.SIGN_TX, P1.ADD_INPUT_BOX_FRAME, sessionId, frame.bytes);
+      await device.send(
+        COMMAND.SIGN_TX,
+        P1.ADD_INPUT_BOX_FRAME,
+        sessionId,
+        Buffer.from(frame.bytes)
+      );
     }
 
     if (input.extension !== undefined && input.extension.length > 0) {
@@ -121,13 +127,13 @@ async function sendInputs(device: Device, sessionId: number, inputs: AttestedBox
 async function sendBoxContextExtension(
   device: Device,
   sessionId: number,
-  extension: Buffer
+  extension: Uint8Array
 ) {
   await device.sendData(
     COMMAND.SIGN_TX,
     P1.ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK,
     sessionId,
-    extension
+    Buffer.from(extension)
   );
 }
 
@@ -163,7 +169,7 @@ async function sendOutputs(
       ])
     );
 
-    const tree = deserialize.hex(box.ergoTree);
+    const tree = hex.encode(box.ergoTree);
     if (tree === MINER_FEE_TREE) {
       await addOutputBoxMinersFeeTree(device, sessionId);
     } else if (ErgoAddress.fromErgoTree(tree).toString() === changeMap.address) {
@@ -182,12 +188,16 @@ async function sendOutputs(
   }
 }
 
-async function addOutputBoxErgoTree(device: Device, sessionId: number, ergoTree: Buffer) {
+async function addOutputBoxErgoTree(
+  device: Device,
+  sessionId: number,
+  ergoTree: Uint8Array
+) {
   await device.sendData(
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_ERGO_TREE_CHUNK,
     sessionId,
-    ergoTree
+    Buffer.from(ergoTree)
   );
 }
 
@@ -231,13 +241,13 @@ async function addOutputBoxTokens(
 async function addOutputBoxRegisters(
   device: Device,
   sessionId: number,
-  registers: Buffer
+  registers: Uint8Array
 ) {
   await device.sendData(
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_REGISTERS_CHUNK,
     sessionId,
-    registers
+    Buffer.from(registers)
   );
 }
 

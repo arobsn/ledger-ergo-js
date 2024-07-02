@@ -1,6 +1,7 @@
 import type { RETURN_CODE } from "../device";
 import type { BoxCandidate, ChangeMap } from "./public";
 import type { AttestedBox } from "./attestedBox";
+import type { Buffer } from "buffer";
 
 export type DeviceResponse = {
   data: Buffer;
