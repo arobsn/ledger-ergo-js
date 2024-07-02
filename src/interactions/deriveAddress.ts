@@ -40,10 +40,7 @@ function sendDeriveAddress(
     throw new Error(`Invalid change path: ${change}`);
   }
 
-  const data = Buffer.concat([
-    Buffer.alloc(1, network),
-    serialize.path(pathArray)
-  ]);
+  const data = Buffer.concat([Buffer.alloc(1, network), serialize.path(pathArray)]);
 
   return device.send(
     COMMAND.DERIVE_ADDRESS,

@@ -18,11 +18,8 @@ import {
   attestInput,
   signTx
 } from "./interactions";
+import type { AttestedTransaction, SignTransactionResponse } from "./types/internal";
 import { uniq, Network } from "@fleet-sdk/common";
-import type {
-  AttestedTransaction,
-  SignTransactionResponse
-} from "./types/internal";
 
 export { DeviceError, RETURN_CODE, Network };
 export * from "./types/public";
@@ -144,10 +141,7 @@ export class ErgoLedgerApp {
    * @param path Bip44 path.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
-  public async showAddress(
-    path: string,
-    network = Network.Mainnet
-  ): Promise<boolean> {
+  public async showAddress(path: string, network = Network.Mainnet): Promise<boolean> {
     this._debug("showAddress", path);
     return showAddress(this._device, network, path, this.authToken);
   }
