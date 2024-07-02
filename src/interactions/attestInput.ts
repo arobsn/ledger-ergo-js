@@ -78,6 +78,7 @@ async function sendTokens(device: Device, tokens: Token[], sessionId: number): P
     results.push(await device.send(COMMAND.ATTEST_INPUT, P1.ADD_TOKENS, sessionId, p));
   }
 
+  /* v8 ignore next */
   return results.pop()?.data[0] || 0;
 }
 
@@ -89,6 +90,7 @@ async function sendRegisters(device: Device, data: Buffer, sessionId: number): P
     data
   );
 
+  /* v8 ignore next */
   return results.pop()?.data[0] || 0;
 }
 

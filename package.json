@@ -49,21 +49,26 @@
     "test:lint": "biome lint",
     "test:format": "biome format",
     "test:unit": "vitest run --no-coverage --environment=node",
-    "watch:unit": "vitest --no-coverage --reporter=dot"
+    "watch:unit": "vitest --no-coverage --reporter=dot",
+    "cov:check": "vitest run --coverage",
+    "cov:open": "vitest run --coverage ; open-cli coverage/index.html"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
     "@fleet-sdk/core": "0.1.0-alpha.12",
-    "@ledgerhq/hw-transport": "^6.27.7",
     "base-x": "^4.0.0",
     "bip32-path": "^0.4.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
+    "@ledgerhq/hw-transport": "^6.31.0",
+    "@ledgerhq/hw-transport-mocker": "^6.29.0",
     "@types/node": "^20.14.9",
     "@types/typescript": "^2.0.0",
+    "@vitest/coverage-v8": "^1.6.0",
+    "open-cli": "^8.0.0",
     "tsup": "^8.1.0",
     "typescript": "^5.5.2",
     "vitest": "^1.6.0"
