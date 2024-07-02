@@ -1,13 +1,12 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { Device, DeviceError, RETURN_CODE } from "./device";
-import {
-  type AppName,
-  type UnsignedBox,
-  type DerivedAddress,
-  type ExtendedPublicKey,
-  type Version,
-  type UnsignedTx,
-  Network
+import type {
+  AppName,
+  UnsignedBox,
+  DerivedAddress,
+  ExtendedPublicKey,
+  Version,
+  UnsignedTransaction
 } from "./types/public";
 import type { AttestedBox } from "./types/attestedBox";
 import {
@@ -19,10 +18,13 @@ import {
   attestInput,
   signTx
 } from "./interactions";
-import { uniq } from "@fleet-sdk/common";
-import type { AttestedTransaction, SignTransactionResponse } from "./types/internal";
+import { uniq, Network } from "@fleet-sdk/common";
+import type {
+  AttestedTransaction,
+  SignTransactionResponse
+} from "./types/internal";
 
-export { DeviceError, RETURN_CODE };
+export { DeviceError, RETURN_CODE, Network };
 export * from "./types/public";
 export const CLA = 0xe0;
 
@@ -142,7 +144,10 @@ export class ErgoLedgerApp {
    * @param path Bip44 path.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
-  public async showAddress(path: string, network = Network.Mainnet): Promise<boolean> {
+  public async showAddress(
+    path: string,
+    network = Network.Mainnet
+  ): Promise<boolean> {
     this._debug("showAddress", path);
     return showAddress(this._device, network, path, this.authToken);
   }
@@ -156,7 +161,10 @@ export class ErgoLedgerApp {
     return attestInput(this._device, box, this.authToken);
   }
 
-  public async signTx(tx: UnsignedTx, network = Network.Mainnet): Promise<Uint8Array[]> {
+  public async signTx(
+    tx: UnsignedTransaction,
+    network = Network.Mainnet
+  ): Promise<Uint8Array[]> {
     this._debug("signTx", { tx, network });
 
     if (!tx.inputs || tx.inputs.length === 0) {

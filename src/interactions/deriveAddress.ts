@@ -1,8 +1,9 @@
 import { COMMAND, RETURN_CODE, type Device } from "../device";
-import type { DerivedAddress, Network } from "../types/public";
+import type { DerivedAddress } from "../types/public";
 import type { DeviceResponse } from "../types/internal";
 import { pathToArray, serialize } from "../serialization/serialize";
 import { deserialize } from "../serialization/deserialize";
+import type { Network } from "@fleet-sdk/common";
 
 const enum ReturnType {
   Return = 0x01,
@@ -39,7 +40,10 @@ function sendDeriveAddress(
     throw new Error(`Invalid change path: ${change}`);
   }
 
-  const data = Buffer.concat([Buffer.alloc(1, network), serialize.path(pathArray)]);
+  const data = Buffer.concat([
+    Buffer.alloc(1, network),
+    serialize.path(pathArray)
+  ]);
 
   return device.send(
     COMMAND.DERIVE_ADDRESS,

@@ -1,4 +1,4 @@
-import { assert } from "../assertions";
+import { assert } from "@fleet-sdk/common";
 
 const sum = (arr: number[]) => arr.reduce((x, y) => x + y, 0);
 

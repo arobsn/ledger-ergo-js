@@ -1,4 +1,4 @@
-import { assert } from "../assertions";
+import { assert } from "@fleet-sdk/common";
 import type { UnsignedBox, AttestedBoxFrame } from "./public";
 
 export class AttestedBox {

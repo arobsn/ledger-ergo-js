@@ -1,13 +1,5 @@
-import { isHex } from "@fleet-sdk/common";
-import {
-  assert,
-  isUint16,
-  isUint32,
-  isUint64String,
-  isUint8,
-  isValidBip32Path,
-  isValidErgoPath
-} from "../assertions";
+import { isHex, assert } from "@fleet-sdk/common";
+import { isUint16, isUint32, isUint64String, isUint8, isErgoPath } from "../assertions";
 import basex from "base-x";
 import bip32Path from "bip32-path";
 
@@ -16,7 +8,7 @@ const bs10 = basex("0123456789");
 export const serialize = {
   path(path: number[] | string): Buffer {
     const pathArray = typeof path === "string" ? pathToArray(path) : path;
-    assert(isValidErgoPath(pathArray), "Invalid Ergo path");
+    assert(isErgoPath(pathArray), "Invalid Ergo path");
 
     const buffer = Buffer.alloc(1 + pathArray.length * 4);
     buffer[0] = pathArray.length;
@@ -55,7 +47,6 @@ export const serialize = {
   uint64(value: string): Buffer {
     assert(isUint64String(value), "invalid uint64 string");
     const data = bs10.decode(value);
-    assert(data.length <= 8, "excessive data");
 
     const padding = Buffer.alloc(8 - data.length);
     return Buffer.concat([padding, Buffer.from(data)]);
@@ -95,6 +86,5 @@ export const serialize = {
 };
 
 export function pathToArray(path: string): number[] {
-  assert(isValidBip32Path(path), "Invalid Bip32 path.");
   return bip32Path.fromString(path).toPathArray();
 }
