@@ -16,27 +16,27 @@ const MAX_DATA_LENGTH = 255;
 const MIN_RESPONSE_LENGTH = 2;
 
 export class Device {
-  private _transport: Transport;
-  private _cla: number;
+  #transport: Transport;
+  #cla: number;
 
-  public get transport(): Transport {
-    return this._transport;
+  get transport(): Transport {
+    return this.#transport;
   }
 
   constructor(transport: Transport, cla: number) {
-    this._transport = transport;
-    this._cla = cla;
+    this.#transport = transport;
+    this.#cla = cla;
   }
 
-  public async sendData(
+  async sendData(
     ins: COMMAND,
     p1: number,
     p2: number,
     data: Buffer
   ): Promise<DeviceResponse[]> {
-    let responses: DeviceResponse[] = [];
+    const responses: DeviceResponse[] = [];
     for (let i = 0; i < Math.ceil(data.length / MAX_DATA_LENGTH); i++) {
-      const chunk = data.slice(
+      const chunk = data.subarray(
         i * MAX_DATA_LENGTH,
         Math.min((i + 1) * MAX_DATA_LENGTH, data.length)
       );
@@ -47,7 +47,7 @@ export class Device {
     return responses;
   }
 
-  public async send(
+  async send(
     ins: COMMAND,
     p1: number,
     p2: number,
@@ -57,43 +57,41 @@ export class Device {
       throw new DeviceError(RETURN_CODE.TOO_MUCH_DATA);
     }
 
-    const apdu = this.mountApdu(this._cla, ins, p1, p2, data);
-    const response = await this.transport.exchange(apdu);
+    const adpu = mountApdu(this.#cla, ins, p1, p2, data);
+    const response = await this.transport.exchange(adpu);
 
     if (response.length < MIN_RESPONSE_LENGTH) {
       throw new DeviceError(RETURN_CODE.WRONG_RESPONSE_LENGTH);
     }
     const returnCode = response.readUInt16BE(response.length - 2);
-    if (returnCode != RETURN_CODE.OK) {
-      throw new DeviceError(returnCode);
-    }
+    if (returnCode !== RETURN_CODE.OK) throw new DeviceError(returnCode);
 
-    const responseData = response.slice(0, response.length - 2);
+    const responseData = response.subarray(0, response.length - 2);
     return { returnCode, data: responseData };
   }
+}
 
-  private mountApdu(
-    cla: number,
-    ins: COMMAND,
-    p1: number,
-    p2: number,
-    data: Buffer
-  ): Buffer {
-    return Buffer.concat([
-      serialize.uint8(cla),
-      serialize.uint8(ins),
-      serialize.uint8(p1),
-      serialize.uint8(p2),
-      serialize.uint8(data.length),
-      data
-    ]);
-  }
+function mountApdu(
+  cla: number,
+  ins: COMMAND,
+  p1: number,
+  p2: number,
+  data: Buffer
+): Buffer {
+  return Buffer.concat([
+    serialize.uint8(cla),
+    serialize.uint8(ins),
+    serialize.uint8(p1),
+    serialize.uint8(p2),
+    serialize.uint8(data.length),
+    data
+  ]);
 }
 
 export class DeviceError extends Error {
   #code;
 
-  public get code() {
+  get code() {
     return this.#code;
   }
 
