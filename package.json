@@ -67,7 +67,6 @@
     "@biomejs/biome": "^1.8.3",
     "@ledgerhq/hw-transport": "^6.31.0",
     "@ledgerhq/hw-transport-mocker": "^6.29.0",
-    "@types/node": "^20.14.9",
     "@vitest/coverage-v8": "^1.6.0",
     "open-cli": "^8.0.0",
     "tsup": "^8.1.0",

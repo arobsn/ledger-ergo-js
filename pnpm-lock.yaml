@@ -33,9 +33,6 @@ importers:
       '@ledgerhq/hw-transport-mocker':
         specifier: ^6.29.0
         version: 6.29.0
-      '@types/node':
-        specifier: ^20.14.9
-        version: 20.14.9
       '@vitest/coverage-v8':
         specifier: ^1.6.0
         version: 1.6.0(vitest@1.6.0(@types/node@20.14.9))
@@ -1601,6 +1598,7 @@ snapshots:
   '@types/node@20.14.9':
     dependencies:
       undici-types: 5.26.5
+    optional: true
 
   '@vitest/coverage-v8@1.6.0(vitest@1.6.0(@types/node@20.14.9))':
     dependencies:
@@ -2383,7 +2381,8 @@ snapshots:
 
   ufo@1.5.3: {}
 
-  undici-types@5.26.5: {}
+  undici-types@5.26.5:
+    optional: true
 
   unique-string@3.0.0:
     dependencies:

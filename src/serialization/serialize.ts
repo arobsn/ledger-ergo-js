@@ -1,9 +1,7 @@
 import { isHex, assert } from "@fleet-sdk/common";
 import { isUint16, isUint32, isUint64String, isUint8, isErgoPath } from "../assertions";
-import basex from "base-x";
 import bip32Path from "bip32-path";
-
-const bs10 = basex("0123456789");
+import { base10 } from "./utils";
 
 export const serialize = {
   path(path: number[] | string): Buffer {
@@ -46,7 +44,7 @@ export const serialize = {
 
   uint64(value: string): Buffer {
     assert(isUint64String(value), "invalid uint64 string");
-    const data = bs10.decode(value);
+    const data = base10.decode(value);
 
     const padding = Buffer.alloc(8 - data.length);
     return Buffer.concat([padding, Buffer.from(data)]);

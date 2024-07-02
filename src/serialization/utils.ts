@@ -1,4 +1,7 @@
 import { assert } from "@fleet-sdk/common";
+import base from "base-x";
+
+export const base10 = base("0123456789");
 
 const sum = (arr: number[]) => arr.reduce((x, y) => x + y, 0);
 

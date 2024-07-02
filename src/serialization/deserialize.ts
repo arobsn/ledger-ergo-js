@@ -1,7 +1,5 @@
-import basex from "base-x";
 import { assert } from "@fleet-sdk/common";
-
-const bs10 = basex("0123456789");
+import { base10 } from "./utils";
 
 export const deserialize = {
   hex(buffer: Buffer): string {
@@ -19,7 +17,7 @@ export const deserialize = {
 
   uint64(buffer: Buffer): string {
     assert(buffer.length === 8, "invalid uint64 buffer");
-    return trimLeadingZeros(bs10.encode(buffer));
+    return trimLeadingZeros(base10.encode(buffer));
   }
 };
 

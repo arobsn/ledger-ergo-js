@@ -3,15 +3,13 @@
     "target": "ESNext",
     "moduleResolution": "Node",
     "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
     "strict": true,
     "sourceMap": true,
     "declaration": true,
     "esModuleInterop": true,
     "importHelpers": true,
     "allowSyntheticDefaultImports": true,
-    "typeRoots": ["node_modules/@types"],
     "baseUrl": "."
   },
-  "include": ["src", "bip32-path.d.ts"]
+  "include": ["src"]
 }
