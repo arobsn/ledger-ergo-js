@@ -1,7 +1,5 @@
-import bip32Path from "bip32-path";
 import { assert, ensureBigInt } from "@fleet-sdk/common";
-import { type Coder, hex } from "@fleet-sdk/crypto";
-import { Buffer } from "buffer";
+import { hex } from "@fleet-sdk/crypto";
 import { isErgoPath, pathToArray } from "./utils";
 
 export class ByteWriter {

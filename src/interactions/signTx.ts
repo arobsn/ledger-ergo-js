@@ -4,7 +4,6 @@ import { ErgoAddress, type Network } from "@fleet-sdk/core";
 import type { AttestedTransaction } from "../types/internal";
 import type { AttestedBox } from "../types/attestedBox";
 import { hex } from "@fleet-sdk/crypto";
-import { Buffer } from "buffer";
 import { ByteWriter } from "../serialization/byteWriter";
 import { chunk } from "@fleet-sdk/common";
 import { EMPTY_BYTES } from "../serialization/utils";

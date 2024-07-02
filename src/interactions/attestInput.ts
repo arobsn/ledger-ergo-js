@@ -2,7 +2,6 @@ import { COMMAND, MAX_DATA_LENGTH, type Device } from "../device";
 import type { AttestedBoxFrame, UnsignedBox, Token } from "../types/public";
 import type { DeviceResponse } from "../types/internal";
 import { AttestedBox } from "../types/attestedBox";
-import { Buffer } from "buffer";
 import { ByteWriter } from "../serialization/byteWriter";
 import { chunk } from "@fleet-sdk/common";
 import { hex } from "@fleet-sdk/crypto";
