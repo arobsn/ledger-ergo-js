@@ -1,10 +1,10 @@
 import { COMMAND, RETURN_CODE, type Device } from "../device";
 import type { DerivedAddress } from "../types/public";
 import type { DeviceResponse } from "../types/internal";
-import { pathToArray, serialize } from "../serialization/serialize";
-import { deserialize } from "../serialization/deserialize";
 import type { Network } from "@fleet-sdk/common";
-import { Buffer } from "buffer";
+import { ByteWriter } from "../serialization/byteWriter";
+import { hex } from "@fleet-sdk/crypto";
+import { pathToArray } from "../serialization/utils";
 
 const enum ReturnType {
   Return = 0x01,
@@ -24,6 +24,8 @@ const enum P2 {
 const CHANGE_PATH_INDEX = 3;
 const ALLOWED_CHANGE_PATHS = [0, 1];
 
+const MAX_APDU_SIZE = 46; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-11-DERIVE-ADDR.md#data
+
 function sendDeriveAddress(
   device: Device,
   network: Network,
@@ -41,13 +43,17 @@ function sendDeriveAddress(
     throw new Error(`Invalid change path: ${change}`);
   }
 
-  const data = Buffer.concat([Buffer.alloc(1, network), serialize.path(pathArray)]);
+  const data = new ByteWriter(MAX_APDU_SIZE)
+    .write(network)
+    .writePath(path)
+    .writeAuthToken(authToken)
+    .toBytes();
 
   return device.send(
     COMMAND.DERIVE_ADDRESS,
     returnType === ReturnType.Return ? P1.RETURN : P1.DISPLAY,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
-    authToken ? Buffer.concat([data, serialize.uint32(authToken)]) : data
+    data
   );
 }
 
@@ -64,7 +70,7 @@ export async function deriveAddress(
     ReturnType.Return,
     authToken
   );
-  return { addressHex: deserialize.hex(response.data) };
+  return { addressHex: hex.encode(response.data) };
 }
 
 export async function showAddress(

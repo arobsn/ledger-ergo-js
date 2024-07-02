@@ -1,7 +1,6 @@
 import { COMMAND, type Device } from "../device";
 import type { AppName } from "../types/public";
-import { deserialize } from "../serialization/deserialize";
-import { Buffer } from "buffer";
+import { EMPTY_BYTES } from "../serialization/utils";
 
 const enum P1 {
   UNUSED = 0x00
@@ -16,7 +15,7 @@ export async function getAppName(device: Device): Promise<AppName> {
     COMMAND.GET_APP_NAME,
     P1.UNUSED,
     P2.UNUSED,
-    Buffer.from([])
+    EMPTY_BYTES
   );
-  return { name: deserialize.ascii(response.data) };
+  return { name: String.fromCharCode(...response.data) };
 }

@@ -1,7 +1,7 @@
 import type Transport from "@ledgerhq/hw-transport";
 import type { DeviceResponse } from "./types/internal";
-import { serialize } from "./serialization/serialize";
-import { Buffer } from "buffer";
+import type { Buffer } from "buffer";
+import { ByteWriter } from "./serialization/byteWriter";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -13,8 +13,9 @@ export const enum COMMAND {
   SIGN_TX = 0x21
 }
 
-const MAX_DATA_LENGTH = 255;
+export const MAX_DATA_LENGTH = 255;
 const MIN_RESPONSE_LENGTH = 2;
+const MIN_APDU_LENGTH = 5;
 
 export class Device {
   #transport: Transport;
@@ -33,7 +34,7 @@ export class Device {
     ins: COMMAND,
     p1: number,
     p2: number,
-    data: Buffer
+    data: Uint8Array
   ): Promise<DeviceResponse[]> {
     const responses: DeviceResponse[] = [];
     for (let i = 0; i < Math.ceil(data.length / MAX_DATA_LENGTH); i++) {
@@ -52,14 +53,14 @@ export class Device {
     ins: COMMAND,
     p1: number,
     p2: number,
-    data: Buffer
+    data: Uint8Array
   ): Promise<DeviceResponse> {
     if (data.length > MAX_DATA_LENGTH) {
       throw new DeviceError(RETURN_CODE.TOO_MUCH_DATA);
     }
 
-    const adpu = mountApdu(this.#cla, ins, p1, p2, data);
-    const response = await this.transport.exchange(adpu);
+    const apdu = mountApdu(this.#cla, ins, p1, p2, data);
+    const response = await this.transport.exchange(apdu);
 
     if (response.length < MIN_RESPONSE_LENGTH) {
       throw new DeviceError(RETURN_CODE.WRONG_RESPONSE_LENGTH);
@@ -77,16 +78,16 @@ function mountApdu(
   ins: COMMAND,
   p1: number,
   p2: number,
-  data: Buffer
+  data: Uint8Array
 ): Buffer {
-  return Buffer.concat([
-    serialize.uint8(cla),
-    serialize.uint8(ins),
-    serialize.uint8(p1),
-    serialize.uint8(p2),
-    serialize.uint8(data.length),
-    data
-  ]);
+  return new ByteWriter(MIN_APDU_LENGTH + data.length)
+    .write(cla)
+    .write(ins)
+    .write(p1)
+    .write(p2)
+    .write(data.length)
+    .writeBytes(data)
+    .toBuffer();
 }
 
 export class DeviceError extends Error {

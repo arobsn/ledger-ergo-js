@@ -1,22 +1,17 @@
-import { assert } from "@fleet-sdk/common";
+import bip32Path from "bip32-path";
 import base from "base-x";
 
 export const base10 = base("0123456789");
 
-const sum = (arr: number[]) => arr.reduce((x, y) => x + y, 0);
+export const EMPTY_BYTES = Uint8Array.from([]);
+const [ERGO_PURPOSE, ERGO_COIN_TYPE] = bip32Path.fromString("m/44'/429'").toPathArray();
 
-export function chunkBy(data: Uint8Array, chunkLengths: number[]) {
-  assert(data.length >= sum(chunkLengths), "data is too small");
+export function pathToArray(path: string): number[] {
+  return bip32Path.fromString(path).toPathArray();
+}
 
-  let offset = 0;
-  const result = [];
-  const restLength = data.length - sum(chunkLengths);
-
-  for (const length of [...chunkLengths, restLength]) {
-    assert(length >= 0, `bad chunk length: ${length}`);
-    result.push(data.subarray(offset, offset + length));
-    offset += length;
-  }
-
-  return result;
+export function isErgoPath(path: number[]): boolean {
+  if (path.length < 2) return false;
+  const [pathPurpose, pathCoinType] = path;
+  return pathPurpose === ERGO_PURPOSE && pathCoinType === ERGO_COIN_TYPE;
 }
