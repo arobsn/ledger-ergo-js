@@ -50,6 +50,7 @@ export class ErgoLedgerApp {
 
   constructor(transport: Transport);
   constructor(transport: Transport, authToken: number);
+  constructor(transport: Transport, authToken: number, scrambleKey: string);
   constructor(transport: Transport, authToken?: number, scrambleKey = "ERG") {
     transport.decorateAppAPIMethods(
       this,
@@ -136,7 +137,10 @@ export class ErgoLedgerApp {
    * @param path Bip44 path.
    * @returns a Promise with the derived address in hex format.
    */
-  public async deriveAddress(path: string, network = Network.Mainnet): Promise<DerivedAddress> {
+  public async deriveAddress(
+    path: string,
+    network = Network.Mainnet
+  ): Promise<DerivedAddress> {
     this._debug("deriveAddress", path);
 
     const pathArray = this.getDerivationPathArray(path);
@@ -148,7 +152,10 @@ export class ErgoLedgerApp {
    * @param path Bip44 path.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
-  public async showAddress(path: string, network = Network.Mainnet): Promise<boolean> {
+  public async showAddress(
+    path: string,
+    network = Network.Mainnet
+  ): Promise<boolean> {
     this._debug("showAddress", path);
 
     const pathArray = this.getDerivationPathArray(path);
@@ -159,7 +166,10 @@ export class ErgoLedgerApp {
     const pathArray = Serialize.bip32PathAsArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
     assert(pathArray.length >= 5, "Invalid path length.");
-    assert(pathArray[CHANGE_PATH_INDEX] in [0, 1], "Invalid change path value.");
+    assert(
+      pathArray[CHANGE_PATH_INDEX] in [0, 1],
+      "Invalid change path value."
+    );
 
     return pathArray;
   }
@@ -173,7 +183,10 @@ export class ErgoLedgerApp {
     return attestInput(this._device, box, this.authToken);
   }
 
-  public async signTx(tx: UnsignedTx, network = Network.Mainnet): Promise<Uint8Array[]> {
+  public async signTx(
+    tx: UnsignedTx,
+    network = Network.Mainnet
+  ): Promise<Uint8Array[]> {
     this._debug("signTx", { tx, network });
 
     if (!tx.inputs || tx.inputs.length === 0) {
@@ -192,7 +205,13 @@ export class ErgoLedgerApp {
 
     const signatures: SignTxResponse = {};
     for (let path of signPaths) {
-      signatures[path] = await signTx(this._device, attestedTx, path, network, this.authToken);
+      signatures[path] = await signTx(
+        this._device,
+        attestedTx,
+        path,
+        network,
+        this.authToken
+      );
     }
 
     const signBytes: Uint8Array[] = [];

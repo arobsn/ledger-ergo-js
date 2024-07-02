@@ -182,11 +182,7 @@ async function addOutputBoxMinersFeeTree(device: Device, sessionId: number) {
   await device.send(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_MINERS_FEE_TREE, sessionId, Buffer.from([]));
 }
 
-async function addOutputBoxChangeTree(device: Device, sessionId: number, path?: string) {
-  if (!path) {
-    throw new Error("change path is not present");
-  }
-
+async function addOutputBoxChangeTree(device: Device, sessionId: number, path: string) {
   await device.send(
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_CHANGE_TREE,

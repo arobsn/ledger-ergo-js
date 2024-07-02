@@ -1,9 +1,49 @@
-import { describe, it, expect, test } from "vitest";
+import { describe, it, expect, test, vi } from "vitest";
 import { ErgoLedgerApp } from "./erg";
 import {
   openTransportReplayer,
   RecordStore
 } from "@ledgerhq/hw-transport-mocker";
+
+describe("construction", () => {
+  it("should construct app with transport", async () => {
+    const transport = await openTransportReplayer(
+      RecordStore.fromString(`
+        => e001000000
+        <= 000004019000
+      `)
+    );
+
+    const app = new ErgoLedgerApp(transport);
+
+    expect(app.transport).to.be.equal(transport);
+    expect(app.authToken).to.be.greaterThan(0);
+  });
+
+  it("should enable debug mode", async () => {
+    const consoleMock = vi.spyOn(console, "debug").mockImplementation(() => {
+      return;
+    });
+
+    const transport = await openTransportReplayer(
+      RecordStore.fromString(`
+        => e001000000
+        <= 000004019000
+
+        => e010020011038000002c800001ad800000007ee523ef
+        <= 025381e95e132a4b7a6fc66844a81657a07da1ef5041eaefb7fce03f71c06a11a99cc4eb9abc8d3f55afeff7bcb8fe2d0a8d100fa35f6fcbac74deded867633eba9000
+      `)
+    );
+
+    const authToken = Number("0x7ee523ef");
+    const app = new ErgoLedgerApp(transport, authToken).enableDebugMode();
+
+    await app.getAppVersion(); // without arguments call
+    await app.getExtendedPublicKey("m/44'/429'/0'"); // with arguments call
+
+    expect(consoleMock).to.be.toHaveBeenCalledTimes(2);
+  });
+});
 
 describe("Get app name and version", () => {
   it("should get app version", async () => {
@@ -17,7 +57,8 @@ describe("Get app name and version", () => {
     const app = new ErgoLedgerApp(transport);
     const version = await app.getAppVersion();
 
-    expect(version).toEqual({
+    expect(app.transport).to.be.equal(transport);
+    expect(version).to.be.deep.equal({
       flags: { isDebug: true },
       major: 0,
       minor: 0,
@@ -175,6 +216,18 @@ describe("transaction signing", () => {
       expect(result).to.deep.equal(proofs);
     }
   );
+
+  it("Should throw with empty inputs", async () => {
+    const { adpuQueue, tx } = txTestVectors[0];
+    const transport = await openTransportReplayer(
+      RecordStore.fromString(adpuQueue)
+    );
+
+    const app = new ErgoLedgerApp(transport);
+    await expect(() => app.signTx({ ...tx, inputs: [] })).rejects.toThrow(
+      "Bad input count"
+    );
+  });
 
   it("Should attest input", async () => {
     const transport = await openTransportReplayer(
