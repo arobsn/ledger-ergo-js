@@ -1,12 +1,12 @@
 import { COMMAND, RETURN_CODE, type Device } from "../device";
 import type { DerivedAddress, Network } from "../types/public";
 import type { DeviceResponse } from "../types/internal";
-import { serialize } from "../serialization/serialize";
+import { pathToArray, serialize } from "../serialization/serialize";
 import { deserialize } from "../serialization/deserialize";
 
 const enum ReturnType {
-  Return,
-  Display
+  Return = 0x01,
+  Display = 0x02
 }
 
 const enum P1 {
@@ -19,20 +19,30 @@ const enum P2 {
   WITH_TOKEN = 0x02
 }
 
+const CHANGE_PATH_INDEX = 3;
+const ALLOWED_CHANGE_PATHS = [0, 1];
+
 function sendDeriveAddress(
   device: Device,
   network: Network,
-  path: number[],
+  path: string,
   returnType: ReturnType,
   authToken?: number
 ): Promise<DeviceResponse> {
+  const pathArray = pathToArray(path);
+  if (pathArray.length < 5) throw new Error("Invalid path length.");
+  if (!ALLOWED_CHANGE_PATHS.includes(pathArray[CHANGE_PATH_INDEX])) {
+    throw new Error("Invalid change path value.");
+  }
+
   const data = Buffer.concat([
     Buffer.alloc(1, network),
-    serialize.bip32Path(path)
+    serialize.path(pathArray)
   ]);
+
   return device.send(
     COMMAND.DERIVE_ADDRESS,
-    returnType == ReturnType.Return ? P1.RETURN : P1.DISPLAY,
+    returnType === ReturnType.Return ? P1.RETURN : P1.DISPLAY,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
     authToken ? Buffer.concat([data, serialize.uint32(authToken)]) : data
   );
@@ -41,7 +51,7 @@ function sendDeriveAddress(
 export async function deriveAddress(
   device: Device,
   network: Network,
-  path: number[],
+  path: string,
   authToken?: number
 ): Promise<DerivedAddress> {
   const response = await sendDeriveAddress(
@@ -57,7 +67,7 @@ export async function deriveAddress(
 export async function showAddress(
   device: Device,
   network: Network,
-  path: number[],
+  path: string,
   authToken?: number
 ): Promise<boolean> {
   const response = await sendDeriveAddress(

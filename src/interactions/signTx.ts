@@ -66,7 +66,7 @@ async function sendHeader(
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
     Buffer.concat([
       serialize.uint8(network),
-      serialize.bip32Path(path),
+      serialize.path(path),
       authToken ? serialize.uint32(authToken) : Buffer.alloc(0)
     ])
   );
@@ -105,7 +105,7 @@ async function sendDistinctTokensIds(
   }
 
   const MAX_PACKET_SIZE = 7;
-  const packets = serialize.arrayAndChunk(ids, MAX_PACKET_SIZE, (id) =>
+  const packets = serialize.arrayAsMappedChunks(ids, MAX_PACKET_SIZE, (id) =>
     Buffer.from(id)
   );
 
@@ -154,7 +154,7 @@ async function sendDataInputs(
   boxIds: string[]
 ) {
   const MAX_PACKET_SIZE = 7;
-  const packets = serialize.arrayAndChunk(boxIds, MAX_PACKET_SIZE, (id) =>
+  const packets = serialize.arrayAsMappedChunks(boxIds, MAX_PACKET_SIZE, (id) =>
     serialize.hex(id)
   );
 
@@ -245,7 +245,7 @@ async function addOutputBoxChangeTree(
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_CHANGE_TREE,
     sessionId,
-    serialize.bip32Path(path)
+    serialize.path(path)
   );
 }
 

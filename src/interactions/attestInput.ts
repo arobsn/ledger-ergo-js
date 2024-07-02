@@ -88,12 +88,12 @@ async function sendTokens(
   sessionId: number
 ): Promise<number> {
   const MAX_PACKET_SIZE = 6;
-  const packets = serialize.arrayAndChunk(tokens, MAX_PACKET_SIZE, (t) =>
+  const packets = serialize.arrayAsMappedChunks(tokens, MAX_PACKET_SIZE, (t) =>
     Buffer.concat([serialize.hex(t.id), serialize.uint64(t.amount)])
   );
 
   const results: DeviceResponse[] = [];
-  for (let p of packets) {
+  for (const p of packets) {
     results.push(
       await device.send(COMMAND.ATTEST_INPUT, P1.ADD_TOKENS, sessionId, p)
     );

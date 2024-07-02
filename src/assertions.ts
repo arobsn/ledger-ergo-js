@@ -7,6 +7,10 @@ const MAX_UINT32_VALUE = 4294967295;
 const MAX_UINT16_VALUE = 65535;
 const MAX_UNIT8_VALUE = 255;
 
+const [ERGO_PURPOSE, ERGO_COIN_TYPE] = bip32Path
+  .fromString("m/44'/429'")
+  .toPathArray();
+
 export function assert(cond: boolean, errMsg: string): asserts cond {
   if (!cond) {
     throw new Error(`Assertion failed${errMsg ? `: ${errMsg}` : "."}`);
@@ -14,7 +18,7 @@ export function assert(cond: boolean, errMsg: string): asserts cond {
 }
 
 export function isValidBip32Path(path: number[] | string): boolean {
-  if (typeof path == "string") {
+  if (typeof path === "string") {
     return bip32Path.validateString(path, true);
   }
 
@@ -22,15 +26,9 @@ export function isValidBip32Path(path: number[] | string): boolean {
 }
 
 export function isValidErgoPath(path: number[]): boolean {
-  if (path.length < 2) {
-    return false;
-  }
-
+  if (path.length < 2) return false;
   const [pathPurpose, pathCoinType] = path;
-  const [ergoPurpose, ergoCoinType] = bip32Path
-    .fromString("m/44'/429'")
-    .toPathArray();
-  return pathPurpose === ergoPurpose && pathCoinType === ergoCoinType;
+  return pathPurpose === ERGO_PURPOSE && pathCoinType === ERGO_COIN_TYPE;
 }
 
 export function isInteger(data: unknown): boolean {
@@ -88,8 +86,3 @@ export function isUint64String(data: string): boolean {
     (data.length > MIN_UINT_64_STR.length || data >= MIN_UINT_64_STR)
   );
 }
-
-export const isHexString = (data: unknown) =>
-  typeof data === "string" &&
-  data.length % 2 === 0 &&
-  /^[0-9a-fA-F]*$/.test(data);

@@ -15,12 +15,12 @@ const enum P2 {
 
 export async function getExtendedPublicKey(
   device: Device,
-  path: number[],
+  path: string,
   authToken?: number
 ): Promise<ExtendedPublicKey> {
-  const data = serialize.bip32Path(path);
+  const data = serialize.path(path);
   const response = await device.send(
-    COMMAND.GET_EXTENTED_PUB_KEY,
+    COMMAND.GET_EXTENDED_PUB_KEY,
     authToken ? P1.WITH_TOKEN : P1.WITHOUT_TOKEN,
     P2.UNUSED,
     authToken ? Buffer.concat([data, serialize.uint32(authToken)]) : data
