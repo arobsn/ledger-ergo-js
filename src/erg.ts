@@ -1,16 +1,14 @@
 import type Transport from "@ledgerhq/hw-transport";
-import Device from "./interactions/common/device";
-import {
+import { Device, DeviceError, RETURN_CODE } from "./device";
+import type {
   AppName,
   UnsignedBox,
   DerivedAddress,
   ExtendedPublicKey,
   Version,
-  UnsignedTx,
-  Network
+  UnsignedTransaction
 } from "./types/public";
-import { assert, isValidErgoPath } from "./validations";
-import AttestedBox from "./models/attestedBox";
+import type { AttestedBox } from "./types/attestedBox";
 import {
   getAppName,
   getExtendedPublicKey,
@@ -20,16 +18,12 @@ import {
   attestInput,
   signTx
 } from "./interactions";
-import Serialize from "./serialization/serialize";
-import { AttestedTx, SignTxResponse } from "./types/internal";
-import { uniq } from "./serialization/utils";
-import { DeviceError, RETURN_CODE } from "./errors";
+import type { AttestedTransaction, SignTransactionResponse } from "./types/internal";
+import { uniq, Network } from "@fleet-sdk/common";
 
-export * from "./errors";
+export { DeviceError, RETURN_CODE, Network };
 export * from "./types/public";
 export const CLA = 0xe0;
-
-const CHANGE_PATH_INDEX = 3;
 
 /**
  * Ergo's Ledger hardware wallet API
@@ -126,10 +120,7 @@ export class ErgoLedgerApp {
    */
   public async getExtendedPublicKey(path: string): Promise<ExtendedPublicKey> {
     this._debug("getExtendedPublicKey", path);
-
-    const pathArray = Serialize.bip32PathAsArray(path);
-    assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
-    return getExtendedPublicKey(this._device, pathArray, this.authToken);
+    return getExtendedPublicKey(this._device, path, this.authToken);
   }
 
   /**
@@ -142,9 +133,7 @@ export class ErgoLedgerApp {
     network = Network.Mainnet
   ): Promise<DerivedAddress> {
     this._debug("deriveAddress", path);
-
-    const pathArray = this.getDerivationPathArray(path);
-    return deriveAddress(this._device, network, pathArray, this.authToken);
+    return deriveAddress(this._device, network, path, this.authToken);
   }
 
   /**
@@ -152,26 +141,9 @@ export class ErgoLedgerApp {
    * @param path Bip44 path.
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
-  public async showAddress(
-    path: string,
-    network = Network.Mainnet
-  ): Promise<boolean> {
+  public async showAddress(path: string, network = Network.Mainnet): Promise<boolean> {
     this._debug("showAddress", path);
-
-    const pathArray = this.getDerivationPathArray(path);
-    return showAddress(this._device, network, pathArray, this.authToken);
-  }
-
-  private getDerivationPathArray(path: string) {
-    const pathArray = Serialize.bip32PathAsArray(path);
-    assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
-    assert(pathArray.length >= 5, "Invalid path length.");
-    assert(
-      pathArray[CHANGE_PATH_INDEX] in [0, 1],
-      "Invalid change path value."
-    );
-
-    return pathArray;
+    return showAddress(this._device, network, path, this.authToken);
   }
 
   public async attestInput(box: UnsignedBox): Promise<AttestedBox> {
@@ -184,7 +156,7 @@ export class ErgoLedgerApp {
   }
 
   public async signTx(
-    tx: UnsignedTx,
+    tx: UnsignedTransaction,
     network = Network.Mainnet
   ): Promise<Uint8Array[]> {
     this._debug("signTx", { tx, network });
@@ -195,7 +167,7 @@ export class ErgoLedgerApp {
 
     const attestedInputs = await this._attestInputs(tx.inputs);
     const signPaths = uniq(tx.inputs.map((i) => i.signPath));
-    const attestedTx: AttestedTx = {
+    const attestedTx: AttestedTransaction = {
       inputs: attestedInputs,
       dataInputs: tx.dataInputs,
       outputs: tx.outputs,
@@ -203,8 +175,8 @@ export class ErgoLedgerApp {
       changeMap: tx.changeMap
     };
 
-    const signatures: SignTxResponse = {};
-    for (let path of signPaths) {
+    const signatures: SignTransactionResponse = {};
+    for (const path of signPaths) {
       signatures[path] = await signTx(
         this._device,
         attestedTx,
@@ -215,7 +187,7 @@ export class ErgoLedgerApp {
     }
 
     const signBytes: Uint8Array[] = [];
-    for (let input of tx.inputs) {
+    for (const input of tx.inputs) {
       signBytes.push(signatures[input.signPath]);
     }
 
@@ -233,7 +205,7 @@ export class ErgoLedgerApp {
     return attestedBoxes;
   }
 
-  private _debug(caller: string, message: any = "") {
+  private _debug(caller: string, message: unknown = "") {
     if (!this._logging) {
       return;
     }

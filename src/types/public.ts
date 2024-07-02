@@ -64,16 +64,16 @@ export type BoxCandidate = {
 
 export type AttestedBoxFrame = {
   boxId: string;
-  framesCount: number;
-  frameIndex: number;
+  count: number;
+  index: number;
   amount: string;
   tokens: Token[];
   attestation: string;
   extensionLength?: number;
-  buffer: Buffer;
+  bytes: Buffer;
 };
 
-export type UnsignedTx = {
+export type UnsignedTransaction = {
   inputs: UnsignedBox[];
   dataInputs: string[];
   outputs: BoxCandidate[];
@@ -85,8 +85,3 @@ export type ChangeMap = {
   address: string;
   path: string;
 };
-
-export enum Network {
-  Mainnet = 0 << 4,
-  Testnet = 1 << 4
-}

@@ -1,13 +1,13 @@
-import { RETURN_CODE } from "../errors";
-import AttestedBox from "../models/attestedBox";
-import { BoxCandidate, ChangeMap } from "./public";
+import type { RETURN_CODE } from "../device";
+import type { BoxCandidate, ChangeMap } from "./public";
+import type { AttestedBox } from "./attestedBox";
 
 export type DeviceResponse = {
   data: Buffer;
   returnCode: RETURN_CODE;
 };
 
-export type AttestedTx = {
+export type AttestedTransaction = {
   inputs: AttestedBox[];
   dataInputs: string[];
   outputs: BoxCandidate[];
@@ -15,6 +15,6 @@ export type AttestedTx = {
   changeMap: ChangeMap;
 };
 
-export type SignTxResponse = {
+export type SignTransactionResponse = {
   [path: string]: Uint8Array;
 };

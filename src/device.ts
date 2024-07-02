@@ -1,3 +1,109 @@
+import type Transport from "@ledgerhq/hw-transport";
+import type { DeviceResponse } from "./types/internal";
+import { serialize } from "./serialization/serialize";
+
+export const enum COMMAND {
+  GET_APP_VERSION = 0x01,
+  GET_APP_NAME = 0x02,
+
+  GET_EXTENDED_PUB_KEY = 0x10,
+  DERIVE_ADDRESS = 0x11,
+  ATTEST_INPUT = 0x20,
+  SIGN_TX = 0x21
+}
+
+const MAX_DATA_LENGTH = 255;
+const MIN_RESPONSE_LENGTH = 2;
+
+export class Device {
+  #transport: Transport;
+  #cla: number;
+
+  get transport(): Transport {
+    return this.#transport;
+  }
+
+  constructor(transport: Transport, cla: number) {
+    this.#transport = transport;
+    this.#cla = cla;
+  }
+
+  async sendData(
+    ins: COMMAND,
+    p1: number,
+    p2: number,
+    data: Buffer
+  ): Promise<DeviceResponse[]> {
+    const responses: DeviceResponse[] = [];
+    for (let i = 0; i < Math.ceil(data.length / MAX_DATA_LENGTH); i++) {
+      const chunk = data.subarray(
+        i * MAX_DATA_LENGTH,
+        Math.min((i + 1) * MAX_DATA_LENGTH, data.length)
+      );
+
+      responses.push(await this.send(ins, p1, p2, chunk));
+    }
+
+    return responses;
+  }
+
+  async send(
+    ins: COMMAND,
+    p1: number,
+    p2: number,
+    data: Buffer
+  ): Promise<DeviceResponse> {
+    if (data.length > MAX_DATA_LENGTH) {
+      throw new DeviceError(RETURN_CODE.TOO_MUCH_DATA);
+    }
+
+    const adpu = mountApdu(this.#cla, ins, p1, p2, data);
+    const response = await this.transport.exchange(adpu);
+
+    if (response.length < MIN_RESPONSE_LENGTH) {
+      throw new DeviceError(RETURN_CODE.WRONG_RESPONSE_LENGTH);
+    }
+    const returnCode = response.readUInt16BE(response.length - 2);
+    if (returnCode !== RETURN_CODE.OK) throw new DeviceError(returnCode);
+
+    const responseData = response.subarray(0, response.length - 2);
+    return { returnCode, data: responseData };
+  }
+}
+
+function mountApdu(
+  cla: number,
+  ins: COMMAND,
+  p1: number,
+  p2: number,
+  data: Buffer
+): Buffer {
+  return Buffer.concat([
+    serialize.uint8(cla),
+    serialize.uint8(ins),
+    serialize.uint8(p1),
+    serialize.uint8(p2),
+    serialize.uint8(data.length),
+    data
+  ]);
+}
+
+export class DeviceError extends Error {
+  #code;
+
+  get code() {
+    return this.#code;
+  }
+
+  constructor(code: RETURN_CODE, options?: ErrorOptions) {
+    super(RETURN_MESSAGES[code] || "Unknown error", options);
+    this.#code = code;
+
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = new.target.name;
+  }
+}
+
 export enum RETURN_CODE {
   DENIED = 0x6985,
   WRONG_P1P2 = 0x6a86,
@@ -83,7 +189,3 @@ export const RETURN_MESSAGES = {
   [RETURN_CODE.STACK_OVERFLOW]: "Stack overflow",
   [RETURN_CODE.OK]: "Ok"
 };
-
-export function getReturnMessage(code: RETURN_CODE): string {
-  return RETURN_MESSAGES[code] || "Unknown error";
-}

@@ -28,3 +28,6 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
       - run: pnpm test:unit
+      - run: pnpm test:format
+      - run: pnpm test:lint
+      - run: pnpm cov:check
