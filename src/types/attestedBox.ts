@@ -2,36 +2,36 @@ import { assert } from "../assertions";
 import type { UnsignedBox, AttestedBoxFrame } from "./public";
 
 export class AttestedBox {
-  private _box: UnsignedBox;
-  private _frames: AttestedBoxFrame[];
-  private _extension?: Buffer;
+  #box: UnsignedBox;
+  #frames: AttestedBoxFrame[];
+  #extension?: Buffer;
 
   constructor(box: UnsignedBox, frames: AttestedBoxFrame[]) {
-    this._box = box;
-    this._frames = frames;
+    this.#box = box;
+    this.#frames = frames;
   }
 
   public get box(): UnsignedBox {
-    return this._box;
+    return this.#box;
   }
 
   public get frames(): AttestedBoxFrame[] {
-    return this._frames;
+    return this.#frames;
   }
 
   public get extension(): Buffer | undefined {
-    return this._extension;
+    return this.#extension;
   }
 
   public setExtension(extension: Buffer): AttestedBox {
-    assert(!this._extension, "extension already present");
+    assert(!this.#extension, "The extension is already inserted");
 
     const lengthBuffer = Buffer.alloc(4);
-    const firstFrame = this._frames[0];
+    const firstFrame = this.#frames[0];
     if (extension.length === 1 && extension[0] === 0) {
       lengthBuffer.writeUInt32BE(0, 0);
     } else {
-      this._extension = extension;
+      this.#extension = extension;
       firstFrame.extensionLength = extension.length;
       lengthBuffer.writeUInt32BE(extension.length, 0);
     }
