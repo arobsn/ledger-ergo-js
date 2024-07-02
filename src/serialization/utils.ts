@@ -1,4 +1,4 @@
-import { assert, isArray, isBuffer, isInteger } from "../validations";
+import { assert, isArray, isBuffer, isInteger } from "../assertions";
 
 const sum = (arr: Array<number>) => arr.reduce((x, y) => x + y, 0);
 

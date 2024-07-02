@@ -1,16 +1,16 @@
 import type Transport from "@ledgerhq/hw-transport";
-import Device from "./interactions/common/device";
+import { Device, DeviceError, RETURN_CODE } from "./device";
 import {
-  AppName,
-  UnsignedBox,
-  DerivedAddress,
-  ExtendedPublicKey,
-  Version,
-  UnsignedTx,
+  type AppName,
+  type UnsignedBox,
+  type DerivedAddress,
+  type ExtendedPublicKey,
+  type Version,
+  type UnsignedTx,
   Network
 } from "./types/public";
-import { assert, isValidErgoPath } from "./validations";
-import AttestedBox from "./models/attestedBox";
+import { assert, isValidErgoPath } from "./assertions";
+import type { AttestedBox } from "./types/attestedBox";
 import {
   getAppName,
   getExtendedPublicKey,
@@ -20,12 +20,14 @@ import {
   attestInput,
   signTx
 } from "./interactions";
-import Serialize from "./serialization/serialize";
-import { AttestedTx, SignTxResponse } from "./types/internal";
+import { serialize } from "./serialization/serialize";
+import type {
+  AttestedTransaction,
+  SignTransactionResponse
+} from "./types/internal";
 import { uniq } from "./serialization/utils";
-import { DeviceError, RETURN_CODE } from "./errors";
 
-export * from "./errors";
+export { DeviceError, RETURN_CODE };
 export * from "./types/public";
 export const CLA = 0xe0;
 
@@ -127,7 +129,7 @@ export class ErgoLedgerApp {
   public async getExtendedPublicKey(path: string): Promise<ExtendedPublicKey> {
     this._debug("getExtendedPublicKey", path);
 
-    const pathArray = Serialize.bip32PathAsArray(path);
+    const pathArray = serialize.bip32PathAsArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
     return getExtendedPublicKey(this._device, pathArray, this.authToken);
   }
@@ -163,7 +165,7 @@ export class ErgoLedgerApp {
   }
 
   private getDerivationPathArray(path: string) {
-    const pathArray = Serialize.bip32PathAsArray(path);
+    const pathArray = serialize.bip32PathAsArray(path);
     assert(isValidErgoPath(pathArray), "Invalid Ergo path.");
     assert(pathArray.length >= 5, "Invalid path length.");
     assert(
@@ -195,7 +197,7 @@ export class ErgoLedgerApp {
 
     const attestedInputs = await this._attestInputs(tx.inputs);
     const signPaths = uniq(tx.inputs.map((i) => i.signPath));
-    const attestedTx: AttestedTx = {
+    const attestedTx: AttestedTransaction = {
       inputs: attestedInputs,
       dataInputs: tx.dataInputs,
       outputs: tx.outputs,
@@ -203,7 +205,7 @@ export class ErgoLedgerApp {
       changeMap: tx.changeMap
     };
 
-    const signatures: SignTxResponse = {};
+    const signatures: SignTransactionResponse = {};
     for (let path of signPaths) {
       signatures[path] = await signTx(
         this._device,

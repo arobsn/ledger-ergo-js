@@ -1,7 +1,7 @@
-import { AttestedBoxFrame, UnsignedBox } from "../types/public";
-import { assert } from "../validations";
+import { assert } from "../assertions";
+import type { UnsignedBox, AttestedBoxFrame } from "./public";
 
-export default class AttestedBox {
+export class AttestedBox {
   private _box: UnsignedBox;
   private _frames: AttestedBoxFrame[];
   private _extension?: Buffer;

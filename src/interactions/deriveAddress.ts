@@ -1,9 +1,8 @@
-import Device, { COMMAND } from "./common/device";
-import { DerivedAddress, Network } from "../types/public";
-import { DeviceResponse } from "../types/internal";
-import { RETURN_CODE } from "../errors";
-import Serialize from "../serialization/serialize";
-import Deserialize from "../serialization/deserialize";
+import { COMMAND, RETURN_CODE, type Device } from "../device";
+import type { DerivedAddress, Network } from "../types/public";
+import type { DeviceResponse } from "../types/internal";
+import { serialize } from "../serialization/serialize";
+import { deserialize } from "../serialization/deserialize";
 
 const enum ReturnType {
   Return,
@@ -27,12 +26,15 @@ function sendDeriveAddress(
   returnType: ReturnType,
   authToken?: number
 ): Promise<DeviceResponse> {
-  const data = Buffer.concat([Buffer.alloc(1, network), Serialize.bip32Path(path)]);
+  const data = Buffer.concat([
+    Buffer.alloc(1, network),
+    serialize.bip32Path(path)
+  ]);
   return device.send(
     COMMAND.DERIVE_ADDRESS,
     returnType == ReturnType.Return ? P1.RETURN : P1.DISPLAY,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
-    authToken ? Buffer.concat([data, Serialize.uint32(authToken)]) : data
+    authToken ? Buffer.concat([data, serialize.uint32(authToken)]) : data
   );
 }
 
@@ -42,8 +44,14 @@ export async function deriveAddress(
   path: number[],
   authToken?: number
 ): Promise<DerivedAddress> {
-  const response = await sendDeriveAddress(device, network, path, ReturnType.Return, authToken);
-  return { addressHex: Deserialize.hex(response.data) };
+  const response = await sendDeriveAddress(
+    device,
+    network,
+    path,
+    ReturnType.Return,
+    authToken
+  );
+  return { addressHex: deserialize.hex(response.data) };
 }
 
 export async function showAddress(
@@ -52,6 +60,12 @@ export async function showAddress(
   path: number[],
   authToken?: number
 ): Promise<boolean> {
-  const response = await sendDeriveAddress(device, network, path, ReturnType.Display, authToken);
+  const response = await sendDeriveAddress(
+    device,
+    network,
+    path,
+    ReturnType.Display,
+    authToken
+  );
   return response.returnCode === RETURN_CODE.OK;
 }

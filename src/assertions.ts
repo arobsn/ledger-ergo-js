@@ -7,6 +7,12 @@ const MAX_UINT32_VALUE = 4294967295;
 const MAX_UINT16_VALUE = 65535;
 const MAX_UNIT8_VALUE = 255;
 
+export function assert(cond: boolean, errMsg: string): asserts cond {
+  if (!cond) {
+    throw new Error(`Assertion failed${errMsg ? `: ${errMsg}` : "."}`);
+  }
+}
+
 export function isValidBip32Path(path: number[] | string): boolean {
   if (typeof path == "string") {
     return bip32Path.validateString(path, true);
@@ -21,7 +27,9 @@ export function isValidErgoPath(path: number[]): boolean {
   }
 
   const [pathPurpose, pathCoinType] = path;
-  const [ergoPurpose, ergoCoinType] = bip32Path.fromString("m/44'/429'").toPathArray();
+  const [ergoPurpose, ergoCoinType] = bip32Path
+    .fromString("m/44'/429'")
+    .toPathArray();
   return pathPurpose === ergoPurpose && pathCoinType === ergoCoinType;
 }
 
@@ -39,19 +47,28 @@ export function isBuffer(data: unknown): boolean {
 
 export function isUint32(data: unknown): boolean {
   return (
-    typeof data == "number" && isInteger(data) && data >= MIN_UINT_VALUE && data <= MAX_UINT32_VALUE
+    typeof data == "number" &&
+    isInteger(data) &&
+    data >= MIN_UINT_VALUE &&
+    data <= MAX_UINT32_VALUE
   );
 }
 
 export function isUint16(data: number): boolean {
   return (
-    typeof data == "number" && isInteger(data) && data >= MIN_UINT_VALUE && data <= MAX_UINT16_VALUE
+    typeof data == "number" &&
+    isInteger(data) &&
+    data >= MIN_UINT_VALUE &&
+    data <= MAX_UINT16_VALUE
   );
 }
 
 export function isUint8(data: unknown): boolean {
   return (
-    typeof data == "number" && isInteger(data) && data >= MIN_UINT_VALUE && data <= MAX_UNIT8_VALUE
+    typeof data == "number" &&
+    isInteger(data) &&
+    data >= MIN_UINT_VALUE &&
+    data <= MAX_UNIT8_VALUE
   );
 }
 
@@ -73,4 +90,6 @@ export function isUint64String(data: string): boolean {
 }
 
 export const isHexString = (data: unknown) =>
-  typeof data === "string" && data.length % 2 === 0 && /^[0-9a-fA-F]*$/.test(data);
+  typeof data === "string" &&
+  data.length % 2 === 0 &&
+  /^[0-9a-fA-F]*$/.test(data);
