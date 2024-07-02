@@ -64,13 +64,13 @@ export type BoxCandidate = {
 
 export type AttestedBoxFrame = {
   boxId: string;
-  framesCount: number;
-  frameIndex: number;
+  count: number;
+  index: number;
   amount: string;
   tokens: Token[];
   attestation: string;
   extensionLength?: number;
-  buffer: Buffer;
+  bytes: Buffer;
 };
 
 export type UnsignedTx = {

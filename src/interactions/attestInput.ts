@@ -133,39 +133,37 @@ async function getAttestedFrames(
       Buffer.from([i])
     );
 
-    responses.push(parseAttestedFrameResponse(response.data));
+    responses.push(decodeAttestedFrameResponse(response.data));
   }
 
   return responses;
 }
 
-export function parseAttestedFrameResponse(
-  frameBuff: Buffer
-): AttestedBoxFrame {
+export function decodeAttestedFrameResponse(bytes: Buffer): AttestedBoxFrame {
   let offset = 0;
-  const boxId = deserialize.hex(frameBuff.slice(offset, (offset += 32)));
-  const count = deserialize.uint8(frameBuff.slice(offset, (offset += 1)));
-  const index = deserialize.uint8(frameBuff.slice(offset, (offset += 1)));
-  const amount = deserialize.uint64(frameBuff.slice(offset, (offset += 8)));
-  const tokenCount = deserialize.uint8(frameBuff.slice(offset, (offset += 1)));
+  const boxId = deserialize.hex(bytes.subarray(offset, (offset += 32)));
+  const count = deserialize.uint8(bytes.subarray(offset, (offset += 1)));
+  const index = deserialize.uint8(bytes.subarray(offset, (offset += 1)));
+  const amount = deserialize.uint64(bytes.subarray(offset, (offset += 8)));
+  const tokenCount = deserialize.uint8(bytes.subarray(offset, (offset += 1)));
 
   const tokens: Token[] = [];
   for (let i = 0; i < tokenCount; i++) {
     tokens.push({
-      id: deserialize.hex(frameBuff.slice(offset, (offset += 32))),
-      amount: deserialize.uint64(frameBuff.slice(offset, (offset += 8)))
+      id: deserialize.hex(bytes.subarray(offset, (offset += 32))),
+      amount: deserialize.uint64(bytes.subarray(offset, (offset += 8)))
     });
   }
 
-  const attestation = deserialize.hex(frameBuff.slice(offset, (offset += 16)));
+  const attestation = deserialize.hex(bytes.subarray(offset, (offset += 16)));
 
   return {
     boxId,
-    framesCount: count,
-    frameIndex: index,
+    count,
+    index,
     amount,
     tokens,
     attestation,
-    buffer: frameBuff
+    bytes
   };
 }

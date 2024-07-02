@@ -3,7 +3,7 @@ import { assert } from "../assertions";
 const sum = (arr: number[]) => arr.reduce((x, y) => x + y, 0);
 
 export function chunkBy(data: Buffer, chunkLengths: number[]) {
-  assert(data.length <= sum(chunkLengths), "data is too big");
+  assert(data.length >= sum(chunkLengths), "data is too small");
 
   let offset = 0;
   const result = [];

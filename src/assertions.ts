@@ -45,7 +45,7 @@ export function isBuffer(data: unknown): boolean {
 
 export function isUint32(data: unknown): boolean {
   return (
-    typeof data == "number" &&
+    typeof data === "number" &&
     isInteger(data) &&
     data >= MIN_UINT_VALUE &&
     data <= MAX_UINT32_VALUE
@@ -54,7 +54,7 @@ export function isUint32(data: unknown): boolean {
 
 export function isUint16(data: number): boolean {
   return (
-    typeof data == "number" &&
+    typeof data === "number" &&
     isInteger(data) &&
     data >= MIN_UINT_VALUE &&
     data <= MAX_UINT16_VALUE
@@ -63,7 +63,7 @@ export function isUint16(data: number): boolean {
 
 export function isUint8(data: unknown): boolean {
   return (
-    typeof data == "number" &&
+    typeof data === "number" &&
     isInteger(data) &&
     data >= MIN_UINT_VALUE &&
     data <= MAX_UNIT8_VALUE

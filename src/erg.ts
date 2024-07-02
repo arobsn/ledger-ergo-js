@@ -9,7 +9,6 @@ import {
   type UnsignedTx,
   Network
 } from "./types/public";
-import { assert, isValidErgoPath } from "./assertions";
 import type { AttestedBox } from "./types/attestedBox";
 import {
   getAppName,
@@ -20,7 +19,6 @@ import {
   attestInput,
   signTx
 } from "./interactions";
-import { serialize } from "./serialization/serialize";
 import { uniq } from "@fleet-sdk/common";
 import type {
   AttestedTransaction,

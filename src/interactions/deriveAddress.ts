@@ -30,9 +30,13 @@ function sendDeriveAddress(
   authToken?: number
 ): Promise<DeviceResponse> {
   const pathArray = pathToArray(path);
-  if (pathArray.length < 5) throw new Error("Invalid path length.");
-  if (!ALLOWED_CHANGE_PATHS.includes(pathArray[CHANGE_PATH_INDEX])) {
-    throw new Error("Invalid change path value.");
+  if (pathArray.length < 5) {
+    throw new Error(`Invalid path length. ${pathArray.length}`);
+  }
+
+  const change = pathArray[CHANGE_PATH_INDEX];
+  if (!ALLOWED_CHANGE_PATHS.includes(change)) {
+    throw new Error(`Invalid change path: ${change}`);
   }
 
   const data = Buffer.concat([

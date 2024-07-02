@@ -198,6 +198,30 @@ describe("public key management without auth token", () => {
       "Operation denied by user"
     );
   });
+
+  it("should fail when deriving address with invalid path", async () => {
+    const transport = await openTransportReplayer(
+      RecordStore.fromString(`
+        => e01102011600058000002c800001ad800000000000000000000000
+        <= 6985
+      `)
+    );
+
+    const app = new ErgoLedgerApp(transport).useAuthToken(false);
+    await expect(() => app.showAddress("m/44'/429'/0'/3/0")).rejects.toThrow(
+      "Invalid change path: 3"
+    );
+    await expect(() => app.showAddress("m/44'/429'")).rejects.toThrow(
+      "Invalid path length. 2"
+    );
+
+    await expect(() => app.deriveAddress("m/44'/429'/0'/10/0")).rejects.toThrow(
+      "Invalid change path: 10"
+    );
+    await expect(() => app.deriveAddress("m/44'/429'/0'/1")).rejects.toThrow(
+      "Invalid path length. 4"
+    );
+  });
 });
 
 describe("transaction signing", () => {
@@ -274,14 +298,14 @@ describe("transaction signing", () => {
         attestation: "8c2d9e1dcd467155df32bf1ded800710",
         boxId:
           "2bb2f3111e33ad9d9ab1fa3ae184fc1f06a6ac5a71d40a825997f6637b44784f",
-        buffer: Buffer.from([
+        bytes: Buffer.from([
           43, 178, 243, 17, 30, 51, 173, 157, 154, 177, 250, 58, 225, 132, 252,
           31, 6, 166, 172, 90, 113, 212, 10, 130, 89, 151, 246, 99, 123, 68,
           120, 79, 1, 0, 0, 0, 0, 0, 5, 245, 225, 0, 0, 140, 45, 158, 29, 205,
           70, 113, 85, 223, 50, 191, 29, 237, 128, 7, 16
         ]),
-        frameIndex: 0,
-        framesCount: 1,
+        index: 0,
+        count: 1,
         tokens: []
       }
     ]);

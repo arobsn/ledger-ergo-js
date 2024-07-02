@@ -36,7 +36,7 @@ export class AttestedBox {
       lengthBuffer.writeUInt32BE(extension.length, 0);
     }
 
-    firstFrame.buffer = Buffer.concat([firstFrame.buffer, lengthBuffer]);
+    firstFrame.bytes = Buffer.concat([firstFrame.bytes, lengthBuffer]);
 
     return this;
   }
