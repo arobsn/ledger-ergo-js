@@ -1,7 +1,4 @@
 import bip32Path from "bip32-path";
-import base from "base-x";
-
-export const base10 = base("0123456789");
 
 export const EMPTY_BYTES = Uint8Array.from([]);
 const [ERGO_PURPOSE, ERGO_COIN_TYPE] = bip32Path.fromString("m/44'/429'").toPathArray();

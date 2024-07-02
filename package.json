@@ -60,7 +60,6 @@
     "@fleet-sdk/common": "^0.4.1",
     "@fleet-sdk/core": "0.5.0",
     "@fleet-sdk/crypto": "^0.5.0",
-    "base-x": "^5.0.0",
     "bip32-path": "^0.4.2",
     "buffer": "^6.0.3"
   },
