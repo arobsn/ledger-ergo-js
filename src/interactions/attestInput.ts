@@ -144,14 +144,14 @@ export function decodeAttestedFrameResponse(bytes: Buffer): AttestedBoxFrame {
   const boxId = hex.encode(bytes.subarray(0, (offset += 32)));
   const count = bytes.readUint8(offset++);
   const index = bytes.readUint8(offset++);
-  const amount = bytes.readBigUint64BE(offset).toString();
+  const amount = bytes.readBigUInt64BE(offset).toString();
   offset += 8;
   const tokenCount = bytes.readUint8(offset++);
   const tokens: Token[] = [];
   for (let i = 0; i < tokenCount; i++) {
     tokens.push({
       id: hex.encode(bytes.subarray(offset, (offset += 32))),
-      amount: bytes.readBigUint64BE(offset).toString()
+      amount: bytes.readBigUInt64BE(offset).toString()
     });
     offset += 8;
   }
