@@ -19,22 +19,15 @@ export async function getExtendedPublicKey(
   path: string,
   authToken?: number
 ): Promise<ExtendedPublicKey> {
-  const data = new ByteWriter(MAX_APDU_SIZE)
-    .writePath(path)
-    .writeAuthToken(authToken)
-    .toBytes();
-
   const response = await device.send(
     COMMAND.GET_EXTENDED_PUB_KEY,
     authToken ? P1.WITH_TOKEN : P1.WITHOUT_TOKEN,
     P2.UNUSED,
-    data
+    new ByteWriter(MAX_APDU_SIZE).writePath(path).writeAuthToken(authToken).toBytes()
   );
 
-  const publicKey = hex.encode(response.data.subarray(0, 33));
-  const chainCode = hex.encode(response.data.subarray(33, 65));
   return {
-    publicKey,
-    chainCode
+    publicKey: hex.encode(response.data.subarray(0, 33)),
+    chainCode: hex.encode(response.data.subarray(33, 65))
   };
 }

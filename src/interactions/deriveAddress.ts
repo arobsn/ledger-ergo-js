@@ -43,17 +43,15 @@ function sendDeriveAddress(
     throw new Error(`Invalid change path: ${change}`);
   }
 
-  const data = new ByteWriter(MAX_APDU_SIZE)
-    .write(network)
-    .writePath(path)
-    .writeAuthToken(authToken)
-    .toBytes();
-
   return device.send(
     COMMAND.DERIVE_ADDRESS,
     returnType === ReturnType.Return ? P1.RETURN : P1.DISPLAY,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
-    data
+    new ByteWriter(MAX_APDU_SIZE)
+      .write(network)
+      .writePath(path)
+      .writeAuthToken(authToken)
+      .toBytes()
   );
 }
 
@@ -70,6 +68,7 @@ export async function deriveAddress(
     ReturnType.Return,
     authToken
   );
+
   return { addressHex: hex.encode(response.data) };
 }
 
@@ -86,5 +85,6 @@ export async function showAddress(
     ReturnType.Display,
     authToken
   );
+
   return response.returnCode === RETURN_CODE.OK;
 }

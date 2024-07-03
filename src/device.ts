@@ -38,7 +38,7 @@ export class Device {
   ): Promise<DeviceResponse[]> {
     const responses: DeviceResponse[] = [];
     for (let i = 0; i < Math.ceil(data.length / MAX_DATA_LENGTH); i++) {
-      const chunk = data.slice(
+      const chunk = data.subarray(
         i * MAX_DATA_LENGTH,
         Math.min((i + 1) * MAX_DATA_LENGTH, data.length)
       );

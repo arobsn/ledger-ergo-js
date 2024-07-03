@@ -112,7 +112,7 @@ async function sendRegisters(
     COMMAND.ATTEST_INPUT,
     P1.ADD_REGISTERS_CHUNK,
     sessionId,
-    Buffer.from(data)
+    data
   );
 
   /* v8 ignore next */
@@ -130,7 +130,7 @@ async function getAttestedFrames(
       COMMAND.ATTEST_INPUT,
       P1.GET_ATTESTED_BOX_FRAME,
       sessionId,
-      Buffer.from([i])
+      Uint8Array.from([i])
     );
 
     responses.push(decodeAttestedFrameResponse(response.data));
