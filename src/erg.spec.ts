@@ -1,6 +1,6 @@
-import { describe, it, expect, test, vi } from "vitest";
+import { RecordStore, openTransportReplayer } from "@ledgerhq/hw-transport-mocker";
+import { describe, expect, it, test, vi } from "vitest";
 import { ErgoLedgerApp } from "./erg";
-import { openTransportReplayer, RecordStore } from "@ledgerhq/hw-transport-mocker";
 
 describe("construction", () => {
   it("should construct app with transport", async () => {

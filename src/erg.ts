@@ -1,28 +1,28 @@
+import { Network, uniq } from "@fleet-sdk/common";
 import type Transport from "@ledgerhq/hw-transport";
 import { Device, DeviceError, RETURN_CODE } from "./device";
-import type {
-  AppName,
-  UnsignedBox,
-  DerivedAddress,
-  ExtendedPublicKey,
-  Version,
-  UnsignedTransaction
-} from "./types/public";
-import type { AttestedBox } from "./types/attestedBox";
 import {
-  getAppName,
-  getExtendedPublicKey,
-  getAppVersion,
-  deriveAddress,
-  showAddress,
   attestInput,
+  deriveAddress,
+  getAppName,
+  getAppVersion,
+  getExtendedPublicKey,
+  showAddress,
   signTx
 } from "./interactions";
+import type { AttestedBox } from "./types/attestedBox";
 import type { AttestedTransaction, SignTransactionResponse } from "./types/internal";
-import { uniq, Network } from "@fleet-sdk/common";
+import type {
+  AppName,
+  DerivedAddress,
+  ExtendedPublicKey,
+  UnsignedBox,
+  UnsignedTransaction,
+  Version
+} from "./types/public";
 
-export { DeviceError, RETURN_CODE, Network };
 export * from "./types/public";
+export { DeviceError, Network, RETURN_CODE };
 export const CLA = 0xe0;
 
 /**

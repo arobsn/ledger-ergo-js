@@ -1,6 +1,6 @@
 import { COMMAND, type Device } from "../device";
-import type { AppName } from "../types/public";
 import { EMPTY_BYTES } from "../serialization/utils";
+import type { AppName } from "../types/public";
 
 const enum P1 {
   UNUSED = 0x00

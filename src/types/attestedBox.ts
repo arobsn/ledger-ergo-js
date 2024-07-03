@@ -1,6 +1,6 @@
 import { assert } from "@fleet-sdk/common";
-import type { UnsignedBox, AttestedBoxFrame } from "./public";
 import { ByteWriter } from "../serialization/byteWriter";
+import type { AttestedBoxFrame, UnsignedBox } from "./public";
 
 export class AttestedBox {
   #box: UnsignedBox;

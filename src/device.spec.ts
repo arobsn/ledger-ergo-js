@@ -1,6 +1,6 @@
+import { RecordStore, openTransportReplayer } from "@ledgerhq/hw-transport-mocker";
 import { describe, expect, it } from "vitest";
 import { Device, DeviceError, RETURN_CODE } from "./device";
-import { RecordStore, openTransportReplayer } from "@ledgerhq/hw-transport-mocker";
 import { CLA } from "./erg";
 
 describe("DeviceError construction", () => {
