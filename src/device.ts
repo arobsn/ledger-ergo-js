@@ -1,4 +1,3 @@
-import type { Buffer } from "buffer";
 import type Transport from "@ledgerhq/hw-transport";
 import { ByteWriter } from "./serialization/byteWriter";
 import type { DeviceResponse } from "./types/internal";
