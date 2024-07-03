@@ -1,10 +1,12 @@
-import { deserialize } from "../serialization/deserialize";
-import { serialize } from "../serialization/serialize";
-import type { ChangeMap, BoxCandidate, Token } from "../types/public";
-import { COMMAND, type Device } from "../device";
+import { chunk } from "@fleet-sdk/common";
 import { ErgoAddress, type Network } from "@fleet-sdk/core";
-import type { AttestedTransaction } from "../types/internal";
+import { hex } from "@fleet-sdk/crypto";
+import { COMMAND, type Device, MAX_DATA_LENGTH } from "../device";
+import { ByteWriter } from "../serialization/byteWriter";
+import { EMPTY_BYTES } from "../serialization/utils";
 import type { AttestedBox } from "../types/attestedBox";
+import type { AttestedTransaction } from "../types/internal";
+import type { BoxCandidate, ChangeMap, Token } from "../types/public";
 
 const MINER_FEE_TREE =
   "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";
@@ -30,6 +32,13 @@ const enum P2 {
   WITH_TOKEN = 0x02
 }
 
+const HASH_SIZE = 32;
+const HEADER_SIZE = 46; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data
+const START_TX_SIZE = 7; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#0x10---start-transaction-data
+const ADD_OUTPUT_HEADER_SIZE = 21; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data-5
+const ADD_OUTPUT_CHANGE_PATH_SIZE = 51; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data-6
+const ADD_OUTPUT_TOKENS_SIZE = MAX_DATA_LENGTH; // unclear from docs so setting to max packet size
+
 export async function signTx(
   device: Device,
   tx: AttestedTransaction,
@@ -45,7 +54,7 @@ export async function signTx(
   await sendOutputs(device, sessionId, tx.outputs, tx.changeMap, tx.distinctTokenIds);
   const proof = await sendConfirmAndSign(device, sessionId);
 
-  return new Uint8Array(proof);
+  return proof;
 }
 
 async function sendHeader(
@@ -58,11 +67,11 @@ async function sendHeader(
     COMMAND.SIGN_TX,
     P1.START_SIGNING,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
-    Buffer.concat([
-      serialize.uint8(network),
-      serialize.path(path),
-      authToken ? serialize.uint32(authToken) : Buffer.alloc(0)
-    ])
+    new ByteWriter(HEADER_SIZE)
+      .writeUInt8(network)
+      .writePath(path)
+      .writeAuthToken(authToken)
+      .toBytes()
   );
 
   return response.data[0];
@@ -78,12 +87,12 @@ async function sendStartTx(
     COMMAND.SIGN_TX,
     P1.START_TRANSACTION,
     sessionId,
-    Buffer.concat([
-      serialize.uint16(tx.inputs.length),
-      serialize.uint16(tx.dataInputs.length),
-      serialize.uint8(uniqueTokenIdsCount),
-      serialize.uint16(tx.outputs.length)
-    ])
+    new ByteWriter(START_TX_SIZE)
+      .writeUInt16(tx.inputs.length)
+      .writeUInt16(tx.dataInputs.length)
+      .writeUInt8(uniqueTokenIdsCount)
+      .writeUInt16(tx.outputs.length)
+      .toBytes()
   );
 
   return response.data[0];
@@ -92,17 +101,16 @@ async function sendStartTx(
 async function sendDistinctTokensIds(
   device: Device,
   sessionId: number,
-  ids: Uint8Array[]
+  tokenIds: Uint8Array[]
 ) {
-  if (ids.length === 0) return;
+  if (tokenIds.length === 0) return;
+  const chunks = chunk(tokenIds, Math.floor(MAX_DATA_LENGTH / HASH_SIZE));
+  for (const chunk of chunks) {
+    if (chunk.length === 0) continue;
+    const data = new ByteWriter(chunk.length * HASH_SIZE);
+    for (const id of chunk) data.writeBytes(id);
 
-  const MAX_PACKET_SIZE = 7;
-  const packets = serialize.arrayAsMappedChunks(ids, MAX_PACKET_SIZE, (id) =>
-    Buffer.from(id)
-  );
-
-  for (const p of packets) {
-    await device.send(COMMAND.SIGN_TX, P1.ADD_TOKEN_IDS, sessionId, p);
+    await device.send(COMMAND.SIGN_TX, P1.ADD_TOKEN_IDS, sessionId, data.toBytes());
   }
 }
 
@@ -121,7 +129,7 @@ async function sendInputs(device: Device, sessionId: number, inputs: AttestedBox
 async function sendBoxContextExtension(
   device: Device,
   sessionId: number,
-  extension: Buffer
+  extension: Uint8Array
 ) {
   await device.sendData(
     COMMAND.SIGN_TX,
@@ -132,11 +140,13 @@ async function sendBoxContextExtension(
 }
 
 async function sendDataInputs(device: Device, sessionId: number, boxIds: string[]) {
-  const MAX_PACKET_SIZE = 7;
-  const packets = serialize.arrayAsMappedChunks(boxIds, MAX_PACKET_SIZE, serialize.hex);
+  const chunks = chunk(boxIds, Math.floor(MAX_DATA_LENGTH / HASH_SIZE));
+  for (const chunk of chunks) {
+    if (chunk.length === 0) continue;
+    const data = new ByteWriter(chunk.length * HASH_SIZE);
+    for (const id of chunk) data.writeHex(id);
 
-  for (const p of packets) {
-    await device.send(COMMAND.SIGN_TX, P1.ADD_DATA_INPUTS, sessionId, p);
+    await device.send(COMMAND.SIGN_TX, P1.ADD_DATA_INPUTS, sessionId, data.toBytes());
   }
 }
 
@@ -154,20 +164,20 @@ async function sendOutputs(
       COMMAND.SIGN_TX,
       P1.ADD_OUTPUT_BOX_START,
       sessionId,
-      Buffer.concat([
-        serialize.uint64(box.value),
-        serialize.uint32(box.ergoTree.length),
-        serialize.uint32(box.creationHeight),
-        serialize.uint8(box.tokens.length),
-        serialize.uint32(box.registers.length)
-      ])
+      new ByteWriter(ADD_OUTPUT_HEADER_SIZE)
+        .writeUInt64(box.value)
+        .writeUInt32(box.ergoTree.length)
+        .writeUInt32(box.creationHeight)
+        .writeUInt8(box.tokens.length)
+        .writeUInt32(box.registers.length)
+        .toBytes()
     );
 
-    const tree = deserialize.hex(box.ergoTree);
+    const tree = hex.encode(box.ergoTree);
     if (tree === MINER_FEE_TREE) {
       await addOutputBoxMinersFeeTree(device, sessionId);
     } else if (ErgoAddress.fromErgoTree(tree).toString() === changeMap.address) {
-      await addOutputBoxChangeTree(device, sessionId, changeMap.path);
+      await addOutputBoxChangePath(device, sessionId, changeMap.path);
     } else {
       await addOutputBoxErgoTree(device, sessionId, box.ergoTree);
     }
@@ -182,7 +192,11 @@ async function sendOutputs(
   }
 }
 
-async function addOutputBoxErgoTree(device: Device, sessionId: number, ergoTree: Buffer) {
+async function addOutputBoxErgoTree(
+  device: Device,
+  sessionId: number,
+  ergoTree: Uint8Array
+) {
   await device.sendData(
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_ERGO_TREE_CHUNK,
@@ -196,16 +210,16 @@ async function addOutputBoxMinersFeeTree(device: Device, sessionId: number) {
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_MINERS_FEE_TREE,
     sessionId,
-    Buffer.from([])
+    EMPTY_BYTES
   );
 }
 
-async function addOutputBoxChangeTree(device: Device, sessionId: number, path: string) {
+async function addOutputBoxChangePath(device: Device, sessionId: number, path: string) {
   await device.send(
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_CHANGE_TREE,
     sessionId,
-    serialize.path(path)
+    new ByteWriter(ADD_OUTPUT_CHANGE_PATH_SIZE).writePath(path).toBytes()
   );
 }
 
@@ -215,23 +229,18 @@ async function addOutputBoxTokens(
   tokens: Token[],
   distinctTokenIds: string[]
 ) {
-  await device.send(
-    COMMAND.SIGN_TX,
-    P1.ADD_OUTPUT_BOX_TOKENS,
-    sessionId,
-    serialize.array(tokens, (t) =>
-      Buffer.concat([
-        serialize.uint32(distinctTokenIds.indexOf(t.id)),
-        serialize.uint64(t.amount)
-      ])
-    )
-  );
+  const data = new ByteWriter(ADD_OUTPUT_TOKENS_SIZE);
+  for (const token of tokens) {
+    data.writeUInt32(distinctTokenIds.indexOf(token.id)).writeUInt64(token.amount);
+  }
+
+  await device.send(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_TOKENS, sessionId, data.toBytes());
 }
 
 async function addOutputBoxRegisters(
   device: Device,
   sessionId: number,
-  registers: Buffer
+  registers: Uint8Array
 ) {
   await device.sendData(
     COMMAND.SIGN_TX,
@@ -241,12 +250,15 @@ async function addOutputBoxRegisters(
   );
 }
 
-async function sendConfirmAndSign(device: Device, sessionId: number): Promise<Buffer> {
+async function sendConfirmAndSign(
+  device: Device,
+  sessionId: number
+): Promise<Uint8Array> {
   const response = await device.send(
     COMMAND.SIGN_TX,
     P1.CONFIRM_AND_SIGN,
     sessionId,
-    Buffer.from([])
+    EMPTY_BYTES
   );
 
   return response.data;

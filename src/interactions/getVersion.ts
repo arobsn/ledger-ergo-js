@@ -1,5 +1,6 @@
-import type { Version } from "../types/public";
 import { COMMAND, type Device } from "../device";
+import { EMPTY_BYTES } from "../serialization/utils";
+import type { Version } from "../types/public";
 
 const IS_DEBUG_FLAG = 0x01;
 
@@ -16,7 +17,7 @@ export async function getAppVersion(device: Device): Promise<Version> {
     COMMAND.GET_APP_VERSION,
     P1.UNUSED,
     P2.UNUSED,
-    Buffer.from([])
+    EMPTY_BYTES
   );
 
   return {

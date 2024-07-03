@@ -17,9 +17,6 @@ importers:
       '@fleet-sdk/crypto':
         specifier: ^0.5.0
         version: 0.5.0
-      base-x:
-        specifier: ^5.0.0
-        version: 5.0.0
       bip32-path:
         specifier: ^0.4.2
         version: 0.4.2
@@ -510,9 +507,6 @@ packages:
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
-
-  base-x@5.0.0:
-    resolution: {integrity: sha512-sMW3VGSX1QWVFA6l8U62MLKz29rRfpTlYdCqLdpLo1/Yd4zZwSbnUaDfciIAowAqvq7YFnWq9hrhdg1KYgc1lQ==}
 
   binary-extensions@2.3.0:
     resolution: {integrity: sha512-Ceh+7ox5qe7LJuLHoY0feh3pHuUDHAcRUeyL2VYghZwfpkNIy/+8Ocg0a3UuSoYzavmylwuLWQOf3hl0jjMMIw==}
@@ -1680,8 +1674,6 @@ snapshots:
   assertion-error@1.1.0: {}
 
   balanced-match@1.0.2: {}
-
-  base-x@5.0.0: {}
 
   binary-extensions@2.3.0: {}
 

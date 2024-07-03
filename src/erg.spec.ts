@@ -1,6 +1,6 @@
-import { describe, it, expect, test, vi } from "vitest";
+import { RecordStore, openTransportReplayer } from "@ledgerhq/hw-transport-mocker";
+import { describe, expect, it, test, vi } from "vitest";
 import { ErgoLedgerApp } from "./erg";
-import { openTransportReplayer, RecordStore } from "@ledgerhq/hw-transport-mocker";
 
 describe("construction", () => {
   it("should construct app with transport", async () => {
@@ -220,8 +220,8 @@ describe("public key management without auth token", () => {
 describe("transaction signing", () => {
   test.each(txTestVectors)(
     "should sign $name",
-    async ({ adpuQueue, authToken, proofs, tx }) => {
-      const transport = await openTransportReplayer(RecordStore.fromString(adpuQueue));
+    async ({ apduQueue, authToken, proofs, tx }) => {
+      const transport = await openTransportReplayer(RecordStore.fromString(apduQueue));
 
       const app = new ErgoLedgerApp(transport, authToken).useAuthToken(!!authToken);
 
@@ -231,8 +231,8 @@ describe("transaction signing", () => {
   );
 
   it("Should throw with empty inputs", async () => {
-    const { adpuQueue, tx } = txTestVectors[0];
-    const transport = await openTransportReplayer(RecordStore.fromString(adpuQueue));
+    const { apduQueue, tx } = txTestVectors[0];
+    const transport = await openTransportReplayer(RecordStore.fromString(apduQueue));
 
     const app = new ErgoLedgerApp(transport);
     await expect(() => app.signTx({ ...tx, inputs: [] })).rejects.toThrow(
@@ -301,7 +301,7 @@ const txTestVectors = [
   {
     name: "simple erg-only p2p transaction",
     authToken: 0,
-    adpuQueue: `
+    apduQueue: `
       => e0200101378e73d69748e76867f9e71351481137bc6d5e671979d050f61eabfdccee28a513000100000000067f2af0000000240013d0a10000000001
       <= 469000
 
@@ -428,7 +428,7 @@ const txTestVectors = [
   {
     name: "simple p2p transaction with tokens",
     authToken: Number("0x68771637"),
-    adpuQueue: `
+    apduQueue: `
       => e02001023b27c4d6a5a5e883282a5a1246975a1b42df78aa270638c8d843d63c14fae7a31f000b0000000000009ee8000000240013d08c010000000168771637
       <= aa9000
 
@@ -615,7 +615,7 @@ const txTestVectors = [
   {
     name: "transaction with input extension and data inputs",
     authToken: 0,
-    adpuQueue: `
+    apduQueue: `
       => e0200101375f083bdf25ef9b915205e569c3c0623c5b7ae743a6d26112704cfd8ae1261555000100000001c235c8c0000000c200128d98010000004a
       <= f09000
 

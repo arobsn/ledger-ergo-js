@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { chunkBy } from "./utils";
+import { isErgoPath, pathToArray } from "./utils";
 
-describe("Utils test", () => {
-  it("should chunk buffers", () => {
-    const buffer = Buffer.alloc(11);
-    const [first, last] = chunkBy(buffer, [5, 6]);
-
-    expect(first.length).toEqual(5);
-    expect(last.length).toEqual(6);
+describe("assertions", () => {
+  it("Ergo path", () => {
+    expect(isErgoPath(pathToArray("m/44'/429'"))).to.be.true;
+    expect(isErgoPath(pathToArray("m/44'/2'"))).to.be.false;
+    expect(isErgoPath(pathToArray("m/44'"))).to.be.false;
   });
 });

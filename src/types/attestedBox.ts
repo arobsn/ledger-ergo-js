@@ -1,10 +1,11 @@
 import { assert } from "@fleet-sdk/common";
-import type { UnsignedBox, AttestedBoxFrame } from "./public";
+import { ByteWriter } from "../serialization/byteWriter";
+import type { AttestedBoxFrame, UnsignedBox } from "./public";
 
 export class AttestedBox {
   #box: UnsignedBox;
   #frames: AttestedBoxFrame[];
-  #extension?: Buffer;
+  #extension?: Uint8Array;
 
   constructor(box: UnsignedBox, frames: AttestedBoxFrame[]) {
     this.#box = box;
@@ -19,24 +20,26 @@ export class AttestedBox {
     return this.#frames;
   }
 
-  public get extension(): Buffer | undefined {
+  public get extension(): Uint8Array | undefined {
     return this.#extension;
   }
 
-  public setExtension(extension: Buffer): AttestedBox {
+  public setExtension(extension: Uint8Array): AttestedBox {
     assert(!this.#extension, "The extension is already inserted");
 
-    const lengthBuffer = Buffer.alloc(4);
     const firstFrame = this.#frames[0];
+    const length = firstFrame.bytes.length + 4;
+    const newFrame = new ByteWriter(length).writeBytes(firstFrame.bytes);
+
     if (extension.length === 1 && extension[0] === 0) {
-      lengthBuffer.writeUInt32BE(0, 0);
+      newFrame.writeUInt32(0);
     } else {
       this.#extension = extension;
       firstFrame.extensionLength = extension.length;
-      lengthBuffer.writeUInt32BE(extension.length, 0);
+      newFrame.writeUInt32(extension.length);
     }
 
-    firstFrame.bytes = Buffer.concat([firstFrame.bytes, lengthBuffer]);
+    firstFrame.bytes = newFrame.toBytes();
 
     return this;
   }
