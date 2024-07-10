@@ -11,7 +11,11 @@ export default defineConfig({
         "**/*.d.ts",
         "**/*.bench.ts",
         "**/*.test-d.ts",
-        "**/*.test.ts"
+        "**/*.test.ts",
+        "*.config.ts",
+        "dist/**",
+        "coverage/**",
+        "node_modules/**"
       ]
     }
   }
