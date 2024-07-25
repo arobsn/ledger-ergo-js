@@ -64,13 +64,13 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^1.8.3",
-    "@ledgerhq/hw-transport": "^6.31.0",
-    "@ledgerhq/hw-transport-mocker": "^6.29.0",
-    "@types/node": "^20.14.10",
-    "@vitest/coverage-v8": "^2.0.2",
+    "@ledgerhq/hw-transport": "^6.31.2",
+    "@ledgerhq/hw-transport-mocker": "^6.29.2",
+    "@types/node": "^20.14.12",
+    "@vitest/coverage-v8": "^2.0.4",
     "open-cli": "^8.0.0",
-    "tsup": "^8.1.0",
-    "typescript": "^5.5.3",
-    "vitest": "^2.0.2"
+    "tsup": "^8.2.3",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.4"
   }
 }
