@@ -57,20 +57,20 @@
     "access": "public"
   },
   "dependencies": {
-    "@fleet-sdk/common": "^0.4.1",
-    "@fleet-sdk/core": "0.6.1",
-    "@fleet-sdk/crypto": "^0.5.0",
+    "@fleet-sdk/common": "^0.6.4",
+    "@fleet-sdk/core": "0.7.0",
+    "@fleet-sdk/crypto": "^0.6.4",
     "bip32-path": "^0.4.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.8.3",
-    "@ledgerhq/hw-transport": "^6.31.2",
-    "@ledgerhq/hw-transport-mocker": "^6.29.2",
-    "@types/node": "^22.4.0",
-    "@vitest/coverage-v8": "^2.0.5",
+    "@biomejs/biome": "^1.9.2",
+    "@ledgerhq/hw-transport": "^6.31.3",
+    "@ledgerhq/hw-transport-mocker": "^6.29.3",
+    "@types/node": "^22.5.5",
+    "@vitest/coverage-v8": "^2.1.1",
     "open-cli": "^8.0.0",
-    "tsup": "^8.2.4",
-    "typescript": "^5.5.4",
-    "vitest": "^2.0.5"
+    "tsup": "^8.3.0",
+    "typescript": "^5.6.2",
+    "vitest": "^2.1.1"
   }
 }
