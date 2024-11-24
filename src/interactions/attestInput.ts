@@ -1,4 +1,4 @@
-import { chunk } from "@fleet-sdk/common";
+import { chunk, isEmpty } from "@fleet-sdk/common";
 import { hex } from "@fleet-sdk/crypto";
 import { COMMAND, type Device, MAX_DATA_LENGTH } from "../device";
 import { ByteWriter } from "../serialization/byteWriter";
@@ -85,12 +85,12 @@ async function sendTokens(
   tokens: Token[],
   sessionId: number
 ): Promise<number> {
+  if (isEmpty(tokens)) return 0;
+
   const chunks = chunk(tokens, Math.floor(MAX_DATA_LENGTH / TOKEN_ENTRY_SIZE));
   const results: DeviceResponse[] = [];
 
   for (const chunk of chunks) {
-    if (chunk.length === 0) continue;
-
     const data = new ByteWriter(chunk.length * TOKEN_ENTRY_SIZE);
     for (const token of chunk) data.writeHex(token.id).writeUInt64(token.amount);
 

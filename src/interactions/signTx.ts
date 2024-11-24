@@ -1,4 +1,4 @@
-import { chunk } from "@fleet-sdk/common";
+import { chunk, isEmpty } from "@fleet-sdk/common";
 import { ErgoAddress, type Network } from "@fleet-sdk/core";
 import { hex } from "@fleet-sdk/crypto";
 import { COMMAND, type Device, MAX_DATA_LENGTH } from "../device";
@@ -33,11 +33,11 @@ const enum P2 {
 }
 
 const HASH_SIZE = 32;
-const HEADER_SIZE = 46; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data
-const START_TX_SIZE = 7; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#0x10---start-transaction-data
-const ADD_OUTPUT_HEADER_SIZE = 21; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data-5
-const ADD_OUTPUT_CHANGE_PATH_SIZE = 51; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data-6
-const ADD_OUTPUT_TOKENS_SIZE = MAX_DATA_LENGTH; // unclear from docs so setting to max packet size
+const HEADER_SIZE = 46; // https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data
+const START_TX_SIZE = 7; // https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#0x10---start-transaction-data
+const ADD_OUTPUT_HEADER_SIZE = 21; // https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data-5
+const ADD_OUTPUT_CHANGE_PATH_SIZE = 51; // https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data-6
+const ADD_OUTPUT_TOKEN_SIZE = 12; // https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#0x19---add-output-box-tokens
 
 export async function signTx(
   device: Device,
@@ -103,10 +103,10 @@ async function sendDistinctTokensIds(
   sessionId: number,
   tokenIds: Uint8Array[]
 ) {
-  if (tokenIds.length === 0) return;
+  if (isEmpty(tokenIds)) return;
+
   const chunks = chunk(tokenIds, Math.floor(MAX_DATA_LENGTH / HASH_SIZE));
   for (const chunk of chunks) {
-    if (chunk.length === 0) continue;
     const data = new ByteWriter(chunk.length * HASH_SIZE);
     for (const id of chunk) data.writeBytes(id);
 
@@ -140,9 +140,10 @@ async function sendBoxContextExtension(
 }
 
 async function sendDataInputs(device: Device, sessionId: number, boxIds: string[]) {
+  if (isEmpty(boxIds)) return;
+
   const chunks = chunk(boxIds, Math.floor(MAX_DATA_LENGTH / HASH_SIZE));
   for (const chunk of chunks) {
-    if (chunk.length === 0) continue;
     const data = new ByteWriter(chunk.length * HASH_SIZE);
     for (const id of chunk) data.writeHex(id);
 
@@ -229,12 +230,22 @@ async function addOutputBoxTokens(
   tokens: Token[],
   distinctTokenIds: string[]
 ) {
-  const data = new ByteWriter(ADD_OUTPUT_TOKENS_SIZE);
-  for (const token of tokens) {
-    data.writeUInt32(distinctTokenIds.indexOf(token.id)).writeUInt64(token.amount);
-  }
+  if (isEmpty(distinctTokenIds)) return;
 
-  await device.send(COMMAND.SIGN_TX, P1.ADD_OUTPUT_BOX_TOKENS, sessionId, data.toBytes());
+  const chunks = chunk(tokens, Math.floor(MAX_DATA_LENGTH / ADD_OUTPUT_TOKEN_SIZE));
+  for (const chunk of chunks) {
+    const data = new ByteWriter(chunk.length * ADD_OUTPUT_TOKEN_SIZE);
+    for (const token of chunk) {
+      data.writeUInt32(distinctTokenIds.indexOf(token.id)).writeUInt64(token.amount);
+    }
+
+    await device.send(
+      COMMAND.SIGN_TX,
+      P1.ADD_OUTPUT_BOX_TOKENS,
+      sessionId,
+      data.toBytes()
+    );
+  }
 }
 
 async function addOutputBoxRegisters(
