@@ -89,8 +89,6 @@ async function sendTokens(
   const results: DeviceResponse[] = [];
 
   for (const chunk of chunks) {
-    if (chunk.length === 0) continue;
-
     const data = new ByteWriter(chunk.length * TOKEN_ENTRY_SIZE);
     for (const token of chunk) data.writeHex(token.id).writeUInt64(token.amount);
 
