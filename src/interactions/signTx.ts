@@ -1,4 +1,4 @@
-import { chunk, isEmpty } from "@fleet-sdk/common";
+import { chunk } from "@fleet-sdk/common";
 import { ErgoAddress, type Network } from "@fleet-sdk/core";
 import { hex } from "@fleet-sdk/crypto";
 import { COMMAND, type Device, MAX_DATA_LENGTH } from "../device";
@@ -103,8 +103,6 @@ async function sendDistinctTokensIds(
   sessionId: number,
   tokenIds: Uint8Array[]
 ) {
-  if (isEmpty(tokenIds)) return;
-
   const chunks = chunk(tokenIds, Math.floor(MAX_DATA_LENGTH / HASH_SIZE));
   for (const chunk of chunks) {
     const data = new ByteWriter(chunk.length * HASH_SIZE);
@@ -140,8 +138,6 @@ async function sendBoxContextExtension(
 }
 
 async function sendDataInputs(device: Device, sessionId: number, boxIds: string[]) {
-  if (isEmpty(boxIds)) return;
-
   const chunks = chunk(boxIds, Math.floor(MAX_DATA_LENGTH / HASH_SIZE));
   for (const chunk of chunks) {
     const data = new ByteWriter(chunk.length * HASH_SIZE);
@@ -230,8 +226,6 @@ async function addOutputBoxTokens(
   tokens: Token[],
   distinctTokenIds: string[]
 ) {
-  if (isEmpty(distinctTokenIds)) return;
-
   const chunks = chunk(tokens, Math.floor(MAX_DATA_LENGTH / ADD_OUTPUT_TOKEN_SIZE));
   for (const chunk of chunks) {
     const data = new ByteWriter(chunk.length * ADD_OUTPUT_TOKEN_SIZE);
