@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@fleet-sdk/common':
-        specifier: ^0.6.4
-        version: 0.6.4
+        specifier: ^0.8.0
+        version: 0.8.0
       '@fleet-sdk/core':
-        specifier: 0.7.0
-        version: 0.7.0
+        specifier: 0.8.0
+        version: 0.8.0
       '@fleet-sdk/crypto':
         specifier: ^0.6.4
         version: 0.6.4
@@ -414,16 +414,24 @@ packages:
     resolution: {integrity: sha512-zCae5GwPHBdIpkSvTKYzagHeQgTaeRQSKrVp7e7h7gLUBF5qznEuG98s8XwEddCUYrd5Nm1eNrPU+ZToHucgnQ==}
     engines: {node: '>=18'}
 
-  '@fleet-sdk/core@0.7.0':
-    resolution: {integrity: sha512-DHsQs2vPZ3laDVhpxA6gREDRAP6gEZKvH/sGhBNEyLF1gVkAFvq1XkTjgwXcJiQOyORKXeibK2nNzNfYk8EV0Q==}
+  '@fleet-sdk/common@0.8.0':
+    resolution: {integrity: sha512-Fv4NqkoqnfysKTLlXKIVnuojXL76Yac7pXFDFxhK4Mw+R5ARm8e/wzs50nSB426uxvnCOTQQgdgTOvxbwHHp0Q==}
+    engines: {node: '>=18'}
+
+  '@fleet-sdk/core@0.8.0':
+    resolution: {integrity: sha512-tuxoQI3rDrDP3NAvtADYKvdOxeJsDKuLEEbMjly5HFPhReQiAviLlM2pLID1wI7StOxIGt9enTPDD/7SxJvixg==}
     engines: {node: '>=18'}
 
   '@fleet-sdk/crypto@0.6.4':
     resolution: {integrity: sha512-5YKAcD3axlwR/MAIvHdJcM/Dp+ej2dQ6NAzPdyiAKvhBdFSG6gFtJXB3B62F+m4TBJOiNd+drkQpqlN+3nKQcA==}
     engines: {node: '>=18'}
 
-  '@fleet-sdk/serializer@0.7.0':
-    resolution: {integrity: sha512-yI5huij2i6fUjFKMNmjVihgUnwSVYx8damx+Iiuvv0q+87aumy/rcixpRAC6H2I+KCbsASjOSIkRTBYrX738Ww==}
+  '@fleet-sdk/crypto@0.8.0':
+    resolution: {integrity: sha512-w4b82Kqcsc+d8yIdbcPPdVDgAqThebGmOBXqoln6UuAU0S4xuyjaORc+ORT1+XCkZeC7UJ3DuZanWoLShW0hgw==}
+    engines: {node: '>=18'}
+
+  '@fleet-sdk/serializer@0.8.0':
+    resolution: {integrity: sha512-ZLLSoNALxt0BK6UBv0yEolNa8lTPn8Sog9fgy9CUpuS42K1Dp/ACk3RySQsQrbWBvr8Fz7Dfkc7sPpZcxk55pg==}
     engines: {node: '>=18'}
 
   '@isaacs/cliui@8.0.2':
@@ -470,6 +478,10 @@ packages:
   '@noble/hashes@1.4.0':
     resolution: {integrity: sha512-V1JJ1WTRUqHHrOSh597hURcMqVKVGL/ea3kv0gSnEdsEZ0/+VyPghM1lMNGc00z7CIQorSvbKpuJkxvuHbvdbg==}
     engines: {node: '>= 16'}
+
+  '@noble/hashes@1.6.1':
+    resolution: {integrity: sha512-pq5D8h10hHBjyqX+cfBm0i8JUXJ0UhczFc4r74zbuT9XgewFo2E3J1cOaGtdZynILNmQ685YWGzGE1Zv6io50w==}
+    engines: {node: ^14.21.3 || >=16}
 
   '@pkgjs/parseargs@0.11.0':
     resolution: {integrity: sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg==}
@@ -647,6 +659,9 @@ packages:
 
   '@scure/base@1.1.7':
     resolution: {integrity: sha512-PPNYBslrLNNUQ/Yad37MHYsNQtK67EhWb6WtSvNLLPo7SdVZgkUjD6Dg+5On7zNwmskf8OX7I7Nx5oN+MIWE0g==}
+
+  '@scure/base@1.2.1':
+    resolution: {integrity: sha512-DGmGtC8Tt63J5GfHgfl5CuAXh96VF/LD8K9Hr/Gv0J2lAoRGlPOMpqMpMbCTOoOJMZCk2Xt+DskdDyn6dEFdzQ==}
 
   '@tokenizer/token@0.3.0':
     resolution: {integrity: sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A==}
@@ -1553,11 +1568,13 @@ snapshots:
 
   '@fleet-sdk/common@0.6.4': {}
 
-  '@fleet-sdk/core@0.7.0':
+  '@fleet-sdk/common@0.8.0': {}
+
+  '@fleet-sdk/core@0.8.0':
     dependencies:
-      '@fleet-sdk/common': 0.6.4
-      '@fleet-sdk/crypto': 0.6.4
-      '@fleet-sdk/serializer': 0.7.0
+      '@fleet-sdk/common': 0.8.0
+      '@fleet-sdk/crypto': 0.8.0
+      '@fleet-sdk/serializer': 0.8.0
 
   '@fleet-sdk/crypto@0.6.4':
     dependencies:
@@ -1565,10 +1582,16 @@ snapshots:
       '@noble/hashes': 1.4.0
       '@scure/base': 1.1.7
 
-  '@fleet-sdk/serializer@0.7.0':
+  '@fleet-sdk/crypto@0.8.0':
     dependencies:
-      '@fleet-sdk/common': 0.6.4
-      '@fleet-sdk/crypto': 0.6.4
+      '@fleet-sdk/common': 0.8.0
+      '@noble/hashes': 1.6.1
+      '@scure/base': 1.2.1
+
+  '@fleet-sdk/serializer@0.8.0':
+    dependencies:
+      '@fleet-sdk/common': 0.8.0
+      '@fleet-sdk/crypto': 0.8.0
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -1623,6 +1646,8 @@ snapshots:
   '@ledgerhq/logs@6.12.0': {}
 
   '@noble/hashes@1.4.0': {}
+
+  '@noble/hashes@1.6.1': {}
 
   '@pkgjs/parseargs@0.11.0':
     optional: true
@@ -1730,6 +1755,8 @@ snapshots:
     optional: true
 
   '@scure/base@1.1.7': {}
+
+  '@scure/base@1.2.1': {}
 
   '@tokenizer/token@0.3.0': {}
 

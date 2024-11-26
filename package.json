@@ -57,8 +57,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@fleet-sdk/common": "^0.6.4",
-    "@fleet-sdk/core": "0.7.0",
+    "@fleet-sdk/common": "^0.8.0",
+    "@fleet-sdk/core": "0.8.0",
     "@fleet-sdk/crypto": "^0.6.4",
     "bip32-path": "^0.4.2"
   },
