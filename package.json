@@ -59,18 +59,25 @@
   "dependencies": {
     "@fleet-sdk/common": "^0.8.0",
     "@fleet-sdk/core": "0.8.0",
-    "@fleet-sdk/crypto": "^0.6.4",
+    "@fleet-sdk/crypto": "^0.8.0",
     "bip32-path": "^0.4.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@ledgerhq/hw-transport": "^6.31.4",
     "@ledgerhq/hw-transport-mocker": "^6.29.4",
-    "@types/node": "^22.5.5",
-    "@vitest/coverage-v8": "^2.1.5",
+    "@types/node": "^22.10.0",
+    "@vitest/coverage-v8": "^2.1.6",
     "open-cli": "^8.0.0",
     "tsup": "^8.3.5",
     "typescript": "^5.7.2",
-    "vitest": "^2.1.5"
+    "vitest": "^2.1.6"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite@>=5.3.0 <5.3.6": ">=5.3.6",
+      "vite@>=5.3.0 <=5.3.5": ">=5.3.6",
+      "cross-spawn@>=7.0.0 <7.0.5": ">=7.0.5"
+    }
   }
 }
