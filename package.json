@@ -58,7 +58,7 @@
   },
   "dependencies": {
     "@fleet-sdk/common": "^0.8.0",
-    "@fleet-sdk/core": "0.8.1",
+    "@fleet-sdk/core": "^0.8.1",
     "@fleet-sdk/crypto": "^0.8.0",
     "bip32-path": "^0.4.2"
   },
