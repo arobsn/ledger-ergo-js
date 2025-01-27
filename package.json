@@ -1,8 +1,8 @@
 {
   "name": "ledger-ergo-js",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "license": "MIT",
-  "author": "anon-br",
+  "author": "arobsn",
   "description": "An Ergo Platform JS Library for communication with Ledger Hardware Wallets.",
   "homepage": "",
   "keywords": [
