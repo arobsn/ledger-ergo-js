@@ -1,8 +1,8 @@
 {
   "name": "ledger-ergo-js",
-  "version": "0.1.20",
+  "version": "0.1.21",
   "license": "MIT",
-  "author": "anon-br",
+  "author": "arobsn",
   "description": "An Ergo Platform JS Library for communication with Ledger Hardware Wallets.",
   "homepage": "",
   "keywords": [
@@ -58,19 +58,19 @@
   },
   "dependencies": {
     "@fleet-sdk/common": "^0.8.0",
-    "@fleet-sdk/core": "^0.8.1",
-    "@fleet-sdk/crypto": "^0.8.0",
+    "@fleet-sdk/core": "^0.8.2",
+    "@fleet-sdk/crypto": "^0.8.2",
     "bip32-path": "^0.4.2"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@ledgerhq/hw-transport": "^6.31.4",
     "@ledgerhq/hw-transport-mocker": "^6.29.4",
-    "@types/node": "^22.10.2",
-    "@vitest/coverage-v8": "^2.1.8",
+    "@types/node": "^22.10.10",
+    "@vitest/coverage-v8": "^3.0.4",
     "open-cli": "^8.0.0",
-    "tsup": "^8.3.5",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "tsup": "^8.3.6",
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
   }
 }
