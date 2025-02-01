@@ -7,12 +7,13 @@ const enum RESPONSE_CODE {
 }
 
 const CLA = 0xe0;
+const OPEN_APP = 0xd8;
 
 export async function openApp(device: Device, appName: string): Promise<boolean> {
   // try {
   const response = await device.send(
     CLA,
-    COMMAND.OPEN_APP,
+    OPEN_APP,
     NO_VALUE,
     NO_VALUE,
     asciiCodec.encode(appName)

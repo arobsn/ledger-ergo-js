@@ -2,6 +2,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import { ByteWriter } from "./serialization/byteWriter";
 import type { DeviceResponse } from "./types/internal";
 import { hex } from "@fleet-sdk/crypto";
+import { type AppInfo, getCurrentAppInfo } from "./interactions";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -10,10 +11,7 @@ export const enum COMMAND {
   GET_EXTENDED_PUB_KEY = 0x10,
   DERIVE_ADDRESS = 0x11,
   ATTEST_INPUT = 0x20,
-  SIGN_TX = 0x21,
-
-  // OS commands
-  OPEN_APP = 0xd8
+  SIGN_TX = 0x21
 }
 
 export const MAX_DATA_LENGTH = 255;
@@ -38,6 +36,10 @@ export class Device {
     return this;
   }
 
+  async getCurrentAppInfo(): Promise<AppInfo> {
+    return getCurrentAppInfo(this);
+  }
+
   async sendData(
     cla: number,
     ins: COMMAND,
@@ -60,7 +62,7 @@ export class Device {
 
   async send(
     cla: number,
-    ins: COMMAND,
+    ins: number,
     p1: number,
     p2: number,
     data: Uint8Array
@@ -160,7 +162,12 @@ export enum RETURN_CODE {
   BIP32_FORMATTING_FAILED = 0xe101,
   ADDRESS_FORMATTING_FAILED = 0xe102,
   STACK_OVERFLOW = 0xffff,
-  OK = 0x9000
+
+  OK = 0x9000,
+  GLOBAL_LOCKED_DEVICE = 0x5515,
+  GLOBAL_ACTION_REFUSED = 0x5501,
+  GLOBAL_PIN_NOT_SET = 0x5502,
+  GLOBAL_DEVICE_INTERNAL_ERROR = 0x5223
 }
 
 export const RETURN_MESSAGES = {
@@ -203,5 +210,9 @@ export const RETURN_MESSAGES = {
   [RETURN_CODE.BIP32_FORMATTING_FAILED]: "Can't display Bip32 path",
   [RETURN_CODE.ADDRESS_FORMATTING_FAILED]: "Can't display address",
   [RETURN_CODE.STACK_OVERFLOW]: "Stack overflow",
-  [RETURN_CODE.OK]: "Ok"
+  [RETURN_CODE.OK]: "Ok",
+  [RETURN_CODE.GLOBAL_LOCKED_DEVICE]: "Device is locked",
+  [RETURN_CODE.GLOBAL_ACTION_REFUSED]: "Action refused on device",
+  [RETURN_CODE.GLOBAL_PIN_NOT_SET]: "Pin is not set",
+  [RETURN_CODE.GLOBAL_DEVICE_INTERNAL_ERROR]: "Device internal error"
 };
