@@ -78,6 +78,22 @@ describe("Get app name and version", () => {
   });
 });
 
+describe("Open embedded application", () => {
+  it("should get app name", async () => {
+    const transport = await openTransportReplayer(
+      RecordStore.fromString(`
+        => e0d80000044572676f
+        <= 9000
+      `)
+    );
+
+    const app = new ErgoLedgerApp(transport);
+    const result = await app.openEmbeddedApp();
+
+    expect(result).to.be.true;
+  });
+});
+
 describe("public key management with auth token", () => {
   it("should get extended public key", async () => {
     const transport = await openTransportReplayer(

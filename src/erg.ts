@@ -1,6 +1,6 @@
 import { Network, uniq } from "@fleet-sdk/common";
 import type Transport from "@ledgerhq/hw-transport";
-import { Device, DeviceError, RETURN_CODE } from "./device";
+import { Device, DeviceError, RETURN_CODE, CLA } from "./device";
 import {
   attestInput,
   deriveAddress,
@@ -20,10 +20,10 @@ import type {
   UnsignedTransaction,
   Version
 } from "./types/public";
+import { openApp } from "./interactions/openApp";
 
 export * from "./types/public";
-export { DeviceError, Network, RETURN_CODE };
-export const CLA = 0xe0;
+export { DeviceError, Network, RETURN_CODE, Device, CLA };
 
 /**
  * Ergo's Ledger hardware wallet API
@@ -97,7 +97,7 @@ export class ErgoLedgerApp {
 
   /**
    * Get application version.
-   * @returns a Promise with the Ledger Application version.
+   * @returns Promise with the Ledger Application version.
    */
   async getAppVersion(): Promise<Version> {
     this.#debug("getAppVersion");
@@ -105,8 +105,17 @@ export class ErgoLedgerApp {
   }
 
   /**
+   * Opens the Ergo application on the Ledger device.
+   * @returns Promise that resolves to true if the application was opened successfully
+   */
+  async openEmbeddedApp(): Promise<boolean> {
+    this.#debug("openApp");
+    return await openApp(this.#device, "Ergo");
+  }
+
+  /**
    * Get application name.
-   * @returns a Promise with the Ledger Application name.
+   * @returns Promise with the Ledger Application name.
    */
   async getAppName(): Promise<AppName> {
     this.#debug("getAppName");
@@ -204,7 +213,9 @@ export class ErgoLedgerApp {
     if (!this.#logging) return;
 
     console.debug(
-      `[ledger-ergo-js][${caller}]${message ? ": " : ""}${message ? JSON.stringify(message) : ""}`
+      `[ledger-ergo-js][${caller}]${message ? ": " : ""}${
+        message ? JSON.stringify(message) : ""
+      }`
     );
   }
 }

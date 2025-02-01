@@ -1,6 +1,7 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { ByteWriter } from "./serialization/byteWriter";
 import type { DeviceResponse } from "./types/internal";
+import { hex } from "@fleet-sdk/crypto";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -9,9 +10,13 @@ export const enum COMMAND {
   GET_EXTENDED_PUB_KEY = 0x10,
   DERIVE_ADDRESS = 0x11,
   ATTEST_INPUT = 0x20,
-  SIGN_TX = 0x21
+  SIGN_TX = 0x21,
+
+  // OS commands
+  OPEN_APP = 0xd8
 }
 
+export const CLA = 0xe0;
 export const MAX_DATA_LENGTH = 255;
 const MIN_RESPONSE_LENGTH = 2;
 const MIN_APDU_LENGTH = 5;
@@ -24,7 +29,7 @@ export class Device {
     return this.#transport;
   }
 
-  constructor(transport: Transport, cla: number) {
+  constructor(transport: Transport, cla = CLA) {
     this.#transport = transport;
     this.#cla = cla;
   }
