@@ -106,14 +106,6 @@ export class ErgoLedgerApp {
   }
 
   /**
-   * Opens the Ergo application on the Ledger device.
-   * @returns Promise that resolves to true if the application was opened successfully
-   */
-  async openEmbeddedApp(): Promise<boolean> {
-    return await openApp(this.#device, "Ergo");
-  }
-
-  /**
    * Get application name.
    * @returns Promise with the Ledger Application name.
    */

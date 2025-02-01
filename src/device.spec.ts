@@ -59,6 +59,20 @@ describe("OS interactions", () => {
       "Response format is not recognized"
     );
   });
+
+  it("should get app name", async () => {
+    const transport = await openTransportReplayer(
+      RecordStore.fromString(`
+          => e0d80000044572676f
+          <= 9000
+        `)
+    );
+
+    const device = new Device(transport);
+    const result = await device.openApp();
+
+    expect(result).to.be.true;
+  });
 });
 
 describe("Negative tests", () => {

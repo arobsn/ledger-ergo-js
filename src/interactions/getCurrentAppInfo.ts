@@ -11,6 +11,7 @@ export type AppInfo = {
 
 function reader(bytes: Uint8Array) {
   let offset = 0;
+
   return {
     readByte(): number {
       return bytes[offset++];

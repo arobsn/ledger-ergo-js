@@ -2,7 +2,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import { ByteWriter } from "./serialization/byteWriter";
 import type { DeviceResponse } from "./types/internal";
 import { hex } from "@fleet-sdk/crypto";
-import { type AppInfo, getCurrentAppInfo } from "./interactions";
+import { type AppInfo, getCurrentAppInfo, openApp } from "./interactions";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -36,8 +36,21 @@ export class Device {
     return this;
   }
 
+  /**
+   * Retrieves information about the currently running application on the device.
+   *
+   * @returns {Promise<AppInfo>} A promise that resolves to an object containing information about the current application
+   */
   async getCurrentAppInfo(): Promise<AppInfo> {
     return getCurrentAppInfo(this);
+  }
+
+  /**
+   * Opens the Ergo application on the Ledger device.
+   * @returns Promise that resolves to true if the application was opened successfully
+   */
+  async openApp(): Promise<boolean> {
+    return await openApp(this, "Ergo");
   }
 
   async sendData(
