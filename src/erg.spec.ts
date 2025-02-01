@@ -1,6 +1,6 @@
 import { RecordStore, openTransportReplayer } from "@ledgerhq/hw-transport-mocker";
 import { describe, expect, it, test, vi } from "vitest";
-import { ErgoLedgerApp } from "./erg";
+import { Device, ErgoLedgerApp } from "./erg";
 
 describe("construction", () => {
   it("should construct app with transport", async () => {
@@ -15,6 +15,7 @@ describe("construction", () => {
 
     expect(app.transport).to.be.equal(transport);
     expect(app.authToken).to.be.greaterThan(0);
+    expect(app.device).to.be.instanceOf(Device);
   });
 
   it("should enable debug mode", async () => {
@@ -33,7 +34,7 @@ describe("construction", () => {
     );
 
     const authToken = Number("0x7ee523ef");
-    const app = new ErgoLedgerApp(transport, authToken).enableDebugMode();
+    const app = new ErgoLedgerApp(transport, authToken).useLogging();
 
     await app.getAppVersion(); // without arguments call
     await app.getExtendedPublicKey("m/44'/429'/0'"); // with arguments call

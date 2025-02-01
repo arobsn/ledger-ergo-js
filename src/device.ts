@@ -1,6 +1,7 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { ByteWriter } from "./serialization/byteWriter";
 import type { DeviceResponse } from "./types/internal";
+import { hex } from "@fleet-sdk/crypto";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -21,6 +22,7 @@ const MIN_APDU_LENGTH = 5;
 
 export class Device {
   #transport: Transport;
+  #log: boolean;
 
   get transport(): Transport {
     return this.#transport;
@@ -28,6 +30,12 @@ export class Device {
 
   constructor(transport: Transport) {
     this.#transport = transport;
+    this.#log = false;
+  }
+
+  enableLogging(enabled = true): Device {
+    this.#log = enabled;
+    return this;
   }
 
   async sendData(
@@ -63,6 +71,10 @@ export class Device {
 
     const apdu = mountApdu(cla, ins, p1, p2, data);
     const response = await this.#transport.exchange(apdu);
+
+    if (this.#log) {
+      console.debug(`=> ${hex.encode(apdu)}\n<= ${hex.encode(response)}`);
+    }
 
     if (response.length < MIN_RESPONSE_LENGTH) {
       throw new DeviceError(RETURN_CODE.WRONG_RESPONSE_LENGTH);
