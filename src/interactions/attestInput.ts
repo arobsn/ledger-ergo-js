@@ -19,6 +19,7 @@ const enum P2 {
   WITH_TOKEN = 0x02
 }
 
+const CLA = 0xe0;
 const MAX_HEADER_SIZE = 59; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-20-ATTEST-BOX.md#data
 const TOKEN_ENTRY_SIZE = 40; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-20-ATTEST-BOX.md#data-2
 
@@ -56,6 +57,7 @@ async function sendHeader(
     .toBytes();
 
   const response = await device.send(
+    CLA,
     COMMAND.ATTEST_INPUT,
     P1.BOX_START,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
@@ -71,6 +73,7 @@ async function sendErgoTree(
   sessionId: number
 ): Promise<number> {
   const results = await device.sendData(
+    CLA,
     COMMAND.ATTEST_INPUT,
     P1.ADD_ERGO_TREE_CHUNK,
     sessionId,
@@ -93,7 +96,13 @@ async function sendTokens(
     for (const token of chunk) data.writeHex(token.id).writeUInt64(token.amount);
 
     results.push(
-      await device.send(COMMAND.ATTEST_INPUT, P1.ADD_TOKENS, sessionId, data.toBytes())
+      await device.send(
+        CLA,
+        COMMAND.ATTEST_INPUT,
+        P1.ADD_TOKENS,
+        sessionId,
+        data.toBytes()
+      )
     );
   }
 
@@ -107,6 +116,7 @@ async function sendRegisters(
   sessionId: number
 ): Promise<number> {
   const results = await device.sendData(
+    CLA,
     COMMAND.ATTEST_INPUT,
     P1.ADD_REGISTERS_CHUNK,
     sessionId,
@@ -125,6 +135,7 @@ async function getAttestedFrames(
   const responses: AttestedBoxFrame[] = [];
   for (let i = 0; i < count; i++) {
     const response = await device.send(
+      CLA,
       COMMAND.ATTEST_INPUT,
       P1.GET_ATTESTED_BOX_FRAME,
       sessionId,

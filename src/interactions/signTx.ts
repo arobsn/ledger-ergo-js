@@ -32,6 +32,7 @@ const enum P2 {
   WITH_TOKEN = 0x02
 }
 
+const CLA = 0xe0;
 const HASH_SIZE = 32;
 const HEADER_SIZE = 46; // https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#data
 const START_TX_SIZE = 7; // https://github.com/ergoplatform/ledger-app-ergo/blob/main/doc/INS-21-SIGN-TRANSACTION.md#0x10---start-transaction-data
@@ -64,6 +65,7 @@ async function sendHeader(
   authToken?: number
 ): Promise<number> {
   const response = await device.send(
+    CLA,
     COMMAND.SIGN_TX,
     P1.START_SIGNING,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,
@@ -84,6 +86,7 @@ async function sendStartTx(
   uniqueTokenIdsCount: number
 ): Promise<number> {
   const response = await device.send(
+    CLA,
     COMMAND.SIGN_TX,
     P1.START_TRANSACTION,
     sessionId,
@@ -108,14 +111,20 @@ async function sendDistinctTokensIds(
     const data = new ByteWriter(chunk.length * HASH_SIZE);
     for (const id of chunk) data.writeBytes(id);
 
-    await device.send(COMMAND.SIGN_TX, P1.ADD_TOKEN_IDS, sessionId, data.toBytes());
+    await device.send(CLA, COMMAND.SIGN_TX, P1.ADD_TOKEN_IDS, sessionId, data.toBytes());
   }
 }
 
 async function sendInputs(device: Device, sessionId: number, inputs: AttestedBox[]) {
   for (const input of inputs) {
     for (const frame of input.frames) {
-      await device.send(COMMAND.SIGN_TX, P1.ADD_INPUT_BOX_FRAME, sessionId, frame.bytes);
+      await device.send(
+        CLA,
+        COMMAND.SIGN_TX,
+        P1.ADD_INPUT_BOX_FRAME,
+        sessionId,
+        frame.bytes
+      );
     }
 
     if (input.extension !== undefined && input.extension.length > 0) {
@@ -130,6 +139,7 @@ async function sendBoxContextExtension(
   extension: Uint8Array
 ) {
   await device.sendData(
+    CLA,
     COMMAND.SIGN_TX,
     P1.ADD_INPUT_BOX_CONTEXT_EXTENSION_CHUNK,
     sessionId,
@@ -143,7 +153,13 @@ async function sendDataInputs(device: Device, sessionId: number, boxIds: string[
     const data = new ByteWriter(chunk.length * HASH_SIZE);
     for (const id of chunk) data.writeHex(id);
 
-    await device.send(COMMAND.SIGN_TX, P1.ADD_DATA_INPUTS, sessionId, data.toBytes());
+    await device.send(
+      CLA,
+      COMMAND.SIGN_TX,
+      P1.ADD_DATA_INPUTS,
+      sessionId,
+      data.toBytes()
+    );
   }
 }
 
@@ -158,6 +174,7 @@ async function sendOutputs(
 
   for (const box of boxes) {
     await device.send(
+      CLA,
       COMMAND.SIGN_TX,
       P1.ADD_OUTPUT_BOX_START,
       sessionId,
@@ -195,6 +212,7 @@ async function addOutputBoxErgoTree(
   ergoTree: Uint8Array
 ) {
   await device.sendData(
+    CLA,
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_ERGO_TREE_CHUNK,
     sessionId,
@@ -204,6 +222,7 @@ async function addOutputBoxErgoTree(
 
 async function addOutputBoxMinersFeeTree(device: Device, sessionId: number) {
   await device.send(
+    CLA,
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_MINERS_FEE_TREE,
     sessionId,
@@ -213,6 +232,7 @@ async function addOutputBoxMinersFeeTree(device: Device, sessionId: number) {
 
 async function addOutputBoxChangePath(device: Device, sessionId: number, path: string) {
   await device.send(
+    CLA,
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_CHANGE_TREE,
     sessionId,
@@ -234,6 +254,7 @@ async function addOutputBoxTokens(
     }
 
     await device.send(
+      CLA,
       COMMAND.SIGN_TX,
       P1.ADD_OUTPUT_BOX_TOKENS,
       sessionId,
@@ -248,6 +269,7 @@ async function addOutputBoxRegisters(
   registers: Uint8Array
 ) {
   await device.sendData(
+    CLA,
     COMMAND.SIGN_TX,
     P1.ADD_OUTPUT_BOX_REGISTERS_CHUNK,
     sessionId,
@@ -260,6 +282,7 @@ async function sendConfirmAndSign(
   sessionId: number
 ): Promise<Uint8Array> {
   const response = await device.send(
+    CLA,
     COMMAND.SIGN_TX,
     P1.CONFIRM_AND_SIGN,
     sessionId,

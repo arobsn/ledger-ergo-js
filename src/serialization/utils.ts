@@ -1,6 +1,7 @@
 import bip32Path from "bip32-path";
 
 export const EMPTY_BYTES = Uint8Array.from([]);
+export const NO_VALUE = 0x00;
 const [ERGO_PURPOSE, ERGO_COIN_TYPE] = bip32Path.fromString("m/44'/429'").toPathArray();
 
 export function pathToArray(path: string): number[] {

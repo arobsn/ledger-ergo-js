@@ -4,3 +4,4 @@ export { getAppName } from "./getAppName";
 export { getExtendedPublicKey } from "./getExtendedPublicKey";
 export { getAppVersion } from "./getVersion";
 export { signTx } from "./signTx";
+export { openApp } from "./openApp";

@@ -1,6 +1,6 @@
 import { Network, uniq } from "@fleet-sdk/common";
 import type Transport from "@ledgerhq/hw-transport";
-import { Device, DeviceError, RETURN_CODE, CLA } from "./device";
+import { Device, DeviceError, RETURN_CODE } from "./device";
 import {
   attestInput,
   deriveAddress,
@@ -8,7 +8,8 @@ import {
   getAppVersion,
   getExtendedPublicKey,
   showAddress,
-  signTx
+  signTx,
+  openApp
 } from "./interactions";
 import type { AttestedBox } from "./types/attestedBox";
 import type { AttestedTransaction, SignTransactionResponse } from "./types/internal";
@@ -20,10 +21,9 @@ import type {
   UnsignedTransaction,
   Version
 } from "./types/public";
-import { openApp } from "./interactions/openApp";
 
 export * from "./types/public";
-export { DeviceError, Network, RETURN_CODE, Device, CLA };
+export { DeviceError, Network, RETURN_CODE, Device };
 
 /**
  * Ergo's Ledger hardware wallet API
@@ -40,6 +40,10 @@ export class ErgoLedgerApp {
 
   get transport(): Transport {
     return this.#device.transport;
+  }
+
+  get device(): Device {
+    return this.#device;
   }
 
   constructor(transport: Transport);
@@ -60,7 +64,7 @@ export class ErgoLedgerApp {
       scrambleKey
     );
 
-    this.#device = new Device(transport, CLA);
+    this.#device = new Device(transport);
     this.#authToken = !authToken ? this.#newAuthToken() : authToken;
     this.#useAuthToken = true;
     this.#logging = false;

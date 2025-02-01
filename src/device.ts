@@ -15,25 +15,23 @@ export const enum COMMAND {
   OPEN_APP = 0xd8
 }
 
-export const CLA = 0xe0;
 export const MAX_DATA_LENGTH = 255;
 const MIN_RESPONSE_LENGTH = 2;
 const MIN_APDU_LENGTH = 5;
 
 export class Device {
   #transport: Transport;
-  #cla: number;
 
   get transport(): Transport {
     return this.#transport;
   }
 
-  constructor(transport: Transport, cla = CLA) {
+  constructor(transport: Transport) {
     this.#transport = transport;
-    this.#cla = cla;
   }
 
   async sendData(
+    cla: number,
     ins: COMMAND,
     p1: number,
     p2: number,
@@ -46,13 +44,14 @@ export class Device {
         Math.min((i + 1) * MAX_DATA_LENGTH, data.length)
       );
 
-      responses.push(await this.send(ins, p1, p2, chunk));
+      responses.push(await this.send(cla, ins, p1, p2, chunk));
     }
 
     return responses;
   }
 
   async send(
+    cla: number,
     ins: COMMAND,
     p1: number,
     p2: number,
@@ -62,8 +61,8 @@ export class Device {
       throw new DeviceError(RETURN_CODE.TOO_MUCH_DATA);
     }
 
-    const apdu = mountApdu(this.#cla, ins, p1, p2, data);
-    const response = await this.transport.exchange(apdu);
+    const apdu = mountApdu(cla, ins, p1, p2, data);
+    const response = await this.#transport.exchange(apdu);
 
     if (response.length < MIN_RESPONSE_LENGTH) {
       throw new DeviceError(RETURN_CODE.WRONG_RESPONSE_LENGTH);
