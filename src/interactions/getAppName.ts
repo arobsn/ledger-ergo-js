@@ -1,5 +1,5 @@
 import { COMMAND, type Device } from "../device";
-import { EMPTY_BYTES } from "../serialization/utils";
+import { asciiCodec, EMPTY_BYTES } from "../serialization/utils";
 import type { AppName } from "../types/public";
 
 const enum P1 {
@@ -17,5 +17,5 @@ export async function getAppName(device: Device): Promise<AppName> {
     P2.UNUSED,
     EMPTY_BYTES
   );
-  return { name: String.fromCharCode(...response.data) };
+  return { name: asciiCodec.decode(response.data) };
 }
