@@ -49,8 +49,8 @@ export class Device {
    * Opens the Ergo application on the Ledger device.
    * @returns Promise that resolves to true if the application was opened successfully
    */
-  async openApp(): Promise<boolean> {
-    return openApp(this, "Ergo");
+  async openApp(name = "Ergo"): Promise<boolean> {
+    return openApp(this, name);
   }
 
   /**
