@@ -1,10 +1,10 @@
 import type { Network } from "@fleet-sdk/common";
 import { hex } from "@fleet-sdk/crypto";
-import { COMMAND, type Device, RETURN_CODE } from "../device";
-import { ByteWriter } from "../serialization/byteWriter";
-import { pathToArray } from "../serialization/utils";
-import type { DeviceResponse } from "../types/internal";
-import type { DerivedAddress } from "../types/public";
+import { COMMAND, type Device, RETURN_CODE } from "../../device";
+import { ByteWriter } from "../../serialization/byteWriter";
+import { pathToArray } from "../../serialization/utils";
+import type { DeviceResponse } from "../../types/internal";
+import type { DerivedAddress } from "../../types/public";
 
 const enum ReturnType {
   Return = 0x01,
@@ -21,9 +21,9 @@ const enum P2 {
   WITH_TOKEN = 0x02
 }
 
+const CLA = 0xe0;
 const CHANGE_PATH_INDEX = 3;
 const ALLOWED_CHANGE_PATHS = [0, 1];
-
 const MAX_APDU_SIZE = 46; // https://github.com/tesseract-one/ledger-app-ergo/blob/main/doc/INS-11-DERIVE-ADDR.md#data
 
 function sendDeriveAddress(
@@ -44,6 +44,7 @@ function sendDeriveAddress(
   }
 
   return device.send(
+    CLA,
     COMMAND.DERIVE_ADDRESS,
     returnType === ReturnType.Return ? P1.RETURN : P1.DISPLAY,
     authToken ? P2.WITH_TOKEN : P2.WITHOUT_TOKEN,

@@ -9,7 +9,7 @@ import {
   getExtendedPublicKey,
   showAddress,
   signTx
-} from "./interactions";
+} from "./commands/app";
 import type { AttestedBox } from "./types/attestedBox";
 import type { AttestedTransaction, SignTransactionResponse } from "./types/internal";
 import type {
@@ -22,8 +22,7 @@ import type {
 } from "./types/public";
 
 export * from "./types/public";
-export { DeviceError, Network, RETURN_CODE };
-export const CLA = 0xe0;
+export { DeviceError, Network, RETURN_CODE, Device };
 
 /**
  * Ergo's Ledger hardware wallet API
@@ -32,14 +31,13 @@ export class ErgoLedgerApp {
   #device: Device;
   #authToken: number;
   #useAuthToken: boolean;
-  #logging: boolean;
 
   get authToken(): number | undefined {
     return this.#useAuthToken ? this.#authToken : undefined;
   }
 
-  get transport(): Transport {
-    return this.#device.transport;
+  get device(): Device {
+    return this.#device;
   }
 
   constructor(transport: Transport);
@@ -55,15 +53,17 @@ export class ErgoLedgerApp {
         "deriveAddress",
         "showAddress",
         "attestInput",
-        "signTx"
+        "signTx",
+        "openApp",
+        "closeApp",
+        "getCurrentAppInfo"
       ],
       scrambleKey
     );
 
-    this.#device = new Device(transport, CLA);
+    this.#device = new Device(transport);
     this.#authToken = !authToken ? this.#newAuthToken() : authToken;
     this.#useAuthToken = true;
-    this.#logging = false;
   }
 
   /**
@@ -81,8 +81,8 @@ export class ErgoLedgerApp {
    * @param enable
    * @returns
    */
-  enableDebugMode(enable = true): ErgoLedgerApp {
-    this.#logging = enable;
+  useLogging(enable = true): ErgoLedgerApp {
+    this.#device.enableLogging(enable);
     return this;
   }
 
@@ -97,19 +97,17 @@ export class ErgoLedgerApp {
 
   /**
    * Get application version.
-   * @returns a Promise with the Ledger Application version.
+   * @returns Promise with the Ledger Application version.
    */
   async getAppVersion(): Promise<Version> {
-    this.#debug("getAppVersion");
     return getAppVersion(this.#device);
   }
 
   /**
    * Get application name.
-   * @returns a Promise with the Ledger Application name.
+   * @returns Promise with the Ledger Application name.
    */
   async getAppName(): Promise<AppName> {
-    this.#debug("getAppName");
     return getAppName(this.#device);
   }
 
@@ -119,7 +117,6 @@ export class ErgoLedgerApp {
    * @returns a Promise with the **chain code** and the **public key** for provided BIP32 path.
    */
   async getExtendedPublicKey(path: string): Promise<ExtendedPublicKey> {
-    this.#debug("getExtendedPublicKey", path);
     return getExtendedPublicKey(this.#device, path, this.authToken);
   }
 
@@ -129,7 +126,6 @@ export class ErgoLedgerApp {
    * @returns a Promise with the derived address in hex format.
    */
   async deriveAddress(path: string, network = Network.Mainnet): Promise<DerivedAddress> {
-    this.#debug("deriveAddress", path);
     return deriveAddress(this.#device, network, path, this.authToken);
   }
 
@@ -139,12 +135,10 @@ export class ErgoLedgerApp {
    * @returns a Promise with true if the user accepts or throws an exception if it get rejected.
    */
   async showAddress(path: string, network = Network.Mainnet): Promise<boolean> {
-    this.#debug("showAddress", path);
     return showAddress(this.#device, network, path, this.authToken);
   }
 
   async attestInput(box: UnsignedBox): Promise<AttestedBox> {
-    this.#debug("attestInput", box);
     return this.#attestInput(box);
   }
 
@@ -156,8 +150,6 @@ export class ErgoLedgerApp {
     tx: UnsignedTransaction,
     network = Network.Mainnet
   ): Promise<Uint8Array[]> {
-    this.#debug("signTx", { tx, network });
-
     if (!tx.inputs || tx.inputs.length === 0) {
       throw new DeviceError(RETURN_CODE.BAD_INPUT_COUNT);
     }
@@ -198,13 +190,5 @@ export class ErgoLedgerApp {
     }
 
     return attestedBoxes;
-  }
-
-  #debug(caller: string, message: unknown = "") {
-    if (!this.#logging) return;
-
-    console.debug(
-      `[ledger-ergo-js][${caller}]${message ? ": " : ""}${message ? JSON.stringify(message) : ""}`
-    );
   }
 }

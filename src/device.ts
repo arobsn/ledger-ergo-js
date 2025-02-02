@@ -1,6 +1,8 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { ByteWriter } from "./serialization/byteWriter";
 import type { DeviceResponse } from "./types/internal";
+import { hex } from "@fleet-sdk/crypto";
+import { type AppInfo, closeApp, getCurrentAppInfo, openApp } from "./commands/os";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -18,18 +20,49 @@ const MIN_APDU_LENGTH = 5;
 
 export class Device {
   #transport: Transport;
-  #cla: number;
+  #log: boolean;
 
   get transport(): Transport {
     return this.#transport;
   }
 
-  constructor(transport: Transport, cla: number) {
+  constructor(transport: Transport) {
     this.#transport = transport;
-    this.#cla = cla;
+    this.#log = false;
+  }
+
+  enableLogging(enabled = true): Device {
+    this.#log = enabled;
+    return this;
+  }
+
+  /**
+   * Retrieves information about the currently running application on the device.
+   *
+   * @returns {Promise<AppInfo>} A promise that resolves to an object containing information about the current application
+   */
+  async getCurrentAppInfo(): Promise<AppInfo> {
+    return getCurrentAppInfo(this);
+  }
+
+  /**
+   * Opens the Ergo application on the Ledger device.
+   * @returns Promise that resolves to true if the application was opened successfully
+   */
+  async openApp(name = "Ergo"): Promise<boolean> {
+    return openApp(this, name);
+  }
+
+  /**
+   * Closes the currently open Ergo app on the Ledger device.
+   * @returns A promise that resolves to true if the app was successfully closed.
+   */
+  async closeApp(): Promise<boolean> {
+    return closeApp(this);
   }
 
   async sendData(
+    cla: number,
     ins: COMMAND,
     p1: number,
     p2: number,
@@ -42,14 +75,15 @@ export class Device {
         Math.min((i + 1) * MAX_DATA_LENGTH, data.length)
       );
 
-      responses.push(await this.send(ins, p1, p2, chunk));
+      responses.push(await this.send(cla, ins, p1, p2, chunk));
     }
 
     return responses;
   }
 
   async send(
-    ins: COMMAND,
+    cla: number,
+    ins: number,
     p1: number,
     p2: number,
     data: Uint8Array
@@ -58,8 +92,12 @@ export class Device {
       throw new DeviceError(RETURN_CODE.TOO_MUCH_DATA);
     }
 
-    const apdu = mountApdu(this.#cla, ins, p1, p2, data);
-    const response = await this.transport.exchange(apdu);
+    const apdu = buildApdu(cla, ins, p1, p2, data);
+    const response = await this.#transport.exchange(apdu);
+
+    if (this.#log) {
+      console.debug(`=> ${hex.encode(apdu)}\n<= ${hex.encode(response)}`);
+    }
 
     if (response.length < MIN_RESPONSE_LENGTH) {
       throw new DeviceError(RETURN_CODE.WRONG_RESPONSE_LENGTH);
@@ -72,7 +110,7 @@ export class Device {
   }
 }
 
-function mountApdu(
+function buildApdu(
   cla: number,
   ins: COMMAND,
   p1: number,
@@ -145,7 +183,12 @@ export enum RETURN_CODE {
   BIP32_FORMATTING_FAILED = 0xe101,
   ADDRESS_FORMATTING_FAILED = 0xe102,
   STACK_OVERFLOW = 0xffff,
-  OK = 0x9000
+
+  OK = 0x9000,
+  GLOBAL_LOCKED_DEVICE = 0x5515,
+  GLOBAL_ACTION_REFUSED = 0x5501,
+  GLOBAL_PIN_NOT_SET = 0x5502,
+  GLOBAL_DEVICE_INTERNAL_ERROR = 0x5223
 }
 
 export const RETURN_MESSAGES = {
@@ -188,5 +231,9 @@ export const RETURN_MESSAGES = {
   [RETURN_CODE.BIP32_FORMATTING_FAILED]: "Can't display Bip32 path",
   [RETURN_CODE.ADDRESS_FORMATTING_FAILED]: "Can't display address",
   [RETURN_CODE.STACK_OVERFLOW]: "Stack overflow",
-  [RETURN_CODE.OK]: "Ok"
+  [RETURN_CODE.OK]: "Ok",
+  [RETURN_CODE.GLOBAL_LOCKED_DEVICE]: "Device is locked",
+  [RETURN_CODE.GLOBAL_ACTION_REFUSED]: "Action refused on device",
+  [RETURN_CODE.GLOBAL_PIN_NOT_SET]: "Pin is not set",
+  [RETURN_CODE.GLOBAL_DEVICE_INTERNAL_ERROR]: "Device internal error"
 };

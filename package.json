@@ -1,6 +1,6 @@
 {
   "name": "ledger-ergo-js",
-  "version": "0.1.21",
+  "version": "0.2.0",
   "license": "MIT",
   "author": "arobsn",
   "description": "An Ergo Platform JS Library for communication with Ledger Hardware Wallets.",
@@ -66,7 +66,7 @@
     "@biomejs/biome": "^1.9.4",
     "@ledgerhq/hw-transport": "^6.31.4",
     "@ledgerhq/hw-transport-mocker": "^6.29.4",
-    "@types/node": "^22.10.10",
+    "@types/node": "^22.13.0",
     "@vitest/coverage-v8": "^3.0.4",
     "open-cli": "^8.0.0",
     "tsup": "^8.3.6",
