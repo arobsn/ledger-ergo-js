@@ -13,7 +13,7 @@ describe("construction", () => {
 
     const app = new ErgoLedgerApp(transport);
 
-    expect(app.transport).to.be.equal(transport);
+    expect(app.device.transport).to.be.equal(transport);
     expect(app.authToken).to.be.greaterThan(0);
     expect(app.device).to.be.instanceOf(Device);
   });
@@ -55,7 +55,7 @@ describe("Get app name and version", () => {
     const app = new ErgoLedgerApp(transport);
     const version = await app.getAppVersion();
 
-    expect(app.transport).to.be.equal(transport);
+    expect(app.device.transport).to.be.equal(transport);
     expect(version).to.be.deep.equal({
       flags: { isDebug: true },
       major: 0,

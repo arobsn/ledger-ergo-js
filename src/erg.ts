@@ -37,10 +37,6 @@ export class ErgoLedgerApp {
     return this.#useAuthToken ? this.#authToken : undefined;
   }
 
-  get transport(): Transport {
-    return this.#device.transport;
-  }
-
   get device(): Device {
     return this.#device;
   }
@@ -58,7 +54,10 @@ export class ErgoLedgerApp {
         "deriveAddress",
         "showAddress",
         "attestInput",
-        "signTx"
+        "signTx",
+        "openApp",
+        "closeApp",
+        "getCurrentAppInfo"
       ],
       scrambleKey
     );

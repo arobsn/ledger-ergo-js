@@ -2,7 +2,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import { ByteWriter } from "./serialization/byteWriter";
 import type { DeviceResponse } from "./types/internal";
 import { hex } from "@fleet-sdk/crypto";
-import { type AppInfo, getCurrentAppInfo, openApp } from "./interactions";
+import { type AppInfo, closeApp, getCurrentAppInfo, openApp } from "./interactions";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
@@ -50,7 +50,15 @@ export class Device {
    * @returns Promise that resolves to true if the application was opened successfully
    */
   async openApp(): Promise<boolean> {
-    return await openApp(this, "Ergo");
+    return openApp(this, "Ergo");
+  }
+
+  /**
+   * Closes the currently open Ergo app on the Ledger device.
+   * @returns A promise that resolves to true if the app was successfully closed.
+   */
+  async closeApp(): Promise<boolean> {
+    return closeApp(this);
   }
 
   async sendData(
@@ -84,7 +92,7 @@ export class Device {
       throw new DeviceError(RETURN_CODE.TOO_MUCH_DATA);
     }
 
-    const apdu = mountApdu(cla, ins, p1, p2, data);
+    const apdu = buildApdu(cla, ins, p1, p2, data);
     const response = await this.#transport.exchange(apdu);
 
     if (this.#log) {
@@ -102,7 +110,7 @@ export class Device {
   }
 }
 
-function mountApdu(
+function buildApdu(
   cla: number,
   ins: COMMAND,
   p1: number,

@@ -60,7 +60,7 @@ describe("OS interactions", () => {
     );
   });
 
-  it("should get app name", async () => {
+  it("should open ergo app", async () => {
     const transport = await openTransportReplayer(
       RecordStore.fromString(`
           => e0d80000044572676f
@@ -70,6 +70,20 @@ describe("OS interactions", () => {
 
     const device = new Device(transport);
     const result = await device.openApp();
+
+    expect(result).to.be.true;
+  });
+
+  it("should close current app", async () => {
+    const transport = await openTransportReplayer(
+      RecordStore.fromString(`
+          => b0a7000000
+          <= 9000
+        `)
+    );
+
+    const device = new Device(transport);
+    const result = await device.closeApp();
 
     expect(result).to.be.true;
   });
