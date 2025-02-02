@@ -1,10 +1,10 @@
 import { chunk } from "@fleet-sdk/common";
 import { hex } from "@fleet-sdk/crypto";
-import { COMMAND, type Device, MAX_DATA_LENGTH } from "../device";
-import { ByteWriter } from "../serialization/byteWriter";
-import { AttestedBox } from "../types/attestedBox";
-import type { DeviceResponse } from "../types/internal";
-import type { AttestedBoxFrame, Token, UnsignedBox } from "../types/public";
+import { COMMAND, type Device, MAX_DATA_LENGTH } from "../../device";
+import { ByteWriter } from "../../serialization/byteWriter";
+import { AttestedBox } from "../../types/attestedBox";
+import type { DeviceResponse } from "../../types/internal";
+import type { AttestedBoxFrame, Token, UnsignedBox } from "../../types/public";
 
 const enum P1 {
   BOX_START = 0x01,

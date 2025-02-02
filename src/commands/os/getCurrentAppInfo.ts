@@ -1,5 +1,5 @@
-import type { Device } from "../device";
-import { asciiCodec, EMPTY_BYTES, NO_VALUE } from "../serialization/utils";
+import type { Device } from "../../device";
+import { asciiCodec, EMPTY_BYTES, NO_VALUE } from "../../serialization/utils";
 
 const CLA = 0xb0;
 const GET_CURRENT_APP_INFO = 0x01;

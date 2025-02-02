@@ -1,8 +1,8 @@
 import { hex } from "@fleet-sdk/crypto";
-import { COMMAND, type Device } from "../device";
-import { ByteWriter } from "../serialization/byteWriter";
-import type { ExtendedPublicKey } from "../types/public";
-import { NO_VALUE } from "../serialization/utils";
+import { COMMAND, type Device } from "../../device";
+import { ByteWriter } from "../../serialization/byteWriter";
+import type { ExtendedPublicKey } from "../../types/public";
+import { NO_VALUE } from "../../serialization/utils";
 
 const enum P1 {
   WITHOUT_TOKEN = 0x01,

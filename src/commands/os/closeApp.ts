@@ -1,5 +1,5 @@
-import { RETURN_CODE, type Device } from "../device";
-import { EMPTY_BYTES, NO_VALUE } from "../serialization/utils";
+import { RETURN_CODE, type Device } from "../../device";
+import { EMPTY_BYTES, NO_VALUE } from "../../serialization/utils";
 
 const CLA = 0xb0;
 const CLOSE_APP = 0xa7;

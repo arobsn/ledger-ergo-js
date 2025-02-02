@@ -8,9 +8,8 @@ import {
   getAppVersion,
   getExtendedPublicKey,
   showAddress,
-  signTx,
-  openApp
-} from "./interactions";
+  signTx
+} from "./commands/app";
 import type { AttestedBox } from "./types/attestedBox";
 import type { AttestedTransaction, SignTransactionResponse } from "./types/internal";
 import type {

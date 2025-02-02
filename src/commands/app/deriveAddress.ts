@@ -1,10 +1,10 @@
 import type { Network } from "@fleet-sdk/common";
 import { hex } from "@fleet-sdk/crypto";
-import { COMMAND, type Device, RETURN_CODE } from "../device";
-import { ByteWriter } from "../serialization/byteWriter";
-import { pathToArray } from "../serialization/utils";
-import type { DeviceResponse } from "../types/internal";
-import type { DerivedAddress } from "../types/public";
+import { COMMAND, type Device, RETURN_CODE } from "../../device";
+import { ByteWriter } from "../../serialization/byteWriter";
+import { pathToArray } from "../../serialization/utils";
+import type { DeviceResponse } from "../../types/internal";
+import type { DerivedAddress } from "../../types/public";
 
 const enum ReturnType {
   Return = 0x01,

@@ -1,6 +1,6 @@
-import { COMMAND, type Device } from "../device";
-import { asciiCodec, EMPTY_BYTES, NO_VALUE } from "../serialization/utils";
-import type { AppName } from "../types/public";
+import { COMMAND, type Device } from "../../device";
+import { asciiCodec, EMPTY_BYTES, NO_VALUE } from "../../serialization/utils";
+import type { AppName } from "../../types/public";
 
 const CLA = 0xe0;
 

@@ -1,6 +1,6 @@
-import { COMMAND, type Device } from "../device";
-import { EMPTY_BYTES, NO_VALUE } from "../serialization/utils";
-import type { Version } from "../types/public";
+import { COMMAND, type Device } from "../../device";
+import { EMPTY_BYTES, NO_VALUE } from "../../serialization/utils";
+import type { Version } from "../../types/public";
 
 const IS_DEBUG_FLAG = 0x01;
 const CLA = 0xe0;

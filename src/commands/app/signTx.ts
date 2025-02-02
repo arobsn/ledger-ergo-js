@@ -1,12 +1,12 @@
 import { chunk } from "@fleet-sdk/common";
 import { ErgoAddress, type Network } from "@fleet-sdk/core";
 import { hex } from "@fleet-sdk/crypto";
-import { COMMAND, type Device, MAX_DATA_LENGTH } from "../device";
-import { ByteWriter } from "../serialization/byteWriter";
-import { EMPTY_BYTES } from "../serialization/utils";
-import type { AttestedBox } from "../types/attestedBox";
-import type { AttestedTransaction } from "../types/internal";
-import type { BoxCandidate, ChangeMap, Token } from "../types/public";
+import { COMMAND, type Device, MAX_DATA_LENGTH } from "../../device";
+import { ByteWriter } from "../../serialization/byteWriter";
+import { EMPTY_BYTES } from "../../serialization/utils";
+import type { AttestedBox } from "../../types/attestedBox";
+import type { AttestedTransaction } from "../../types/internal";
+import type { BoxCandidate, ChangeMap, Token } from "../../types/public";
 
 const MINER_FEE_TREE =
   "1005040004000e36100204a00b08cd0279be667ef9dcbbac55a06295ce870b07029bfcdb2dce28d959f2815b16f81798ea02d192a39a8cc7a701730073011001020402d19683030193a38cc7b2a57300000193c2b2a57301007473027303830108cdeeac93b1a57304";

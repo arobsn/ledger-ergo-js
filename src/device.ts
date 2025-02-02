@@ -2,7 +2,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import { ByteWriter } from "./serialization/byteWriter";
 import type { DeviceResponse } from "./types/internal";
 import { hex } from "@fleet-sdk/crypto";
-import { type AppInfo, closeApp, getCurrentAppInfo, openApp } from "./interactions";
+import { type AppInfo, closeApp, getCurrentAppInfo, openApp } from "./commands/os";
 
 export const enum COMMAND {
   GET_APP_VERSION = 0x01,
